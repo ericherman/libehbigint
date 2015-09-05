@@ -88,16 +88,15 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 		str_len -= 2;
 	}
 
-	j = str_len;
+	j = 0;
 	i = 0;
 
 	bi->bytes_used = 0;
-	while (j > 0) {
-		--j;
-		low = str[j];
-		if (j != 0) {
-			--j;
-			high = str[j];
+	while (j < str_len) {
+		low = str[j++];
+		if (j < str_len) {
+			high = low;
+			low = str[j++];
 		} else {
 			high = '0';
 		}
@@ -106,10 +105,9 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 			/* not enough room in bi->bytes */
 			return 8;
 		}
-		if (from_hex(&(bi->bytes[i]), high, low)) {
+		if (from_hex(&(bi->bytes[i++]), high, low)) {
 			return 9;
 		}
-		i++;
 		bi->bytes_used++;
 	}
 
@@ -132,18 +130,18 @@ int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len)
 	if (buf == 0) {
 		return 11;
 	}
-	if (buf_len < 2) {
+	if (buf_len < (bi->bytes_used + 3)) {
 		return 12;
 	}
 	j = 0;
 	buf[j++] = '0';
 	buf[j++] = 'x';
 
-	for (i = bi->bytes_used; i > 0; --i) {
+	for (i = 0; i < bi->bytes_used; ++i) {
 		if (j + 2 > buf_len) {
 			return 13;
 		}
-		err = to_hex(bi->bytes[i - 1], buf + j, buf + j + 1);
+		err = to_hex(bi->bytes[i], buf + j, buf + j + 1);
 		if (err) {
 			return err;
 		}
@@ -153,6 +151,55 @@ int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len)
 		return 14;
 	}
 	buf[j] = '\0';
+
+	return 0;
+}
+
+int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
+{
+	size_t i, j;
+	int a, b, c;
+	struct ehbigint *tmp;
+
+	if (res == 0 || bi1 == 0 || bi2 == 0) {
+		return 15;
+	}
+
+	if (bi1->bytes_used < bi2->bytes_used) {
+		tmp = bi1;
+		bi1 = bi2;
+		bi2 = tmp;
+	}
+
+	c = 0;
+	for (i = 1; i <= bi1->bytes_used; ++i) {
+		j = bi1->bytes_used - i;
+		a = bi1->bytes[j];
+		b = (bi2->bytes_used < i) ? 0 : bi2->bytes[j];
+		c = c + a + b;
+		if (res->bytes_used + 1 > res->bytes_len) {
+			return 15;
+		}
+		res->bytes[res->bytes_len - i] = (unsigned char)c;
+		res->bytes_used++;
+		c = c >> 8;
+	}
+	while (c) {
+		res->bytes[res->bytes_len - i] = (unsigned char)c;
+		res->bytes_used++;
+		c = c >> 8;
+	}
+	if (res->bytes_used != res->bytes_len) {
+		for (i = 0; i < res->bytes_len; ++i) {
+			if (i < res->bytes_used) {
+				res->bytes[i] =
+				    res->bytes[i + res->bytes_len -
+					       res->bytes_used];
+			} else {
+				res->bytes[i] = 0;
+			}
+		}
+	}
 
 	return 0;
 }

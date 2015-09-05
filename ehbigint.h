@@ -22,4 +22,10 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len);
 */
 int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len);
 
+/*
+   populates the first ehbigint with the sum of the second and third
+   returns 0 on success or error_code on error
+*/
+int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2);
+
 #endif /* EHBIGINT_H */

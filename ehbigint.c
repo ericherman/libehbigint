@@ -78,8 +78,16 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 	if (str == 0) {
 		return 6;
 	}
-	if (str_len == 0) {
+	if (str_len == 0 || str[0] == 0) {
 		return 7;
+	}
+
+	/* ignore characters starting with the first NULL in string */
+	for (i = 1; i < str_len; ++i) {
+		if (str[i] == 0) {
+			str_len = i - 1;
+			break;
+		}
 	}
 
 	/* skip over leading '0x' in string */
@@ -88,32 +96,30 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 		str_len -= 2;
 	}
 
-	j = 0;
-	i = 0;
+	j = str_len;
+	i = bi->bytes_len;
 
 	bi->bytes_used = 0;
-	while (j < str_len) {
-		low = str[j++];
-		if (j < str_len) {
-			high = low;
-			low = str[j++];
+	while (j > 0) {
+		low = str[--j];
+		if (j > 0) {
+			high = str[--j];
 		} else {
 			high = '0';
 		}
-
-		if (i > bi->bytes_len) {
+		if (bi->bytes_used >= bi->bytes_len) {
 			/* not enough room in bi->bytes */
 			return 8;
 		}
-		if (from_hex(&(bi->bytes[i++]), high, low)) {
+		if (from_hex(&(bi->bytes[--i]), high, low)) {
 			return 9;
 		}
 		bi->bytes_used++;
 	}
 
 	/* let's just zero out the rest of the bytes, for eazier debug */
-	while (i < bi->bytes_len) {
-		bi->bytes[i++] = 0;
+	while (i-- > 0) {
+		bi->bytes[i] = 0;
 	}
 
 	return 0;
@@ -137,7 +143,7 @@ int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len)
 	buf[j++] = '0';
 	buf[j++] = 'x';
 
-	for (i = 0; i < bi->bytes_used; ++i) {
+	for (i = bi->bytes_len - bi->bytes_used; i < bi->bytes_len; ++i) {
 		if (j + 2 > buf_len) {
 			return 13;
 		}
@@ -157,7 +163,7 @@ int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len)
 
 int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 {
-	size_t i, j;
+	size_t i;
 	int a, b, c;
 	struct ehbigint *tmp;
 
@@ -173,9 +179,8 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 
 	c = 0;
 	for (i = 1; i <= bi1->bytes_used; ++i) {
-		j = bi1->bytes_used - i;
-		a = bi1->bytes[j];
-		b = (bi2->bytes_used < i) ? 0 : bi2->bytes[j];
+		a = bi1->bytes[bi1->bytes_len - i];
+		b = (bi2->bytes_used < i) ? 0 : bi2->bytes[bi2->bytes_len - i];
 		c = c + a + b;
 		if (res->bytes_used + 1 > res->bytes_len) {
 			return 15;
@@ -188,17 +193,6 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 		res->bytes[res->bytes_len - i] = (unsigned char)c;
 		res->bytes_used++;
 		c = c >> 8;
-	}
-	if (res->bytes_used != res->bytes_len) {
-		for (i = 0; i < res->bytes_len; ++i) {
-			if (i < res->bytes_used) {
-				res->bytes[i] =
-				    res->bytes[i + res->bytes_len -
-					       res->bytes_used];
-			} else {
-				res->bytes[i] = 0;
-			}
-		}
 	}
 
 	return 0;

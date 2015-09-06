@@ -35,6 +35,13 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2);
 int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
 			size_t buf_len);
 
+/*
+   converts an arbitrarily long string of hex digits into decimal
+   returns 0 on success or error_code on error
+*/
+int ehbi_hex_to_decimal(const char *hex_str, size_t hex_len, char *buf,
+			size_t buf_len);
+
 /* error codes */
 enum {
 	EHBI_SUCCESS,

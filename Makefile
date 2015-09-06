@@ -73,6 +73,10 @@ $(OUT): $(SO_NAME) $(A_NAME)
 	$(CC) $(OBJ) $(A_NAME) $(AUX_A_FILES) -o $(OUT)-static
 	$(CC) $(OBJ) $(LDFLAGS) $(AUX_LDFLAGS) -o $(OUT)-dynamic
 
+toy: $(OUT)
+	$(CC) -o bi-add ./bi-add.c
+	./bi-add 132904811234120000312412 123412413132500
+
 check: $(OUT)
 	./$(OUT)-static
 	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) ./$(OUT)-dynamic
@@ -84,7 +88,8 @@ tidy:
 
 clean:
 	rm -f *~ *.o *.a *.$(SHAREDEXT) \
-		$(SO_NAME).* \ $(OUT)-static $(OUT)-dynamic
+		$(SO_NAME).* \ $(OUT)-static $(OUT)-dynamic \
+		bi-add
 
 
 install:

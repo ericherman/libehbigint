@@ -101,7 +101,6 @@ int check_add(void)
 
 	bi3.bytes = bytes_buf3;
 	bi3.bytes_len = 20;
-	bi3.bytes_used = 0;
 
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));

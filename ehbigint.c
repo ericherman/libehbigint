@@ -226,6 +226,7 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 		bi2 = tmp;
 	}
 
+	res->bytes_used = 0;
 	c = 0;
 	for (i = 1; i <= bi1->bytes_used; ++i) {
 		a = bi1->bytes[bi1->bytes_len - i];

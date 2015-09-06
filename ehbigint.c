@@ -119,7 +119,7 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 	/* ignore characters starting with the first NULL in string */
 	for (i = 1; i < str_len; ++i) {
 		if (str[i] == 0) {
-			str_len = i - 1;
+			str_len = i;
 			break;
 		}
 	}

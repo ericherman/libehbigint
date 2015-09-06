@@ -195,6 +195,13 @@ int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len)
 	}
 	buf[j] = '\0';
 
+	/* strip leading '0's ("0x0123" -> "0x123") */
+	while (buf[2] == '0') {
+		for (j = 2; j < buf_len - 1 && buf[j] != 0; ++j) {
+			buf[j] = buf[j + 1];
+		}
+	}
+
 	return 0;
 }
 

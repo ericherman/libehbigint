@@ -54,9 +54,9 @@ int check_add(void)
 	struct ehbigint bi1, bi2, bi3;
 
 	/*  char *u64_max =   "0xFFFFFFFFFFFFFFFF" */
-	const char *str_1 = "0x120000F0000000000A";
-	const char *str_2 = "0x12000020000000000A";
-	const char *str_3 = "0x240001100000000014";
+	const char *str_1 = "0xF20000F0000000000A";
+	const char *str_2 = "0x32000020000000000A";
+	const char *str_3 = "0x1240001100000000014";
 
 	failures = 0;
 

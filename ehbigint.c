@@ -251,3 +251,80 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 
 	return EHBI_SUCCESS;
 }
+
+int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
+			size_t buf_len)
+{
+	size_t i, j, k, hex_len;
+	int err;
+	unsigned char *hex_buf;
+
+	if (dec_str == 0 || buf == 0) {
+		LOG_ERROR0("Null argument");
+		return EHBI_NULL_ARGS;
+	}
+
+	if (buf_len < 4) {
+		LOG_ERROR0("Buffer too small");
+		return EHBI_STRING_BUF_TOO_SMALL;
+	}
+	buf[0] = '0';
+	buf[1] = 'x';
+
+	/* first operate with binary data, convert to ASCII later */
+	/* start by adjusting the buf for our needs - needs to be unsigned */
+	hex_buf = (unsigned char *)buf + 2;	/* skip past leading "0x" */
+	hex_len = buf_len - 3;	/* and leave room for the NULL terminator */
+
+	/* zero out the buffer */
+	for (i = 0; i < hex_len; ++i) {
+		hex_buf[i] = 0;
+	}
+
+	for (i = 0; i < dec_len && dec_str[i] != 0; ++i) {
+		if (dec_str[i] < '0' || dec_str[i] > '9') {
+			LOG_ERROR1("Character not decimal (%c)", dec_str[i]);
+			return EHBI_BAD_INPUT;
+		}
+		/* we're doing another digit, multiply previous by 10 */
+		for (j = 0; j < hex_len; ++j) {
+			k = hex_len - 1 - j;
+			hex_buf[k] *= 10;
+		}
+
+		hex_buf[hex_len - 1] += (dec_str[i] - '0');
+
+		/* carry */
+		for (j = 0; j < hex_len; ++j) {
+			k = hex_len - 1 - j;
+			if (hex_buf[k] >= 16) {
+				hex_buf[k - 1] += (hex_buf[k] / 16);
+				hex_buf[k] = (hex_buf[k] % 16);
+			}
+		}
+	}
+
+	/* convert to ASCII */
+	for (j = 0; j < hex_len; ++j) {
+		err = nibble_to_hex(hex_buf[j], buf + 2 + j);
+		if (err) {
+			LOG_ERROR0("Null char pointer");
+			return EHBI_CORRUPT_DATA;
+		}
+	}
+
+	/* left shift away leading zeros */
+	/* first find the index (j) of the first non-zero */
+	for (j = 0; hex_buf[j] == '0' && j < hex_len; ++j) {
+		;
+	}
+	/* next, shift all the contents "j" places to the left */
+	for (i = 0; i < (hex_len - j); ++i) {
+		hex_buf[i] = hex_buf[i + j];
+	}
+
+	/* add a trailing NULL */
+	buf[buf_len - 1 - j] = 0;
+
+	return 0;
+}

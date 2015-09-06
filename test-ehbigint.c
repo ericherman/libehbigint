@@ -4,6 +4,39 @@
 
 #include "ehbigint.h"
 
+int check_decimal_to_hex(void)
+{
+	int err, failures;
+	char buf[20];
+
+	failures = 0;
+
+	err = ehbi_decimal_to_hex("275", 3, buf, 20);
+
+	if (err) {
+		fprintf(stderr, "error %d ehbi_decimal_to_hex\n", err);
+		return 1;
+	}
+
+	failures += check_str(buf, "0x113");
+
+	err = ehbi_decimal_to_hex("65543", 10, buf, 20);
+
+	if (err) {
+		fprintf(stderr, "error %d ehbi_decimal_to_hex\n", err);
+		return 1;
+	}
+
+	failures += check_str(buf, "0x10007");
+
+	if (failures) {
+		fprintf(stderr, "%d failures in check_decimal_to_hex\n",
+			failures);
+	}
+
+	return failures;
+}
+
 int check_hex_round_trip(void)
 {
 	int err, failures;
@@ -103,6 +136,7 @@ int main(void)
 {
 	int failures = 0;
 
+	failures += check_decimal_to_hex();
 	failures += check_hex_round_trip();
 	failures += check_add();
 

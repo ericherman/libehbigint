@@ -28,9 +28,13 @@ endif
 A_NAME=lib$(LIB_NAME).a
 
 INCLUDES=-I.
-SRC=test-$(LIB_NAME).c
-OBJ=test-$(LIB_NAME).o
-OUT=test-$(LIB_NAME)
+TEST_OUT=test-$(LIB_NAME)
+TEST_SRC=$(TEST_OUT).c
+TEST_OBJ=$(TEST_OUT).o
+
+OUT=bi-add
+SRC=$(OUT).c
+OBJ=$(OUT).o
 
 CSTD_CFLAGS=-std=c89
 #CSTD_CFLAGS=-std=c11
@@ -45,16 +49,26 @@ CC=gcc
 # extracted from https://github.com/torvalds/linux/blob/master/scripts/Lindent
 LINDENT=indent -npro -kr -i8 -ts8 -sob -l80 -ss -ncs -cp1 -il0
 
-ifeq ("$(LIBDIR)", "")
-LIBDIR=/usr/local/lib
+ifeq ("$(PREFIX)", "")
+PREFIX=/usr/local
 endif
 
+ifeq ("$(LIBDIR)", "")
+LIBDIR=$(PREFIX)/lib
+endif
+
+
 ifeq ("$(INCDIR)", "")
-INCDIR=/usr/local/include
+INCDIR=$(PREFIX)/include
+endif
+
+ifneq ($(strip $(srcdir)),)
+   VPATH::=$(srcdir)
 endif
 
 LD_LIBRARY_PATH=.$(AUX_LD_LIBRARY_PATHS)
 
+#default: $(LIB_NAME)
 default: $(OUT)
 
 .c.o:
@@ -68,18 +82,27 @@ $(SO_NAME): $(LIB_OBJ)
 $(A_NAME): $(LIB_OBJ)
 	ar -r $(A_NAME) $(SO_OBJS)
 
-$(OUT): $(SO_NAME) $(A_NAME)
-	$(CC) -c $(INCLUDES) $(AUX_INCLUDES) $(CFLAGS) $(SRC) -o $(OBJ)
-	$(CC) $(OBJ) $(A_NAME) $(AUX_A_FILES) -o $(OUT)-static
-	$(CC) $(OBJ) $(LDFLAGS) $(AUX_LDFLAGS) -o $(OUT)-dynamic
+$(LIB_NAME): $(SO_NAME) $(A_NAME)
+	@echo $(UNAME) $(LIB_NAME) library files:
+	@ls -1 $(SO_NAME)* *.a
 
-toy: $(OUT)
-	$(CC) -o bi-add ./bi-add.c
-	./bi-add 132904811234120000312412 123412413132500
+$(TEST_OUT): $(LIB_NAME)
+	$(CC) -c $(INCLUDES) $(AUX_INCLUDES) $(CFLAGS) \
+		$(TEST_SRC) -o $(TEST_OBJ)
+	$(CC) $(TEST_OBJ) $(A_NAME) $(AUX_A_FILES) -o $(TEST_OUT)-static
+	$(CC) $(TEST_OBJ) $(LDFLAGS) $(AUX_LDFLAGS) -o $(TEST_OUT)-dynamic
 
-check: $(OUT)
-	./$(OUT)-static
-	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) ./$(OUT)-dynamic
+$(OUT): $(LIB_NAME)
+	$(CC) -c $(INCLUDES) $(CFLAGS) $(SRC) -o $(OBJ)
+	$(CC) $(OBJ) -o $(OUT)
+
+demo: $(OUT)
+	./$(OUT) 132904811234120000312412 123412413132500
+
+check: $(TEST_OUT)
+	./$(TEST_OUT)-static
+	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) ./$(TEST_OUT)-dynamic
+	@echo "Success."
 
 tidy:
 	$(LINDENT) \
@@ -88,13 +111,16 @@ tidy:
 
 clean:
 	rm -f *~ *.o *.a *.$(SHAREDEXT) \
-		$(SO_NAME).* \ $(OUT)-static $(OUT)-dynamic \
+		$(SO_NAME).* \
+		$(TEST_OUT)-static $(TEST_OUT)-dynamic \
 		bi-add
 
 
-install:
-	 @echo "Installing libraries in $(LIBDIR)"; \
-	 cp -pv $(A_NAME) $(LIBDIR)/;\
-	 cp -Rv $(SO_NAME)* $(LIBDIR)/;\
-	 echo "Installing headers in $(INCDIR)"; \
-	 cp -pv $(LIB_HDR) $(INCDIR)/;
+install: $(LIB_NAME)
+	@echo "Installing $(LIB_NAME) $(UNAME) libraries in $(LIBDIR)"
+	@mkdir -pv $(LIBDIR)
+	@cp -pv $(A_NAME) $(LIBDIR)/
+	@cp -Rv $(SO_NAME)* $(LIBDIR)/
+	@echo "Installing $(LIB_NAME) headers in $(INCDIR)"
+	@mkdir -pv $(INCDIR)
+	@cp -pv $(LIB_HDR) $(INCDIR)/

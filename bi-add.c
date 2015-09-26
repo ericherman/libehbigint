@@ -14,7 +14,6 @@ int main(int argc, char *argv[])
 	struct ehbigint bigint_1;
 	struct ehbigint bigint_2;
 	struct ehbigint bigint_3;
-	int err;
 
 	if (argc < 3) {
 		fprintf(stderr, "usage:\n\t%s decimal1 decimal2\n", argv[0]);

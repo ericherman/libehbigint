@@ -41,6 +41,13 @@ int ehbi_inc(struct ehbigint *bi, struct ehbigint *val);
 int ehbi_inc_ul(struct ehbigint *bi, unsigned long val);
 
 /*
+   returns 1 if the values represented by the ehbigint arguments are equal
+   returns 0 otherwise
+   populates the contents of err with 0 on success or error_code on error
+*/
+int ehbi_equals(struct ehbigint *bi1, struct ehbigint *bi2, int *err);
+
+/*
    converts an arbitrarily long string of decimal digits into hex
    returns 0 on success or error_code on error
 */

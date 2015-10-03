@@ -319,6 +319,30 @@ int ehbi_inc_ul(struct ehbigint *bi, unsigned long val)
 	return ehbi_inc(bi, &temp);
 }
 
+int ehbi_equals(struct ehbigint *bi1, struct ehbigint *bi2, int *err)
+{
+	size_t i;
+	unsigned char a, b;
+
+	if (bi1 == 0 || bi2 == 0 || err == 0) {
+		LOG_ERROR0("Null argument(s)");
+		return EHBI_NULL_ARGS;
+	}
+
+	if (bi1->bytes_used != bi2->bytes_used) {
+		return 0;
+	}
+
+	for (i = 0; i < bi1->bytes_used; ++i) {
+		a = bi1->bytes[bi1->bytes_len - 1 - i];
+		b = bi2->bytes[bi2->bytes_len - 1 - i];
+		if (a != b) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
 int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
 			size_t buf_len)
 {

@@ -38,7 +38,7 @@ int ehbi_inc(struct ehbigint *bi, struct ehbigint *val);
    increments the ehbigint by the value in the second parameter
    returns 0 on success or error_code on error
 */
-int ehbi_inc_l(struct ehbigint *bi, long val);
+int ehbi_inc_ul(struct ehbigint *bi, unsigned long val);
 
 /*
    converts an arbitrarily long string of decimal digits into hex

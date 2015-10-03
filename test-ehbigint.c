@@ -247,14 +247,13 @@ int check_inc(void)
 	return failures;
 }
 
-int check_inc_l(void)
+int check_inc_ul(void)
 {
 	int err, failures;
 	unsigned char bytes_buf1[20];
 	char as_string[80];
 	struct ehbigint bi1;
 
-	/*  char *u64_max = "0xFFFFFFFFFFFFFFFF" */
 	const char *str_1 = "0xF00000000000000001";
 	const char *str_3 = "0xF00000000100000000";
 
@@ -269,9 +268,9 @@ int check_inc_l(void)
 		return 1;
 	}
 
-	err = ehbi_inc_l(&bi1, (long)0x0FFFFFFF);
+	err = ehbi_inc_ul(&bi1, (unsigned long)0xFFFFFFFF);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_inc_l\n", err);
+		fprintf(stderr, "error %d from ehbi_inc_ul\n", err);
 		return 1;
 	}
 
@@ -284,7 +283,7 @@ int check_inc_l(void)
 	failures += check_str(as_string, str_3);
 
 	if (failures) {
-		fprintf(stderr, "%d failures in check_inc_l\n", failures);
+		fprintf(stderr, "%d failures in check_inc_ul\n", failures);
 	}
 
 	return failures;
@@ -301,7 +300,7 @@ int main(void)
 	failures += check_from_hex_to_hex_round_trip();
 	failures += check_add();
 	failures += check_inc();
-	failures += check_inc_l();
+	failures += check_inc_ul();
 
 	if (failures) {
 		fprintf(stderr, "%d failures in total\n", failures);

@@ -302,15 +302,15 @@ int ehbi_inc(struct ehbigint *bi, struct ehbigint *val)
 	return EHBI_SUCCESS;
 }
 
-int ehbi_inc_l(struct ehbigint *bi, long val)
+int ehbi_inc_ul(struct ehbigint *bi, unsigned long val)
 {
 	size_t i;
-	unsigned char bytes[sizeof(long)];
+	unsigned char bytes[sizeof(unsigned long)];
 	struct ehbigint temp;
 
 	temp.bytes = bytes;
-	temp.bytes_len = sizeof(long);
-	temp.bytes_used = sizeof(long);
+	temp.bytes_len = sizeof(unsigned long);
+	temp.bytes_used = sizeof(unsigned long);
 
 	for (i = temp.bytes_len; i > 0; --i) {
 		temp.bytes[i - 1] = 0xFF & (val >> (i - 1));

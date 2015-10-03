@@ -326,9 +326,13 @@ int ehbi_equals(struct ehbigint *bi1, struct ehbigint *bi2, int *err)
 
 	if (bi1 == 0 || bi2 == 0 || err == 0) {
 		LOG_ERROR0("Null argument(s)");
-		return EHBI_NULL_ARGS;
+		if (err) {
+			*err = EHBI_NULL_ARGS;
+		}
+		return 0;
 	}
 
+	*err = 0;
 	if (bi1->bytes_used != bi2->bytes_used) {
 		return 0;
 	}

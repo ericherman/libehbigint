@@ -2,31 +2,10 @@
 
 #include <stdio.h>
 
-#ifndef LOG_ERROR0
-#define LOG_ERROR0(format) \
- fprintf(stderr, "Line %d: ", __LINE__); \
- fprintf(stderr, format); \
- fprintf(stderr, "\n")
-#endif
-
-#ifndef LOG_ERROR1
-#define LOG_ERROR1(format, arg) \
- fprintf(stderr, "Line %d: ", __LINE__); \
- fprintf(stderr, format, arg); \
- fprintf(stderr, "\n")
-#endif
-
-#ifndef LOG_ERROR2
-#define LOG_ERROR2(format, arg1, arg2) \
- fprintf(stderr, "Line %d: ", __LINE__); \
- fprintf(stderr, format, arg1, arg2); \
- fprintf(stderr, "\n")
-#endif
-
 static int nibble_to_hex(unsigned char nibble, char *c)
 {
 	if (c == 0) {
-		LOG_ERROR0("Null char pointer");
+		EHBI_LOG_ERROR0("Null char pointer");
 		return EHBI_NULL_CHAR_PTR;
 	}
 	if (nibble < 10) {
@@ -34,7 +13,7 @@ static int nibble_to_hex(unsigned char nibble, char *c)
 	} else if (nibble < 16) {
 		*c = 'A' + nibble - 10;
 	} else {
-		LOG_ERROR1("Bad input '%x'", nibble);
+		EHBI_LOG_ERROR1("Bad input '%x'", nibble);
 		return EHBI_BAD_INPUT;
 	}
 	return EHBI_SUCCESS;
@@ -55,7 +34,7 @@ static int from_hex_nibble(unsigned char *nibble, char c)
 {
 
 	if (nibble == 0) {
-		LOG_ERROR0("Null char pointer");
+		EHBI_LOG_ERROR0("Null char pointer");
 		return EHBI_NULL_CHAR_PTR;
 	}
 	if (c >= '0' && c <= '9') {
@@ -65,7 +44,7 @@ static int from_hex_nibble(unsigned char *nibble, char c)
 	} else if (c >= 'A' && c <= 'F') {
 		*nibble = 10 + c - 'A';
 	} else {
-		LOG_ERROR1("Not hex (%c)", c);
+		EHBI_LOG_ERROR1("Not hex (%c)", c);
 		return EHBI_NOT_HEX;
 	}
 
@@ -79,14 +58,14 @@ static int from_hex(unsigned char *byte, char high, char low)
 
 	err = from_hex_nibble(&nibble, high);
 	if (err) {
-		LOG_ERROR1("Error with high nibble (%c)", high);
+		EHBI_LOG_ERROR1("Error with high nibble (%c)", high);
 		return EHBI_BAD_HIGH_NIBBLE;
 	}
 	*byte = (nibble << 4);
 
 	err = from_hex_nibble(&nibble, low);
 	if (err) {
-		LOG_ERROR1("Error with low nibble (%c)", high);
+		EHBI_LOG_ERROR1("Error with low nibble (%c)", high);
 		return EHBI_BAD_LOW_NIBBLE;
 	}
 	*byte += nibble;
@@ -100,19 +79,19 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 	unsigned char high, low;
 
 	if (bi == 0) {
-		LOG_ERROR0("Null struct");
+		EHBI_LOG_ERROR0("Null struct");
 		return EHBI_NULL_STRUCT;
 	}
 	if (bi->bytes == 0) {
-		LOG_ERROR0("Null bytes[]");
+		EHBI_LOG_ERROR0("Null bytes[]");
 		return EHBI_NULL_BYTES;
 	}
 	if (str == 0) {
-		LOG_ERROR0("Null string");
+		EHBI_LOG_ERROR0("Null string");
 		return EHBI_NULL_STRING;
 	}
 	if (str_len == 0 || str[0] == 0) {
-		LOG_ERROR0("Zero length string");
+		EHBI_LOG_ERROR0("Zero length string");
 		return EHBI_ZERO_LEN_STRING;
 	}
 
@@ -142,11 +121,12 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 			high = '0';
 		}
 		if (bi->bytes_used >= bi->bytes_len) {
-			LOG_ERROR0("byte[] too small");
+			EHBI_LOG_ERROR0("byte[] too small");
 			return EHBI_BYTES_TOO_SMALL;
 		}
 		if (from_hex(&(bi->bytes[--i]), high, low)) {
-			LOG_ERROR2("Bad data (high: %c, low: %c)", high, low);
+			EHBI_LOG_ERROR2("Bad data (high: %c, low: %c)", high,
+					low);
 			return EHBI_BAD_DATA;
 		}
 		bi->bytes_used++;
@@ -166,15 +146,15 @@ int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len)
 	size_t i, j;
 
 	if (bi == 0) {
-		LOG_ERROR0("Null struct");
+		EHBI_LOG_ERROR0("Null struct");
 		return EHBI_NULL_STRUCT;
 	}
 	if (buf == 0) {
-		LOG_ERROR0("Null buffer");
+		EHBI_LOG_ERROR0("Null buffer");
 		return EHBI_NULL_STRING_BUF;
 	}
 	if (buf_len < (bi->bytes_used + 3)) {
-		LOG_ERROR0("Buffer too small");
+		EHBI_LOG_ERROR0("Buffer too small");
 		return EHBI_STRING_BUF_TOO_SMALL;
 	}
 	j = 0;
@@ -183,18 +163,18 @@ int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len)
 
 	for (i = bi->bytes_len - bi->bytes_used; i < bi->bytes_len; ++i) {
 		if (j + 2 > buf_len) {
-			LOG_ERROR0("Buffer too small, partially written");
+			EHBI_LOG_ERROR0("Buffer too small, partially written");
 			return EHBI_STRING_BUF_TOO_SMALL_PARTIAL;
 		}
 		err = to_hex(bi->bytes[i], buf + j, buf + j + 1);
 		if (err) {
-			LOG_ERROR0("Corrupted data?");
+			EHBI_LOG_ERROR0("Corrupted data?");
 			return err;
 		}
 		j += 2;
 	}
 	if (j > buf_len) {
-		LOG_ERROR0("Unable to write trailing NULL to buffer");
+		EHBI_LOG_ERROR0("Unable to write trailing NULL to buffer");
 		return EHBI_STRING_BUF_TOO_SMALL_NO_NULL;
 	}
 	buf[j] = '\0';
@@ -216,7 +196,7 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 	struct ehbigint *tmp;
 
 	if (res == 0 || bi1 == 0 || bi2 == 0) {
-		LOG_ERROR0("Null argument(s)");
+		EHBI_LOG_ERROR0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
 
@@ -234,7 +214,7 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 		c = c + a + b;
 
 		if (i > res->bytes_len) {
-			LOG_ERROR0("Result byte[] too small");
+			EHBI_LOG_ERROR0("Result byte[] too small");
 			return EHBI_BYTES_TOO_SMALL;
 		}
 		res->bytes[res->bytes_len - i] = (unsigned char)c;
@@ -244,7 +224,7 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 	}
 	if (c) {
 		if (i > res->bytes_len) {
-			LOG_ERROR0("Result byte[] too small for carry");
+			EHBI_LOG_ERROR0("Result byte[] too small for carry");
 			return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
 		}
 		res->bytes[res->bytes_len - i] = (unsigned char)c;
@@ -260,11 +240,11 @@ int ehbi_inc(struct ehbigint *bi, struct ehbigint *val)
 	int a, b, c;
 
 	if (bi == 0 || val == 0) {
-		LOG_ERROR0("Null argument(s)");
+		EHBI_LOG_ERROR0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
 	if (val->bytes_used > bi->bytes_len) {
-		LOG_ERROR0("byte[] too small");
+		EHBI_LOG_ERROR0("byte[] too small");
 		return EHBI_BYTES_TOO_SMALL;
 	}
 
@@ -283,7 +263,7 @@ int ehbi_inc(struct ehbigint *bi, struct ehbigint *val)
 	}
 	while (c) {
 		if (i > bi->bytes_len) {
-			LOG_ERROR0("byte[] too small for carry");
+			EHBI_LOG_ERROR0("byte[] too small for carry");
 			return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
 		}
 		a = c;
@@ -325,7 +305,7 @@ int ehbi_compare(struct ehbigint *bi1, struct ehbigint *bi2, int *err)
 	unsigned char a, b;
 
 	if (bi1 == 0 || bi2 == 0 || err == 0) {
-		LOG_ERROR0("Null argument(s)");
+		EHBI_LOG_ERROR0("Null argument(s)");
 		if (err) {
 			*err = EHBI_NULL_ARGS;
 		}
@@ -374,12 +354,12 @@ int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
 	unsigned char *hex_buf;
 
 	if (dec_str == 0 || buf == 0) {
-		LOG_ERROR0("Null argument");
+		EHBI_LOG_ERROR0("Null argument");
 		return EHBI_NULL_ARGS;
 	}
 
 	if (buf_len < 4) {
-		LOG_ERROR0("Buffer too small");
+		EHBI_LOG_ERROR0("Buffer too small");
 		return EHBI_STRING_BUF_TOO_SMALL;
 	}
 	buf[0] = '0';
@@ -397,7 +377,8 @@ int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
 
 	for (i = 0; i < dec_len && dec_str[i] != 0; ++i) {
 		if (dec_str[i] < '0' || dec_str[i] > '9') {
-			LOG_ERROR1("Character not decimal (%c)", dec_str[i]);
+			EHBI_LOG_ERROR1("Character not decimal (%c)",
+					dec_str[i]);
 			return EHBI_BAD_INPUT;
 		}
 		/* we're doing another digit, multiply previous by 10 */
@@ -422,7 +403,7 @@ int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
 	for (j = 0; j < hex_len; ++j) {
 		err = nibble_to_hex(hex_buf[j], buf + 2 + j);
 		if (err) {
-			LOG_ERROR0("Null char pointer");
+			EHBI_LOG_ERROR0("Null char pointer");
 			return EHBI_CORRUPT_DATA;
 		}
 	}
@@ -452,12 +433,12 @@ int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
 	unsigned char num_val;
 
 	if (hex == 0 || buf == 0) {
-		LOG_ERROR0("Null argument");
+		EHBI_LOG_ERROR0("Null argument");
 		return EHBI_NULL_ARGS;
 	}
 
 	if (buf_len < 2 || buf_len < hex_len) {
-		LOG_ERROR0("Buffer too small");
+		EHBI_LOG_ERROR0("Buffer too small");
 		return EHBI_STRING_BUF_TOO_SMALL;
 	}
 
@@ -487,7 +468,7 @@ int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
 			ascii_offset = 'a';
 		}
 		if (ascii_offset == 0) {
-			LOG_ERROR1("Character not hex (%c)", hex[i]);
+			EHBI_LOG_ERROR1("Character not hex (%c)", hex[i]);
 			return EHBI_BAD_INPUT;
 		}
 

@@ -107,4 +107,25 @@ enum {
 	EHBI_LAST
 };
 
+#ifndef EHBI_LOG_ERROR0
+#define EHBI_LOG_ERROR0(format) \
+ fprintf(stderr, "%s:%d: ", __FILE__, __LINE__); \
+ fprintf(stderr, format); \
+ fprintf(stderr, "\n")
+#endif
+
+#ifndef EHBI_LOG_ERROR1
+#define EHBI_LOG_ERROR1(format, arg) \
+ fprintf(stderr, "%s:%d: ", __FILE__, __LINE__); \
+ fprintf(stderr, format, arg); \
+ fprintf(stderr, "\n")
+#endif
+
+#ifndef EHBI_LOG_ERROR2
+#define EHBI_LOG_ERROR2(format, arg1, arg2) \
+ fprintf(stderr, "%s:%d: ", __FILE__, __LINE__); \
+ fprintf(stderr, format, arg1, arg2); \
+ fprintf(stderr, "\n")
+#endif
+
 #endif /* EHBIGINT_H */

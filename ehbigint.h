@@ -29,6 +29,18 @@ int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len);
 int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2);
 
 /*
+   increments the first ehbigint by the value in the second parameter
+   returns 0 on success or error_code on error
+*/
+int ehbi_inc(struct ehbigint *bi, struct ehbigint *val);
+
+/*
+   increments the ehbigint by the value in the second parameter
+   returns 0 on success or error_code on error
+*/
+int ehbi_inc_l(struct ehbigint *bi, long val);
+
+/*
    converts an arbitrarily long string of decimal digits into hex
    returns 0 on success or error_code on error
 */
@@ -44,7 +56,7 @@ int ehbi_hex_to_decimal(const char *hex_str, size_t hex_len, char *buf,
 
 /* error codes */
 enum {
-	EHBI_SUCCESS,
+	EHBI_SUCCESS = 0,
 	EHBI_NULL_CHAR_PTR,
 	EHBI_BAD_INPUT,
 	EHBI_NOT_HEX,

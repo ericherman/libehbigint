@@ -232,25 +232,91 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 		a = bi1->bytes[bi1->bytes_len - i];
 		b = (bi2->bytes_used < i) ? 0 : bi2->bytes[bi2->bytes_len - i];
 		c = c + a + b;
-		if (res->bytes_used + 1 > res->bytes_len) {
+
+		if (i > res->bytes_len) {
 			LOG_ERROR0("Result byte[] too small");
 			return EHBI_BYTES_TOO_SMALL;
 		}
 		res->bytes[res->bytes_len - i] = (unsigned char)c;
 		res->bytes_used++;
+
 		c = c >> 8;
 	}
-	while (c) {
-		if (res->bytes_used + 1 > res->bytes_len) {
+	if (c) {
+		if (i > res->bytes_len) {
 			LOG_ERROR0("Result byte[] too small for carry");
 			return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
 		}
 		res->bytes[res->bytes_len - i] = (unsigned char)c;
 		res->bytes_used++;
-		c = c >> 8;
 	}
 
 	return EHBI_SUCCESS;
+}
+
+int ehbi_inc(struct ehbigint *bi, struct ehbigint *val)
+{
+	size_t i;
+	int a, b, c;
+
+	if (bi == 0 || val == 0) {
+		LOG_ERROR0("Null argument(s)");
+		return EHBI_NULL_ARGS;
+	}
+	if (val->bytes_used > bi->bytes_len) {
+		LOG_ERROR0("byte[] too small");
+		return EHBI_BYTES_TOO_SMALL;
+	}
+
+	c = 0;
+	for (i = 1; i <= val->bytes_used; ++i) {
+		a = val->bytes[val->bytes_len - i];
+		b = (bi->bytes_used < i) ? 0 : bi->bytes[bi->bytes_len - i];
+		c = c + a + b;
+
+		bi->bytes[bi->bytes_len - i] = (unsigned char)c;
+		if (bi->bytes_used < i) {
+			bi->bytes_used = i;
+		}
+
+		c = c >> 8;
+	}
+	while (c) {
+		if (i > bi->bytes_len) {
+			LOG_ERROR0("byte[] too small for carry");
+			return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
+		}
+		a = c;
+		b = (bi->bytes_used < i) ? 0 : bi->bytes[bi->bytes_len - i];
+		c = a + b;
+
+		bi->bytes[bi->bytes_len - i] = (unsigned char)c;
+		if (bi->bytes_used < i) {
+			bi->bytes_used = i;
+		}
+
+		c = c >> 8;
+		++i;
+	}
+
+	return EHBI_SUCCESS;
+}
+
+int ehbi_inc_l(struct ehbigint *bi, long val)
+{
+	size_t i;
+	unsigned char bytes[sizeof(long)];
+	struct ehbigint temp;
+
+	temp.bytes = bytes;
+	temp.bytes_len = sizeof(long);
+	temp.bytes_used = sizeof(long);
+
+	for (i = temp.bytes_len; i > 0; --i) {
+		temp.bytes[i - 1] = 0xFF & (val >> (i - 1));
+	}
+
+	return ehbi_inc(bi, &temp);
 }
 
 int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
@@ -325,9 +391,9 @@ int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
 	}
 
 	/* add a trailing NULL */
-	buf[buf_len - 1 - j] = 0;
+	buf[buf_len - 1 - j] = '\0';
 
-	return 0;
+	return EHBI_SUCCESS;
 }
 
 int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
@@ -417,7 +483,7 @@ int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
 	}
 
 	/* add a trailing NULL */
-	buf[buf_len - 1 - j] = 0;
+	buf[buf_len - 1 - j] = '\0';
 
-	return 0;
+	return EHBI_SUCCESS;
 }

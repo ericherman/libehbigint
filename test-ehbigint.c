@@ -130,7 +130,8 @@ int check_from_hex_to_hex_round_trip(void)
 
 	err = ehbi_to_hex_string(&a_bigint, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d returned from ehbi_as_string\n", err);
+		fprintf(stderr, "error %d returned from ehbi_to_hex_string\n",
+			err);
 		return 1;
 	}
 
@@ -184,7 +185,7 @@ int check_add(void)
 
 	err = ehbi_to_hex_string(&bi3, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_as_string\n", err);
+		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
 		return 1;
 	}
 
@@ -192,6 +193,98 @@ int check_add(void)
 
 	if (failures) {
 		fprintf(stderr, "%d failures in check_add\n", failures);
+	}
+
+	return failures;
+}
+
+int check_inc(void)
+{
+	int err, failures;
+	unsigned char bytes_buf1[20];
+	unsigned char bytes_buf2[20];
+	char as_string[80];
+	struct ehbigint bi1, bi2;
+
+	/*  char *u64_max = "0xFFFFFFFFFFFFFFFF" */
+	const char *str_1 = "0xF00000F00000000001";
+	const char *str_2 = "0x100000100000000001";
+	const char *str_3 = "0x1000001000000000002";
+
+	failures = 0;
+
+	bi1.bytes = bytes_buf1;
+	bi1.bytes_len = 20;
+
+	bi2.bytes = bytes_buf2;
+	bi2.bytes_len = 20;
+
+	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
+	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_from_hex_string\n", err);
+		return 1;
+	}
+
+	err = ehbi_inc(&bi1, &bi2);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_inc\n", err);
+		return 1;
+	}
+
+	err = ehbi_to_hex_string(&bi1, as_string, 80);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		return 1;
+	}
+
+	failures += check_str(as_string, str_3);
+
+	if (failures) {
+		fprintf(stderr, "%d failures in check_inc\n", failures);
+	}
+
+	return failures;
+}
+
+int check_inc_l(void)
+{
+	int err, failures;
+	unsigned char bytes_buf1[20];
+	char as_string[80];
+	struct ehbigint bi1;
+
+	/*  char *u64_max = "0xFFFFFFFFFFFFFFFF" */
+	const char *str_1 = "0xF00000000000000001";
+	const char *str_3 = "0xF00000000100000000";
+
+	failures = 0;
+
+	bi1.bytes = bytes_buf1;
+	bi1.bytes_len = 20;
+
+	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_from_hex_string\n", err);
+		return 1;
+	}
+
+	err = ehbi_inc_l(&bi1, (long)0x0FFFFFFF);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_inc_l\n", err);
+		return 1;
+	}
+
+	err = ehbi_to_hex_string(&bi1, as_string, 80);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		return 1;
+	}
+
+	failures += check_str(as_string, str_3);
+
+	if (failures) {
+		fprintf(stderr, "%d failures in check_inc_l\n", failures);
 	}
 
 	return failures;
@@ -207,6 +300,8 @@ int main(void)
 	failures += check_decimal_to_hex_to_decimal_loop();
 	failures += check_from_hex_to_hex_round_trip();
 	failures += check_add();
+	failures += check_inc();
+	failures += check_inc_l();
 
 	if (failures) {
 		fprintf(stderr, "%d failures in total\n", failures);

@@ -48,6 +48,20 @@ int ehbi_inc_ul(struct ehbigint *bi, unsigned long val);
 int ehbi_equals(struct ehbigint *bi1, struct ehbigint *bi2, int *err);
 
 /*
+   returns 1 if the first parameter is less than the second
+   returns 0 otherwise
+   populates the contents of err with 0 on success or error_code on error
+*/
+int ehbi_less_than(struct ehbigint *bi1, struct ehbigint *bi2, int *err);
+
+/*
+   returns 1 if the first parameter is greater than the second
+   returns 0 otherwise
+   populates the contents of err with 0 on success or error_code on error
+*/
+int ehbi_greater_than(struct ehbigint *bi1, struct ehbigint *bi2, int *err);
+
+/*
    returns 0 if the values represented by the ehbigint arguments are equal
    returns <0 if the first ehbigint is less than the second
    returns >0 if the first ehbigint is greater than the second

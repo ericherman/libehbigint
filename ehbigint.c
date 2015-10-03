@@ -356,6 +356,16 @@ int ehbi_equals(struct ehbigint *bi1, struct ehbigint *bi2, int *err)
 	return ((ehbi_compare(bi1, bi2, err) == 0) && (*err == EHBI_SUCCESS));
 }
 
+int ehbi_less_than(struct ehbigint *bi1, struct ehbigint *bi2, int *err)
+{
+	return ((ehbi_compare(bi1, bi2, err) < 0) && (*err == EHBI_SUCCESS));
+}
+
+int ehbi_greater_than(struct ehbigint *bi1, struct ehbigint *bi2, int *err)
+{
+	return ((ehbi_compare(bi1, bi2, err) > 0) && (*err == EHBI_SUCCESS));
+}
+
 int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
 			size_t buf_len)
 {

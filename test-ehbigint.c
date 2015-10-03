@@ -385,6 +385,18 @@ int check_compare(void)
 		return 1;
 	}
 	failures += check_int(result, 0);
+	result = ehbi_less_than(&bi1, &bi1, &err);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_less_than\n", err);
+		return 1;
+	}
+	failures += check_int(result, 0);
+	result = ehbi_greater_than(&bi1, &bi1, &err);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_greater_than\n", err);
+		return 1;
+	}
+	failures += check_int(result, 0);
 
 	result = ehbi_compare(&bi1, &bi2, &err);
 	if (err) {
@@ -392,10 +404,34 @@ int check_compare(void)
 		return 1;
 	}
 	failures += check_int(result, -1);
+	result = ehbi_less_than(&bi1, &bi2, &err);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_less_than\n", err);
+		return 1;
+	}
+	failures += check_int(result, 1);
+	result = ehbi_greater_than(&bi1, &bi2, &err);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_greater_than\n", err);
+		return 1;
+	}
+	failures += check_int(result, 0);
 
 	result = ehbi_compare(&bi2, &bi1, &err);
 	if (err) {
 		fprintf(stderr, "error %d from ehbi_compare\n", err);
+		return 1;
+	}
+	failures += check_int(result, 1);
+	result = ehbi_less_than(&bi2, &bi1, &err);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_less_than\n", err);
+		return 1;
+	}
+	failures += check_int(result, 0);
+	result = ehbi_greater_than(&bi2, &bi1, &err);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_greater_than\n", err);
 		return 1;
 	}
 	failures += check_int(result, 1);
@@ -406,6 +442,18 @@ int check_compare(void)
 		return 1;
 	}
 	failures += check_int(result, 1);
+	result = ehbi_less_than(&bi1, &bi3, &err);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_less_than\n", err);
+		return 1;
+	}
+	failures += check_int(result, 0);
+	result = ehbi_greater_than(&bi1, &bi3, &err);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_greater_than\n", err);
+		return 1;
+	}
+	failures += check_int(result, 1);
 
 	result = ehbi_compare(&bi3, &bi1, &err);
 	if (err) {
@@ -413,6 +461,18 @@ int check_compare(void)
 		return 1;
 	}
 	failures += check_int(result, -1);
+	result = ehbi_less_than(&bi3, &bi1, &err);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_less_than\n", err);
+		return 1;
+	}
+	failures += check_int(result, 1);
+	result = ehbi_greater_than(&bi3, &bi1, &err);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_greater_than\n", err);
+		return 1;
+	}
+	failures += check_int(result, 0);
 
 	if (failures) {
 		fprintf(stderr, "%d failures in check_compare\n", failures);

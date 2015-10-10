@@ -192,7 +192,7 @@ int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len)
 int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 {
 	size_t i;
-	int a, b, c;
+	unsigned char a, b, c;
 	struct ehbigint *tmp;
 
 	if (res == 0 || bi1 == 0 || bi2 == 0) {
@@ -217,17 +217,17 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 			EHBI_LOG_ERROR0("Result byte[] too small");
 			return EHBI_BYTES_TOO_SMALL;
 		}
-		res->bytes[res->bytes_len - i] = (unsigned char)c;
+		res->bytes[res->bytes_len - i] = c;
 		res->bytes_used++;
 
-		c = c >> 8;
+		c = (c < a) ? 1 : 0;
 	}
 	if (c) {
 		if (i > res->bytes_len) {
 			EHBI_LOG_ERROR0("Result byte[] too small for carry");
 			return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
 		}
-		res->bytes[res->bytes_len - i] = (unsigned char)c;
+		res->bytes[res->bytes_len - i] = c;
 		res->bytes_used++;
 	}
 
@@ -237,7 +237,7 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 int ehbi_inc(struct ehbigint *bi, struct ehbigint *val)
 {
 	size_t i;
-	int a, b, c;
+	unsigned char a, b, c;
 
 	if (bi == 0 || val == 0) {
 		EHBI_LOG_ERROR0("Null argument(s)");
@@ -254,12 +254,12 @@ int ehbi_inc(struct ehbigint *bi, struct ehbigint *val)
 		b = (bi->bytes_used < i) ? 0 : bi->bytes[bi->bytes_len - i];
 		c = c + a + b;
 
-		bi->bytes[bi->bytes_len - i] = (unsigned char)c;
+		bi->bytes[bi->bytes_len - i] = c;
 		if (bi->bytes_used < i) {
 			bi->bytes_used = i;
 		}
 
-		c = c >> 8;
+		c = (c < a) ? 1 : 0;
 	}
 	while (c) {
 		if (i > bi->bytes_len) {
@@ -270,12 +270,12 @@ int ehbi_inc(struct ehbigint *bi, struct ehbigint *val)
 		b = (bi->bytes_used < i) ? 0 : bi->bytes[bi->bytes_len - i];
 		c = a + b;
 
-		bi->bytes[bi->bytes_len - i] = (unsigned char)c;
+		bi->bytes[bi->bytes_len - i] = c;
 		if (bi->bytes_used < i) {
 			bi->bytes_used = i;
 		}
 
-		c = c >> 8;
+		c = (c < a) ? 1 : 0;
 		++i;
 	}
 

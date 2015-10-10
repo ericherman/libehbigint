@@ -41,6 +41,14 @@ int ehbi_inc(struct ehbigint *bi, struct ehbigint *val);
 int ehbi_inc_ul(struct ehbigint *bi, unsigned long val);
 
 /*
+   populates the first ehbigint with the value of the second perameter minus
+   the third
+   returns 0 on success or error_code on error
+*/
+int ehbi_subtract(struct ehbigint *res, struct ehbigint *bi1,
+		  struct ehbigint *bi2);
+
+/*
    returns 1 if the values represented by the ehbigint arguments are equal
    returns 0 otherwise
    populates the contents of err with 0 on success or error_code on error

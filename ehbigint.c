@@ -299,6 +299,18 @@ int ehbi_inc_ul(struct ehbigint *bi, unsigned long val)
 	return ehbi_inc(bi, &temp);
 }
 
+int ehbi_subtract(struct ehbigint *res, struct ehbigint *bi1,
+		  struct ehbigint *bi2)
+{
+	if (res == 0 || bi1 == 0 || bi2 == 0) {
+		EHBI_LOG_ERROR0("Null argument(s)");
+		return EHBI_NULL_ARGS;
+	}
+
+	EHBI_LOG_ERROR0("Not implemented");
+	return EHBI_LAST;
+}
+
 int ehbi_compare(struct ehbigint *bi1, struct ehbigint *bi2, int *err)
 {
 	size_t i;

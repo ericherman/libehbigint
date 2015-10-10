@@ -302,13 +302,53 @@ int ehbi_inc_ul(struct ehbigint *bi, unsigned long val)
 int ehbi_subtract(struct ehbigint *res, struct ehbigint *bi1,
 		  struct ehbigint *bi2)
 {
+	size_t i, max_len;
+	unsigned char a, b, c;
+
 	if (res == 0 || bi1 == 0 || bi2 == 0) {
 		EHBI_LOG_ERROR0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
 
-	EHBI_LOG_ERROR0("Not implemented");
-	return EHBI_LAST;
+	if (bi1->bytes_used >= bi2->bytes_used) {
+		max_len = bi1->bytes_used;
+	} else {
+		max_len = bi2->bytes_used;
+	}
+
+	res->bytes_used = 0;
+	c = 0;
+	for (i = 1; i <= max_len; ++i) {
+		if (bi1->bytes_used < i) {
+			a = ((1 << 7) & bi1->bytes[0]) ? 0xFF : 0;
+		} else {
+			a = bi1->bytes[bi1->bytes_len - i];
+		}
+		b = (bi2->bytes_used < i) ? 0 : bi2->bytes[bi2->bytes_len - i];
+		c = c + (a - b);
+
+		if (i > res->bytes_len) {
+			EHBI_LOG_ERROR0("Result byte[] too small");
+			return EHBI_BYTES_TOO_SMALL;
+		}
+		res->bytes[res->bytes_len - i] = c;
+		res->bytes_used++;
+
+		c = (c > a) ? 0xFF : 0;
+	}
+	if (c) {
+		if (i > res->bytes_len) {
+			EHBI_LOG_ERROR0("Result byte[] too small for carry");
+			return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
+		}
+		while (i <= res->bytes_len) {
+			res->bytes[res->bytes_len - i] = 0xFF;
+			res->bytes_used++;
+			++i;
+		}
+	}
+
+	return EHBI_SUCCESS;
 }
 
 int ehbi_compare(struct ehbigint *bi1, struct ehbigint *bi2, int *err)

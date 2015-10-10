@@ -486,7 +486,7 @@ int check_subtract(void)
 	int err, failures;
 	unsigned char bytes_buf1[20];
 	unsigned char bytes_buf2[20];
-	unsigned char bytes_buf3[20];
+	unsigned char bytes_buf3[14];
 	char as_string[80];
 	struct ehbigint bi1, bi2, bi3;
 
@@ -494,6 +494,8 @@ int check_subtract(void)
 	const char *str_1 = "0xF20100F00002202040A";
 	const char *str_2 = "0x320000200004404020A";
 	const char *str_3 = "0xC00100CFFFFDDFE0200";
+
+	const char *str_4 = "0xFFFFFFFFF3FFEFF300002201FE00";
 
 	failures = 0;
 
@@ -504,7 +506,7 @@ int check_subtract(void)
 	bi2.bytes_len = 20;
 
 	bi3.bytes = bytes_buf3;
-	bi3.bytes_len = 20;
+	bi3.bytes_len = 14;
 
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
@@ -526,6 +528,20 @@ int check_subtract(void)
 	}
 
 	failures += check_str(as_string, str_3);
+
+	err = ehbi_subtract(&bi3, &bi2, &bi1);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_subtract\n", err);
+		return 1;
+	}
+
+	err = ehbi_to_hex_string(&bi3, as_string, 80);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		return 1;
+	}
+
+	failures += check_str(as_string, str_4);
 
 	if (failures) {
 		fprintf(stderr, "%d failures in check_subtract\n", failures);

@@ -15,8 +15,8 @@ int main(int argc, char *argv[])
 	struct ehbigint bigint_2;
 	struct ehbigint bigint_3;
 
-	if (argc < 3) {
-		fprintf(stderr, "usage:\n\t%s decimal1 decimal2\n", argv[0]);
+	if (argc < 4) {
+		fprintf(stderr, "usage:\n\t%s decimal1 [+-] decimal2\n", argv[0]);
 		return -1;
 	}
 
@@ -30,19 +30,29 @@ int main(int argc, char *argv[])
 	bigint_3.bytes_len = 1024;
 
 	ehbi_decimal_to_hex(argv[1], strlen(argv[1]), hexbuf1, 1024);
-	ehbi_decimal_to_hex(argv[2], strlen(argv[2]), hexbuf2, 1024);
+	ehbi_decimal_to_hex(argv[3], strlen(argv[3]), hexbuf2, 1024);
 
 	ehbi_from_hex_string(&bigint_1, hexbuf1, 1024);
 	ehbi_from_hex_string(&bigint_2, hexbuf2, 1024);
 
-	ehbi_add(&bigint_3, &bigint_1, &bigint_2);
+	switch (*argv[2]) {
+	case '+':
+		ehbi_add(&bigint_3, &bigint_1, &bigint_2);
+		break;
+	case '-':
+		ehbi_subtract(&bigint_3, &bigint_1, &bigint_2);
+		break;
+	default:
+		fprintf(stderr, "operator '%c' not supported.\n", *argv[2]);
+		return -1;
+	}
 
 	ehbi_to_hex_string(&bigint_3, hexbuf3, 1024);
 
 	ehbi_hex_to_decimal(hexbuf1, 1024, buf, 1024);
 	printf("   %40s\n", buf);
 	ehbi_hex_to_decimal(hexbuf2, 1024, buf, 1024);
-	printf(" + %40s\n", buf);
+	printf(" %c %40s\n", *argv[2], buf);
 	ehbi_hex_to_decimal(hexbuf3, 1024, buf, 1024);
 	printf(" = %40s\n", buf);
 

@@ -32,7 +32,7 @@ TEST_OUT=test-$(LIB_NAME)
 TEST_SRC=$(TEST_OUT).c
 TEST_OBJ=$(TEST_OUT).o
 
-OUT=bi-add
+OUT=bi-calc
 SRC=$(OUT).c
 OBJ=$(OUT).o
 
@@ -102,7 +102,7 @@ $(OUT): $(LIB_NAME)
 	$(CC) $(OBJ) -o $(OUT)
 
 demo: $(OUT)
-	./$(OUT) 132904811234120000312412 123412413132500
+	./$(OUT) 132904811234120000312412 + 123412413132500
 
 check: $(TEST_OUT)
 	./$(TEST_OUT)-static
@@ -118,7 +118,7 @@ clean:
 	rm -f *~ *.o *.a *.$(SHAREDEXT) \
 		$(SO_NAME).* \
 		$(TEST_OUT)-static $(TEST_OUT)-dynamic \
-		bi-add
+		bi-calc
 
 
 install: $(LIB_NAME)

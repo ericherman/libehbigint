@@ -1,0 +1,6 @@
+* hex_to_decimal and decimal_to_hex do not understand negative numbers
+  (treats as unsigned)
+
+* the compare functions return a true or false
+  perhaps the other functions should not return the err_code,
+  but rather pass an &err in?

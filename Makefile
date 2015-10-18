@@ -38,8 +38,13 @@ OBJ=$(OUT).o
 
 CSTD_CFLAGS=-std=c89
 #CSTD_CFLAGS=-std=c11
-#DEBUG_CFLAGS=-ggdb -O0
+
+ifeq ("$(DEBUG)", "")
 DEBUG_CFLAGS=-O3
+else
+DEBUG_CFLAGS=-ggdb -O0
+endif
+
 NOISY_CFLAGS=-Wall -Wextra -pedantic -Werror
 
 CFLAGS += $(CSTD_CFLAGS) $(DEBUG_CFLAGS) $(NOISY_CFLAGS)

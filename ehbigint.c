@@ -134,7 +134,7 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 
 	/* let's just zero out the rest of the bytes, for easier debug */
 	while (i-- > 0) {
-		bi->bytes[i] = 0;
+		bi->bytes[i] = (bi->bytes[i+1] > 0x7F) ? 0xFF : 0;
 	}
 
 	return EHBI_SUCCESS;
@@ -180,9 +180,11 @@ int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len)
 	buf[j] = '\0';
 
 	/* strip leading '0's ("0x0123" -> "0x123") */
-	while (buf[2] == '0') {
-		for (j = 2; j < buf_len - 1 && buf[j] != 0; ++j) {
-			buf[j] = buf[j + 1];
+	/* strip leading "00"s ("0x000123" -> "0x0123") */
+	while ((buf[2] == '0' || buf[2] == 'F') && buf[2] == buf[3]
+		&& buf[2] == buf[4] && buf[2] == buf[5]) {
+		for (j = 2; j < buf_len - 1 && buf[j] != 0; j += 2) {
+			buf[j] = buf[j + 2];
 		}
 	}
 
@@ -336,6 +338,7 @@ int ehbi_subtract(struct ehbigint *res, struct ehbigint *bi1,
 
 		c = (c > a) ? 0xFF : 0;
 	}
+
 	if (c) {
 		if (i > res->bytes_len) {
 			EHBI_LOG_ERROR0("Result byte[] too small for carry");
@@ -343,7 +346,6 @@ int ehbi_subtract(struct ehbigint *res, struct ehbigint *bi1,
 		}
 		while (i <= res->bytes_len) {
 			res->bytes[res->bytes_len - i] = 0xFF;
-			res->bytes_used++;
 			++i;
 		}
 	}
@@ -465,6 +467,13 @@ int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
 	for (j = 0; hex_buf[j] == '0' && j < hex_len; ++j) {
 		;
 	}
+
+	/* but work on whole bytes */
+	/* since j was incremented, whole bytes of '0' will be odd */
+	if (j % 2 == 0) {
+		j -= 1;
+	}
+
 	/* next, shift all the contents "j" places to the left */
 	for (i = 0; i < (hex_len - j); ++i) {
 		hex_buf[i] = hex_buf[i + j];

@@ -18,7 +18,7 @@ int check_decimal_to_hex(void)
 		return 1;
 	}
 
-	failures += check_str(buf, "0x113");
+	failures += check_str(buf, "0x0113");
 
 	err = ehbi_decimal_to_hex("65543", 10, buf, 20);
 
@@ -27,7 +27,7 @@ int check_decimal_to_hex(void)
 		return 1;
 	}
 
-	failures += check_str(buf, "0x10007");
+	failures += check_str(buf, "0x010007");
 
 	if (failures) {
 		fprintf(stderr, "%d failures in check_decimal_to_hex\n",
@@ -155,9 +155,9 @@ int check_add(void)
 	struct ehbigint bi1, bi2, bi3;
 
 	/*  char *u64_max =   "0xFFFFFFFFFFFFFFFF" */
-	const char *str_1 = "0xF20000F0000000000A";
+	const char *str_1 = "0x00F20000F0000000000A";
 	const char *str_2 = "0x32000020000000000A";
-	const char *str_3 = "0x1240001100000000014";
+	const char *str_3 = "0x01240001100000000014";
 
 	failures = 0;
 
@@ -207,9 +207,9 @@ int check_inc(void)
 	struct ehbigint bi1, bi2;
 
 	/*  char *u64_max = "0xFFFFFFFFFFFFFFFF" */
-	const char *str_1 = "0xF00000F00000000001";
-	const char *str_2 = "0x100000100000000001";
-	const char *str_3 = "0x1000001000000000002";
+	const char *str_1 = "0x00F00000F00000000001";
+	const char *str_2 = "0x00100000100000000001";
+	const char *str_3 = "0x01000001000000000002";
 
 	failures = 0;
 
@@ -254,8 +254,8 @@ int check_inc_ul(void)
 	char as_string[80];
 	struct ehbigint bi1;
 
-	const char *str_1 = "0xF00000000000000001";
-	const char *str_3 = "0xF00000000100000000";
+	const char *str_1 = "0x700000000000000001";
+	const char *str_3 = "0x700000000100000000";
 
 	failures = 0;
 
@@ -297,8 +297,8 @@ int check_equals(void)
 	unsigned char bytes_buf3[20];
 	struct ehbigint bi1, bi2, bi3;
 
-	const char *str_1 = "0xF20000F";
-	const char *str_2 = "0xF20000F";
+	const char *str_1 = "0x720000F";
+	const char *str_2 = "0x720000F";
 	const char *str_3 = "0x0F";
 
 	failures = 0;
@@ -356,9 +356,9 @@ int check_compare(void)
 	unsigned char bytes_buf3[20];
 	struct ehbigint bi1, bi2, bi3;
 
-	const char *str_1 = "0x70000000000";
-	const char *str_2 = "0x7F000000000";
-	const char *str_3 = "0xFF";
+	const char *str_1 = "0x60000000000";
+	const char *str_2 = "0x6F000000000";
+	const char *str_3 = "0x7F";
 
 	failures = 0;
 
@@ -491,11 +491,11 @@ int check_subtract(void)
 	struct ehbigint bi1, bi2, bi3;
 
 	/*  char *u64_max =    "0xFFFFFFFFFFFFFFFF" */
-	const char *str_1 = "0xF20100F00002202040A";
-	const char *str_2 = "0x320000200004404020A";
-	const char *str_3 = "0xC00100CFFFFDDFE0200";
+	const char *str_1 = "0x0F20100F00002202040A";
+	const char *str_2 = "0x0320000200004404020A";
+	const char *str_3 = "0x0C00100CFFFFDDFE0200";
 
-	const char *str_4 = "0xFFFFFFFFF3FFEFF300002201FE00";
+	const char *str_4 = "0xF3FFEFF300002201FE00";
 
 	failures = 0;
 

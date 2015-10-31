@@ -301,6 +301,12 @@ int ehbi_inc_ul(struct ehbigint *bi, unsigned long val)
 		j = (temp.bytes_len - 1) - i;
 		temp.bytes[j] = c;
 	}
+	for (i = 0; i < temp.bytes_len; ++i) {
+		if (temp.bytes[i] != 0x00) {
+			break;
+		}
+	}
+	temp.bytes_used = temp.bytes_len - i;
 
 	return ehbi_inc(bi, &temp);
 }
@@ -340,6 +346,12 @@ int ehbi_dec(struct ehbigint *bi, struct ehbigint *val)
 			++j;
 		}
 	}
+	for (i = 0; i < bi->bytes_len; ++i) {
+		if (bi->bytes[i] != 0x00) {
+			break;
+		}
+	}
+	bi->bytes_used = bi->bytes_len - i;
 
 	return EHBI_SUCCESS;
 }
@@ -417,8 +429,8 @@ int ehbi_compare(struct ehbigint *bi1, struct ehbigint *bi2, int *err)
 	}
 
 	for (i = 0; i < bi1->bytes_used; ++i) {
-		a = bi1->bytes[bi1->bytes_len - 1 - i];
-		b = bi2->bytes[bi2->bytes_len - 1 - i];
+		a = bi1->bytes[(bi1->bytes_len - bi1->bytes_used) + i];
+		b = bi2->bytes[(bi2->bytes_len - bi2->bytes_used) + i];
 		if (a > b) {
 			return 1;
 		} else if (a < b) {

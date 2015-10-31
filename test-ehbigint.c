@@ -4,6 +4,30 @@
 
 #include "ehbigint.h"
 
+int check_to_hex_string()
+{
+	int err, failures;
+
+	unsigned char bytes[4] = { 0x00, 0x00, 0x00, 0x01 };
+	struct ehbigint a_bigint;
+	char as_string[80];
+
+	failures = 0;
+
+	a_bigint.bytes = bytes;
+	a_bigint.bytes_len = 4;
+	a_bigint.bytes_used = 1;
+
+	err = ehbi_to_hex_string(&a_bigint, as_string, 80);
+	if (err) {
+		fprintf(stderr, "error %d ehbi_decimal_to_hex\n", err);
+		return 1;
+	}
+	failures += check_str(as_string, "0x01");
+
+	return failures;
+}
+
 int check_decimal_to_hex(void)
 {
 	int err, failures;
@@ -530,6 +554,80 @@ int check_compare(void)
 	return failures;
 }
 
+int check_compare2(void)
+{
+	int err, failures, result;
+	unsigned char bytes_buf1[20];
+	unsigned char bytes_buf2[10];
+	struct ehbigint bi1, bi2;
+
+	const char *str_1 = "0x00F513";
+	const char *str_2 = "0x00023B";
+
+	failures = 0;
+
+	bi1.bytes = bytes_buf1;
+	bi1.bytes_len = 20;
+
+	bi2.bytes = bytes_buf2;
+	bi2.bytes_len = 10;
+
+	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
+	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_from_hex_string\n", err);
+		return 1;
+	}
+
+	result = ehbi_compare(&bi1, &bi2, &err);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_compare\n", err);
+		return 1;
+	}
+	failures += check_int(result, 1);
+
+	result = ehbi_less_than(&bi1, &bi2, &err);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_less_than\n", err);
+		return 1;
+	}
+	failures += check_int(result, 0);
+
+	result = ehbi_greater_than(&bi1, &bi2, &err);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_greater_than\n", err);
+		return 1;
+	}
+	failures += check_int(result, 1);
+
+	result = ehbi_compare(&bi2, &bi1, &err);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_compare\n", err);
+		return 1;
+	}
+	failures += check_int(result, -1);
+
+	result = ehbi_less_than(&bi2, &bi1, &err);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_less_than\n", err);
+		return 1;
+	}
+	failures += check_int(result, 1);
+
+	result = ehbi_greater_than(&bi2, &bi1, &err);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_greater_than\n", err);
+		return 1;
+	}
+	failures += check_int(result, 0);
+
+	if (failures) {
+		fprintf(stderr, "%d failures in check_compare\n", failures);
+	}
+
+	return failures;
+}
+
 int check_subtract(void)
 {
 	int err, failures;
@@ -604,6 +702,7 @@ int main(void)
 {
 	int failures = 0;
 
+	failures += check_to_hex_string();
 	failures += check_decimal_to_hex();
 	failures += check_hex_to_decimal();
 	failures += check_decimal_to_hex_to_decimal_loop();
@@ -613,6 +712,7 @@ int main(void)
 	failures += check_inc_ul();
 	failures += check_equals();
 	failures += check_compare();
+	failures += check_compare2();
 	failures += check_subtract();
 	failures += check_dec();
 

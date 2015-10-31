@@ -33,6 +33,14 @@ int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len);
 int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2);
 
 /*
+   populates the first ehbigint quotient and remainder with the results
+   of the numerator divided by the denominator
+   returns 0 on success or error_code on error
+*/
+int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
+	     struct ehbigint *numerator, struct ehbigint *denominator);
+
+/*
    increments the first ehbigint by the value in the second parameter
    returns 0 on success or error_code on error
 */

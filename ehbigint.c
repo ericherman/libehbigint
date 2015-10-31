@@ -237,6 +237,53 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 	return EHBI_SUCCESS;
 }
 
+int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
+	     struct ehbigint *numerator, struct ehbigint *denominator)
+{
+	size_t i;
+	int err;
+
+	if (quotient == 0 || remainder == 0 || numerator == 0
+	    || denominator == 0) {
+		EHBI_LOG_ERROR0("Null argument(s)");
+		return EHBI_NULL_ARGS;
+	}
+
+	if (remainder->bytes_len < numerator->bytes_len) {
+		EHBI_LOG_ERROR0("byte[] too small");
+		return EHBI_BYTES_TOO_SMALL;
+	}
+
+	for (i = 0; i < quotient->bytes_len; ++i) {
+		quotient->bytes[i] = 0x00;
+	}
+
+	/* Smarter would be to do a long-division style approach, but for now,
+	   I'm going do looped subtraction because that will be easy
+	   but slow, of course. */
+
+	memcpy(remainder->bytes, numerator->bytes, numerator->bytes_len);
+	remainder->bytes_used = numerator->bytes_used;
+	remainder->bytes_len = numerator->bytes_len;
+
+	err = 0;
+	while (ehbi_greater_than(remainder, denominator, &err)) {
+		if (err) {
+			return err;
+		}
+		err = ehbi_inc_ul(quotient, 1);
+		if (err) {
+			return err;
+		}
+		err = ehbi_dec(remainder, denominator);
+		if (err) {
+			return err;
+		}
+	}
+
+	return EHBI_SUCCESS;
+}
+
 int ehbi_inc(struct ehbigint *bi, struct ehbigint *val)
 {
 	size_t i;

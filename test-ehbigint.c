@@ -697,6 +697,89 @@ int check_subtract(void)
 	return failures;
 }
 
+int check_div(void)
+{
+	int err, failures;
+
+	int inumerator = 287713;
+	int idenominator = 571;
+	int iquotient = 503;
+	int iremainder = 500;
+
+	unsigned char bytes_numerator[10];
+	unsigned char bytes_denominator[10];
+	unsigned char bytes_quotient[10];
+	unsigned char bytes_remainder[10];
+
+	struct ehbigint numerator;
+	struct ehbigint denominator;
+	struct ehbigint quotient;
+	struct ehbigint remainder;
+
+	char as_string[80];
+	char expected[80];
+
+	numerator.bytes = bytes_numerator;
+	numerator.bytes_len = 10;
+	numerator.bytes_used = 0;
+
+	denominator.bytes = bytes_denominator;
+	denominator.bytes_len = 10;
+	denominator.bytes_used = 0;
+
+	quotient.bytes = bytes_quotient;
+	quotient.bytes_len = 10;
+	quotient.bytes_used = 0;
+
+	remainder.bytes = bytes_remainder;
+	remainder.bytes_len = 10;
+	remainder.bytes_used = 0;
+
+	sprintf(as_string, "0x%04X", inumerator);
+	err = ehbi_from_hex_string(&numerator, as_string, strlen(as_string));
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_from_hex_string\n", err);
+		return 1;
+	}
+
+	sprintf(as_string, "0x%04X", idenominator);
+	err = ehbi_from_hex_string(&denominator, as_string, strlen(as_string));
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_from_hex_string\n", err);
+		return 1;
+	}
+
+	err = ehbi_div(&quotient, &remainder, &numerator, &denominator);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_div\n", err);
+		return 1;
+	}
+
+	failures = 0;
+
+	err = ehbi_to_hex_string(&quotient, as_string, 80);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		return 1;
+	}
+	sprintf(expected, "0x%04X", iquotient);
+	failures += check_str(as_string, expected);
+
+	err = ehbi_to_hex_string(&remainder, as_string, 80);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		return 1;
+	}
+	sprintf(expected, "0x%04X", iremainder);
+	failures += check_str(as_string, expected);
+
+	if (failures) {
+		fprintf(stderr, "%d failures in check_div\n", failures);
+	}
+
+	return failures;
+}
+
 /* int main(int argc, char *argv[]) */
 int main(void)
 {
@@ -715,6 +798,7 @@ int main(void)
 	failures += check_compare2();
 	failures += check_subtract();
 	failures += check_dec();
+	failures += check_div();
 
 	if (failures) {
 		fprintf(stderr, "%d failures in total\n", failures);

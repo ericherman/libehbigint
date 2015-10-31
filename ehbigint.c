@@ -304,6 +304,45 @@ int ehbi_inc_ul(struct ehbigint *bi, unsigned long val)
 	return ehbi_inc(bi, &temp);
 }
 
+int ehbi_dec(struct ehbigint *bi, struct ehbigint *val)
+{
+	size_t i, j;
+	unsigned char a, b, c;
+
+	if (bi == 0 || val == 0) {
+		EHBI_LOG_ERROR0("Null argument(s)");
+		return EHBI_NULL_ARGS;
+	}
+
+	c = 0;
+	for (i = 1; i <= val->bytes_used; ++i) {
+		a = (bi->bytes_used < i) ? 0 : bi->bytes[bi->bytes_len - i];
+		b = val->bytes[val->bytes_len - i];
+		c = a - b;
+
+		bi->bytes[bi->bytes_len - i] = c;
+
+		j = i;
+		while (c > a) {
+			if ((bi->bytes_len - j) == 0) {
+				EHBI_LOG_ERROR0("byte[] too small for borrow");
+				return EHBI_BYTES_TOO_SMALL_FOR_BORROW;
+			}
+			bi->bytes[bi->bytes_len - (j + 1)] -= 1;
+			if (bi->bytes[bi->bytes_len - (j + 1)] == 0xFF) {
+				c = 1;
+				a = 0;
+			} else {
+				c = 0;
+				a = 0;
+			}
+			++j;
+		}
+	}
+
+	return EHBI_SUCCESS;
+}
+
 int ehbi_subtract(struct ehbigint *res, struct ehbigint *bi1,
 		  struct ehbigint *bi2)
 {

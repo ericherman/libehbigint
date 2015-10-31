@@ -35,6 +35,12 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2);
 int ehbi_inc(struct ehbigint *bi, struct ehbigint *val);
 
 /*
+   decrements the first ehbigint by the value in the second parameter
+   returns 0 on success or error_code on error
+*/
+int ehbi_dec(struct ehbigint *bi, struct ehbigint *val);
+
+/*
    increments the ehbigint by the value in the second parameter
    returns 0 on success or error_code on error
 */
@@ -110,6 +116,7 @@ enum {
 	EHBI_NULL_BYTES,
 	EHBI_BYTES_TOO_SMALL,
 	EHBI_BYTES_TOO_SMALL_FOR_CARRY,
+	EHBI_BYTES_TOO_SMALL_FOR_BORROW,
 	EHBI_BAD_DATA,
 	EHBI_CORRUPT_DATA,
 	EHBI_LAST

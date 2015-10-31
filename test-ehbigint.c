@@ -247,6 +247,55 @@ int check_inc(void)
 	return failures;
 }
 
+int check_dec(void)
+{
+	int err, failures;
+	unsigned char bytes_buf1[20];
+	unsigned char bytes_buf2[20];
+	char as_string[80];
+	struct ehbigint bi1, bi2;
+
+	/*  char *u64_max = "0xFFFFFFFFFFFFFFFF" */
+	const char *str_1 = "0x700002000000000001";
+	const char *str_2 = "0x100000100000000001";
+	const char *str_3 = "0x600001F00000000000";
+
+	failures = 0;
+
+	bi1.bytes = bytes_buf1;
+	bi1.bytes_len = 20;
+
+	bi2.bytes = bytes_buf2;
+	bi2.bytes_len = 20;
+
+	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
+	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_from_hex_string\n", err);
+		return 1;
+	}
+
+	err = ehbi_dec(&bi1, &bi2);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_inc\n", err);
+		return 1;
+	}
+
+	err = ehbi_to_hex_string(&bi1, as_string, 80);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		return 1;
+	}
+
+	failures += check_str(as_string, str_3);
+
+	if (failures) {
+		fprintf(stderr, "%d failures in check_inc\n", failures);
+	}
+
+	return failures;
+}
+
 int check_inc_ul(void)
 {
 	int err, failures;
@@ -565,6 +614,7 @@ int main(void)
 	failures += check_equals();
 	failures += check_compare();
 	failures += check_subtract();
+	failures += check_dec();
 
 	if (failures) {
 		fprintf(stderr, "%d failures in total\n", failures);

@@ -48,7 +48,7 @@ endif
 NOISY_CFLAGS=-Wall -Wextra -pedantic -Werror
 
 CFLAGS += $(CSTD_CFLAGS) $(DEBUG_CFLAGS) $(NOISY_CFLAGS)
-LDFLAGS += -L. -l$(LIB_NAME)
+LDFLAGS += -L. -l$(LIB_NAME) -rdynamic
 CC=gcc
 
 # extracted from https://github.com/torvalds/linux/blob/master/scripts/Lindent
@@ -112,6 +112,7 @@ check: $(TEST_OUT)
 tidy:
 	$(LINDENT) \
 		-T size_t \
+		-T FILE \
 		*.h *.c
 
 clean:

@@ -1,6 +1,7 @@
 #include "ehbigint.h"
 
-#include <stdio.h>
+#include <string.h>
+#include <execinfo.h>
 
 static int nibble_to_hex(unsigned char nibble, char *c)
 {
@@ -617,4 +618,13 @@ int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
 	buf[buf_len - 1 - j] = '\0';
 
 	return EHBI_SUCCESS;
+}
+
+void ehbi_log_backtrace(FILE *log)
+{
+	void *array[4096];
+	size_t size;
+
+	size = backtrace(array, 4096);
+	backtrace_symbols_fd(array, size, fileno(log));
 }

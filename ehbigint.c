@@ -134,7 +134,7 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 
 	/* let's just zero out the rest of the bytes, for easier debug */
 	while (i-- > 0) {
-		bi->bytes[i] = (bi->bytes[i+1] > 0x7F) ? 0xFF : 0;
+		bi->bytes[i] = (bi->bytes[i + 1] > 0x7F) ? 0xFF : 0;
 	}
 
 	return EHBI_SUCCESS;
@@ -182,7 +182,7 @@ int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len)
 	/* strip leading '0's ("0x0123" -> "0x123") */
 	/* strip leading "00"s ("0x000123" -> "0x0123") */
 	while ((buf[2] == '0' || buf[2] == 'F') && buf[2] == buf[3]
-		&& buf[2] == buf[4] && buf[2] == buf[5]) {
+	       && buf[2] == buf[4] && buf[2] == buf[5]) {
 		for (j = 2; j < buf_len - 1 && buf[j] != 0; j += 2) {
 			buf[j] = buf[j + 2];
 		}

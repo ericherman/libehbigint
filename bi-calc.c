@@ -16,7 +16,8 @@ int main(int argc, char *argv[])
 	struct ehbigint bigint_3;
 
 	if (argc < 4) {
-		fprintf(stderr, "usage:\n\t%s decimal1 [+-] decimal2\n", argv[0]);
+		fprintf(stderr, "usage:\n\t%s decimal1 [+-] decimal2\n",
+			argv[0]);
 		return -1;
 	}
 

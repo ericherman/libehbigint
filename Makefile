@@ -40,7 +40,7 @@ CSTD_CFLAGS=-std=c89 -DEHBI_ENSURE_POSIX=1
 #CSTD_CFLAGS=-std=c11
 
 ifeq ("$(DEBUG)", "")
-DEBUG_CFLAGS=-O3
+DEBUG_CFLAGS=-ggdb -O3
 else
 DEBUG_CFLAGS=-ggdb -O0
 endif
@@ -124,9 +124,9 @@ clean:
 
 install: $(LIB_NAME)
 	@echo "Installing $(LIB_NAME) $(UNAME) libraries in $(LIBDIR)"
-	@mkdir -pv $(LIBDIR)
-	@cp -pv $(A_NAME) $(LIBDIR)/
-	@cp -Rv $(SO_NAME)* $(LIBDIR)/
+	mkdir -pv $(LIBDIR)
+	cp -pv $(A_NAME) $(LIBDIR)/
+	cp -Rv $(SO_NAME)* $(LIBDIR)/
 	@echo "Installing $(LIB_NAME) headers in $(INCDIR)"
-	@mkdir -pv $(INCDIR)
-	@cp -pv $(LIB_HDR) $(INCDIR)/
+	mkdir -pv $(INCDIR)
+	cp -pv $(LIB_HDR) $(INCDIR)/

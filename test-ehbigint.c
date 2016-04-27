@@ -828,6 +828,56 @@ int check_set()
 	return failures;
 }
 
+int check_mul()
+{
+	int err, failures;
+
+	unsigned char a_bytes[10];
+	struct ehbigint a_bigint;
+	char as_string[80];
+
+	unsigned char b_bytes[10];
+	struct ehbigint b_bigint;
+
+	unsigned char result_bytes[10];
+	struct ehbigint result;
+
+	failures = 0;
+
+	a_bigint.bytes = a_bytes;
+	a_bigint.bytes_len = 10;
+	a_bigint.bytes_used = 0;
+
+	b_bigint.bytes = b_bytes;
+	b_bigint.bytes_len = 10;
+	b_bigint.bytes_used = 0;
+
+	err = ehbi_set_ul(&a_bigint, 3);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_set_ul\n", err);
+		return 1;
+	}
+
+	err = ehbi_set_ul(&b_bigint, 5);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_set_ul\n", err);
+		return 1;
+	}
+
+	result.bytes = result_bytes;
+	result.bytes_len = 10;
+	err = ehbi_mul(&result, &a_bigint, &b_bigint);
+
+	err = ehbi_to_hex_string(&result, as_string, 80);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		return 1;
+	}
+	failures += check_str(as_string, "0x0F");
+
+	return failures;
+}
+
 /* int main(int argc, char *argv[]) */
 int main(void)
 {
@@ -848,6 +898,7 @@ int main(void)
 	failures += check_dec();
 	failures += check_div();
 	failures += check_set();
+	failures += check_mul();
 
 	if (failures) {
 		fprintf(stderr, "%d failures in total\n", failures);

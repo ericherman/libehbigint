@@ -49,6 +49,12 @@ int ehbi_set_ul(struct ehbigint *bi, unsigned long val);
 int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2);
 
 /*
+   populates the first ehbigint with the sum of the second and third
+   returns 0 on success or error_code on error
+*/
+int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2);
+
+/*
    populates the first ehbigint quotient and remainder with the results
    of the numerator divided by the denominator
    returns 0 on success or error_code on error
@@ -147,6 +153,7 @@ enum {
 	EHBI_BYTES_TOO_SMALL_FOR_BORROW,
 	EHBI_BAD_DATA,
 	EHBI_CORRUPT_DATA,
+	EHBI_STACK_TOO_SMALL,
 	EHBI_LAST
 };
 

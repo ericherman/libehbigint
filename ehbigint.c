@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <execinfo.h>
+#include <alloca.h>
 
 static int nibble_to_hex(unsigned char nibble, char *c)
 {
@@ -247,6 +248,75 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 	}
 
 	return EHBI_SUCCESS;
+}
+
+int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
+{
+	size_t size;
+	int err;
+	struct ehbigint bi, *t1, zero, one;
+	unsigned char zero_bytes[sizeof(unsigned long)];
+	unsigned char one_bytes[sizeof(unsigned long)];
+	unsigned char *bi_bytes;
+
+	if (res == 0 || bi1 == 0 || bi2 == 0) {
+		EHBI_LOG_ERROR0("Null argument(s)");
+		return EHBI_NULL_ARGS;
+	}
+
+	if (bi1->bytes_used < bi2->bytes_used) {
+		t1 = bi1;
+		bi1 = bi2;
+		bi2 = t1;
+	}
+
+	zero.bytes = zero_bytes;
+	zero.bytes_len = sizeof(unsigned long);
+	err = ehbi_set_ul(&zero, 0);
+	if (err) {
+		return err;
+	}
+
+	one.bytes = one_bytes;
+	one.bytes_len = sizeof(unsigned long);
+	err = ehbi_set_ul(&one, 1);
+	if (err) {
+		return err;
+	}
+
+	err = ehbi_set(res, &zero);
+	if (err) {
+		return err;
+	}
+
+	size = sizeof(unsigned char) * bi2->bytes_used;
+	bi_bytes = alloca(size);
+	if (!bi_bytes) {
+		EHBI_LOG_ERROR1("Could not alloca(%lu) bytes on stack",
+				(unsigned long)size);
+		return EHBI_STACK_TOO_SMALL;
+	}
+	bi.bytes = bi_bytes;
+	bi.bytes_len = size;
+
+	err = ehbi_set(&bi, bi2);
+	if (err) {
+		return err;
+	}
+	while (ehbi_greater_than(&bi, &zero, &err)) {
+		if (err) {
+			return err;
+		}
+		err = ehbi_inc(res, bi1);
+		if (err) {
+			return err;
+		}
+		err = ehbi_dec(&bi, &one);
+		if (err) {
+			return err;
+		}
+	}
+	return err;
 }
 
 int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,

@@ -141,6 +141,18 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 	return EHBI_SUCCESS;
 }
 
+int ehbi_set_ul(struct ehbigint *bi, unsigned long val)
+{
+	bi->bytes_used = 0;
+	return ehbi_inc_ul(bi, val);
+}
+
+int ehbi_set(struct ehbigint *bi, struct ehbigint *val)
+{
+	bi->bytes_used = 0;
+	return ehbi_inc(bi, val);
+}
+
 int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len)
 {
 	int err;

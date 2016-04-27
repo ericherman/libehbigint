@@ -780,6 +780,54 @@ int check_div(void)
 	return failures;
 }
 
+int check_set()
+{
+	int err, failures;
+
+	unsigned char a_bytes[10];
+	struct ehbigint a_bigint;
+	char as_string[80];
+	unsigned long three = 3;
+
+	unsigned char b_bytes[10];
+	struct ehbigint b_bigint;
+
+	failures = 0;
+
+	a_bigint.bytes = a_bytes;
+	a_bigint.bytes_len = 10;
+	a_bigint.bytes_used = 0;
+
+	b_bigint.bytes = b_bytes;
+	b_bigint.bytes_len = 10;
+	b_bigint.bytes_used = 0;
+
+	err = ehbi_set_ul(&a_bigint, three);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_set_ul\n", err);
+		return 1;
+	}
+	err = ehbi_to_hex_string(&a_bigint, as_string, 80);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		return 1;
+	}
+	failures += check_str(as_string, "0x03");
+
+	err = ehbi_set(&b_bigint, &a_bigint);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_set_ul\n", err);
+		return 1;
+	}
+	err = ehbi_to_hex_string(&b_bigint, as_string, 80);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		return 1;
+	}
+	failures += check_str(as_string, "0x03");
+	return failures;
+}
+
 /* int main(int argc, char *argv[]) */
 int main(void)
 {
@@ -799,6 +847,7 @@ int main(void)
 	failures += check_subtract();
 	failures += check_dec();
 	failures += check_div();
+	failures += check_set();
 
 	if (failures) {
 		fprintf(stderr, "%d failures in total\n", failures);

@@ -27,6 +27,18 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len);
 int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len);
 
 /*
+   populates an ehbigint with the value
+   returns 0 on success or error_code on error
+*/
+int ehbi_set(struct ehbigint *bi, struct ehbigint *val);
+
+/*
+   populates an ehbigint with the value
+   returns 0 on success or error_code on error
+*/
+int ehbi_set_ul(struct ehbigint *bi, unsigned long val);
+
+/*
    populates the first ehbigint with the sum of the second and third
    returns 0 on success or error_code on error
 */

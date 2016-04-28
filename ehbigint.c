@@ -153,13 +153,11 @@ int ehbi_from_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 {
 	char *hex;
 	int err;
-	size_t size;
 
-	size = sizeof(char) * len;
-	hex = alloca(size);
+	hex = alloca(len);
 	if (!hex) {
 		EHBI_LOG_ERROR1("Could not alloca(%lu) bytes on stack",
-				(unsigned long)size);
+				(unsigned long)len);
 		return EHBI_STACK_TOO_SMALL;
 	}
 	err = ehbi_decimal_to_hex(dec, len, hex, len);
@@ -238,7 +236,7 @@ int ehbi_to_decimal_string(struct ehbigint *bi, char *buf, size_t len)
 	size_t size;
 	int err;
 
-	size = sizeof(char) * (2 * bi->bytes_used) + 4;
+	size = strlen("0x00") + (2 * bi->bytes_used) + 1;
 	hex = alloca(size);
 	if (!hex) {
 		EHBI_LOG_ERROR1("Could not alloca(%lu) bytes on stack",
@@ -283,7 +281,7 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 		res->bytes[res->bytes_len - i] = c;
 		res->bytes_used++;
 
-		c = (c < a) ? 1 : 0;
+		c = (c < a) || (c == a && b != 0) ? 1 : 0;
 	}
 	if (c) {
 		if (i > res->bytes_len) {
@@ -292,6 +290,14 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 		}
 		res->bytes[res->bytes_len - i] = c;
 		res->bytes_used++;
+		if (c == 0xFF) {
+			if (res->bytes_used == res->bytes_len) {
+				EHBI_LOG_ERROR0
+				    ("Result byte[] too small for carry");
+				return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
+			}
+			res->bytes_used++;
+		}
 	}
 
 	return EHBI_SUCCESS;
@@ -301,7 +307,7 @@ int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 {
 	size_t size;
 	int err;
-	struct ehbigint bi, *t1, zero, one;
+	struct ehbigint bidx, *t1, zero, one;
 	unsigned char zero_bytes[sizeof(unsigned long)];
 	unsigned char one_bytes[sizeof(unsigned long)];
 	unsigned char *bi_bytes;
@@ -311,10 +317,13 @@ int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 		return EHBI_NULL_ARGS;
 	}
 
-	if (bi1->bytes_used < bi2->bytes_used) {
+	if (ehbi_less_than(bi1, bi2, &err)) {
 		t1 = bi1;
 		bi1 = bi2;
 		bi2 = t1;
+	}
+	if (err) {
+		return err;
 	}
 
 	zero.bytes = zero_bytes;
@@ -336,21 +345,21 @@ int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 		return err;
 	}
 
-	size = sizeof(unsigned char) * bi2->bytes_used;
+	size = bi2->bytes_used;
 	bi_bytes = alloca(size);
 	if (!bi_bytes) {
 		EHBI_LOG_ERROR1("Could not alloca(%lu) bytes on stack",
 				(unsigned long)size);
 		return EHBI_STACK_TOO_SMALL;
 	}
-	bi.bytes = bi_bytes;
-	bi.bytes_len = size;
+	bidx.bytes = bi_bytes;
+	bidx.bytes_len = size;
 
-	err = ehbi_set(&bi, bi2);
+	err = ehbi_set(&bidx, bi2);
 	if (err) {
 		return err;
 	}
-	while (ehbi_greater_than(&bi, &zero, &err)) {
+	while (ehbi_greater_than(&bidx, &zero, &err)) {
 		if (err) {
 			return err;
 		}
@@ -358,7 +367,7 @@ int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 		if (err) {
 			return err;
 		}
-		err = ehbi_dec(&bi, &one);
+		err = ehbi_dec(&bidx, &one);
 		if (err) {
 			return err;
 		}
@@ -428,6 +437,7 @@ int ehbi_inc(struct ehbigint *bi, struct ehbigint *val)
 	}
 
 	c = 0;
+
 	for (i = 1; i <= val->bytes_used; ++i) {
 		a = val->bytes[val->bytes_len - i];
 		b = (bi->bytes_used < i) ? 0 : bi->bytes[bi->bytes_len - i];
@@ -438,7 +448,7 @@ int ehbi_inc(struct ehbigint *bi, struct ehbigint *val)
 			bi->bytes_used = i;
 		}
 
-		c = (c < a) ? 1 : 0;
+		c = (c < a) || (c == a && b != 0) ? 1 : 0;
 	}
 	while (c) {
 		if (i > bi->bytes_len) {
@@ -454,8 +464,16 @@ int ehbi_inc(struct ehbigint *bi, struct ehbigint *val)
 			bi->bytes_used = i;
 		}
 
-		c = (c < a) ? 1 : 0;
+		c = (c < a) || (c == a && b != 0) ? 1 : 0;
 		++i;
+	}
+	if (bi->bytes[bi->bytes_len - bi->bytes_used] == 0xFF) {
+		if (bi->bytes_used == bi->bytes_len) {
+			EHBI_LOG_ERROR0("byte[] too small for carry");
+			return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
+		}
+		++bi->bytes_used;
+		bi->bytes[bi->bytes_len - bi->bytes_used] = 0x00;
 	}
 
 	return EHBI_SUCCESS;

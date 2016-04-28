@@ -24,11 +24,24 @@ struct ehbigint {
 int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len);
 
 /*
+   populates an ehbigint with a decimal string value e.g. "1234567890123456789"
+   returns 0 on success or error_code on error
+*/
+int ehbi_from_decimal_string(struct ehbigint *bi, const char *dec, size_t len);
+
+/*
    populates the passed in buffer with a hex string representation
    of the ehbigint
    returns 0 on success or error_code on error
 */
 int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len);
+
+/*
+   populates the passed in buffer with a hex string representation
+   of the ehbigint
+   returns 0 on success or error_code on error
+*/
+int ehbi_to_decimal_string(struct ehbigint *bi, char *buf, size_t buf_len);
 
 /*
    populates an ehbigint with the value

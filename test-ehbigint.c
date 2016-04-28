@@ -4,11 +4,11 @@
 
 #include "ehbigint.h"
 
-int check_to_hex_string()
+int check_to_string()
 {
 	int err, failures;
 
-	unsigned char bytes[4] = { 0x00, 0x00, 0x00, 0x01 };
+	unsigned char bytes[4] = { 0x00, 0x01, 0x00, 0x45 };
 	struct ehbigint a_bigint;
 	char as_string[80];
 
@@ -16,14 +16,21 @@ int check_to_hex_string()
 
 	a_bigint.bytes = bytes;
 	a_bigint.bytes_len = 4;
-	a_bigint.bytes_used = 1;
+	a_bigint.bytes_used = 3;
 
 	err = ehbi_to_hex_string(&a_bigint, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d ehbi_decimal_to_hex\n", err);
+		fprintf(stderr, "error %d ehbi_to_hex_string\n", err);
 		return 1;
 	}
-	failures += check_str(as_string, "0x01");
+	failures += check_str(as_string, "0x010045");
+
+	err = ehbi_to_decimal_string(&a_bigint, as_string, 80);
+	if (err) {
+		fprintf(stderr, "error %d ehbi_to_decimal_string\n", err);
+		return 1;
+	}
+	failures += check_str(as_string, "65605");
 
 	return failures;
 }
@@ -164,6 +171,46 @@ int check_from_hex_to_hex_round_trip(void)
 	if (failures) {
 		fprintf(stderr, "%d failures in check_string_round_trip\n",
 			failures);
+	}
+
+	return failures;
+}
+
+int check_from_decimal_to_decimal_round_trip(void)
+{
+	int err, failures;
+	unsigned char bytes_buf[20];
+	char as_string[80];
+
+	/*   const char *u64_max =    "18446744073709551615" */
+	const char *expected_str = "12345678901234567890000";
+
+	struct ehbigint a_bigint;
+	a_bigint.bytes = bytes_buf;
+	a_bigint.bytes_len = 20;
+
+	failures = 0;
+
+	err =
+	    ehbi_from_decimal_string(&a_bigint, expected_str,
+				     strlen(expected_str));
+
+	if (err) {
+		fprintf(stderr, "error %d ehbi_from_decimal_string\n", err);
+		return 1;
+	}
+
+	err = ehbi_to_decimal_string(&a_bigint, as_string, 80);
+	if (err) {
+		fprintf(stderr, "error %d ehbi_to_decimal_string\n", err);
+		return 1;
+	}
+
+	failures += check_str(as_string, expected_str);
+
+	if (failures) {
+		fprintf(stderr, "%d failures in "
+			"check_decimal_to_decimal_round_trip\n", failures);
 	}
 
 	return failures;
@@ -883,11 +930,12 @@ int main(void)
 {
 	int failures = 0;
 
-	failures += check_to_hex_string();
+	failures += check_to_string();
 	failures += check_decimal_to_hex();
 	failures += check_hex_to_decimal();
 	failures += check_decimal_to_hex_to_decimal_loop();
 	failures += check_from_hex_to_hex_round_trip();
+	failures += check_from_decimal_to_decimal_round_trip();
 	failures += check_add();
 	failures += check_inc();
 	failures += check_inc_ul();

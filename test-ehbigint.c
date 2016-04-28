@@ -39,6 +39,7 @@ int check_decimal_to_hex(void)
 {
 	int err, failures;
 	char buf[20];
+	const char *str;
 
 	failures = 0;
 
@@ -59,6 +60,14 @@ int check_decimal_to_hex(void)
 	}
 
 	failures += check_str(buf, "0x010007");
+
+	str = "5088824049625";
+	err = ehbi_decimal_to_hex(str, strlen(str), buf, 20);
+	if (err) {
+		fprintf(stderr, "error %d ehbi_decimal_to_hex\n", err);
+		return 1;
+	}
+	failures += check_str(buf, "0x04A0D58CBFD9");
 
 	if (failures) {
 		fprintf(stderr, "%d failures in check_decimal_to_hex\n",
@@ -802,6 +811,7 @@ int check_div(void)
 
 	char as_string[80];
 	char expected[80];
+	char *str;
 
 	numerator.bytes = bytes_numerator;
 	numerator.bytes_len = 10;
@@ -856,6 +866,39 @@ int check_div(void)
 	}
 	sprintf(expected, "0x%04X", iremainder);
 	failures += check_str(as_string, expected);
+
+	/*
+	   lldiv_t result = lldiv(5088824049625,33554393);
+	   result.quot: 151658, result.remainder: 31916031
+	 */
+	str = "5088824049625";
+	err = ehbi_from_decimal_string(&numerator, str, strlen(str));
+	if (err) {
+		fprintf(stderr,
+			"error %d ehbi_from_decimal_string(&numerator, %s, %lu)\n",
+			err, str, (unsigned long)strlen(str));
+		return 1;
+	}
+	str = "33554393";
+	denominator.bytes_used = 0;
+	ehbi_from_decimal_string(&denominator, str, strlen(str));
+	err = ehbi_div(&quotient, &remainder, &numerator, &denominator);
+	if (err) {
+		fprintf(stderr, "error %d from ehbi_div\n", err);
+		return 1;
+	}
+	err = ehbi_to_decimal_string(&quotient, as_string, 80);
+	if (err) {
+		fprintf(stderr, "error %d ehbi_to_decimal_string\n", err);
+		return 1;
+	}
+	failures += check_str(as_string, "151658");
+	err = ehbi_to_decimal_string(&remainder, as_string, 80);
+	if (err) {
+		fprintf(stderr, "error %d ehbi_to_decimal_string\n", err);
+		return 1;
+	}
+	failures += check_str(as_string, "31916031");
 
 	if (failures) {
 		fprintf(stderr, "%d failures in check_div\n", failures);

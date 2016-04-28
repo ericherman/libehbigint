@@ -152,19 +152,21 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 int ehbi_from_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 {
 	char *hex;
+	size_t size;
 	int err;
 
-	hex = alloca(len);
+	size = strlen("0x00") + len + 1;
+	hex = alloca(size);
 	if (!hex) {
 		EHBI_LOG_ERROR1("Could not alloca(%lu) bytes on stack",
-				(unsigned long)len);
+				(unsigned long)size);
 		return EHBI_STACK_TOO_SMALL;
 	}
-	err = ehbi_decimal_to_hex(dec, len, hex, len);
+	err = ehbi_decimal_to_hex(dec, len, hex, size);
 	if (err) {
 		return err;
 	}
-	return ehbi_from_hex_string(bi, hex, len);
+	return ehbi_from_hex_string(bi, hex, size);
 }
 
 int ehbi_set_ul(struct ehbigint *bi, unsigned long val)
@@ -661,7 +663,7 @@ int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
 		return EHBI_NULL_ARGS;
 	}
 
-	if (buf_len < 4) {
+	if (buf_len < 5) {
 		EHBI_LOG_ERROR0("Buffer too small");
 		return EHBI_STRING_BUF_TOO_SMALL;
 	}

@@ -36,7 +36,7 @@ OUT=bi-calc
 SRC=$(OUT).c
 OBJ=$(OUT).o
 
-CSTD_CFLAGS=-std=c89
+CSTD_CFLAGS=-std=c89 -DEHBI_ENSURE_POSIX=1
 #CSTD_CFLAGS=-std=c11
 
 ifeq ("$(DEBUG)", "")

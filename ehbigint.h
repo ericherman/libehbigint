@@ -1,8 +1,12 @@
 #ifndef EHBIGINT_H
 #define EHBIGINT_H
 
-/* needed for backtrace_symbols_fd */
-#define _POSIX_C_SOURCE 1
+/* _POSIX_C_SOURCE needed for backtrace_symbols_fd */
+#ifndef _POSIX_C_SOURCE
+#ifdef EHBI_ENSURE_POSIX
+#define _POSIX_C_SOURCE EHBI_ENSURE_POSIX
+#endif /* EHBI_ENSURE_POSIX */
+#endif /* _POSIX_C_SOURCE */
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -693,9 +693,13 @@ int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
 
 void ehbi_log_backtrace(FILE *log)
 {
+#ifdef _POSIX_C_SOURCE
 	void *array[4096];
 	size_t size;
 
 	size = backtrace(array, 4096);
 	backtrace_symbols_fd(array, size, fileno(log));
+#else
+	fprintf(log, "(backtrace unavailable)\n");
+#endif /* _POSIX_C_SOURCE */
 }

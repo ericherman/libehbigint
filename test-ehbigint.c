@@ -12,6 +12,9 @@
 	(ECHECK_FUNC == NULL) ? "" : ECHECK_FUNC, \
 	(ECHECK_FUNC == NULL) ? "" : "()")
 
+#define LOG_ERROR(format) \
+	STDERR_FILE_LINE_FUNC; fprintf(stderr, format)
+
 #define LOG_ERROR1(format, arg) \
 	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg)
 
@@ -93,6 +96,10 @@ int test_to_string()
 	failures += check_ehbigint_hex(&a_bigint, "0x010045");
 	failures += check_ehbigint_dec(&a_bigint, "65605");
 
+	if (failures) {
+		LOG_ERROR1("%d failures in test_to_string\n", failures);
+	}
+
 	return failures;
 }
 
@@ -108,7 +115,8 @@ int test_decimal_to_hex(void)
 
 	if (err) {
 		LOG_ERROR1("error %d ehbi_decimal_to_hex\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	failures += check_str(buf, "0x0113");
@@ -117,7 +125,8 @@ int test_decimal_to_hex(void)
 
 	if (err) {
 		LOG_ERROR1("error %d ehbi_decimal_to_hex\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	failures += check_str(buf, "0x010007");
@@ -126,7 +135,8 @@ int test_decimal_to_hex(void)
 	err = ehbi_decimal_to_hex(str, strlen(str), buf, 20);
 	if (err) {
 		LOG_ERROR1("error %d ehbi_decimal_to_hex\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_str(buf, "0x04A0D58CBFD9");
 
@@ -148,7 +158,8 @@ int test_hex_to_decimal(void)
 
 	if (err) {
 		LOG_ERROR1("error %d ehbi_hex_to_decimal\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	failures += check_str(buf, "275");
@@ -157,7 +168,8 @@ int test_hex_to_decimal(void)
 
 	if (err) {
 		LOG_ERROR1("error %d ehbi_hex_to_decimal\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	failures += check_str(buf, "65543");
@@ -222,7 +234,8 @@ int test_from_hex_to_hex_round_trip(void)
 	if (err) {
 		LOG_ERROR1("error %d returned from ehbi_from_hex_string\n",
 			   err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	failures += check_ehbigint_hex(&a_bigint, expected_str);
@@ -255,13 +268,15 @@ int test_from_decimal_to_decimal_round_trip(void)
 
 	if (err) {
 		LOG_ERROR1("error %d ehbi_from_decimal_string\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	err = ehbi_to_decimal_string(&a_bigint, as_string, BUFLEN);
 	if (err) {
 		LOG_ERROR1("error %d ehbi_to_decimal_string\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	failures += check_str(as_string, expected_str);
@@ -302,13 +317,15 @@ int test_add(void)
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	err = ehbi_add(&bi3, &bi1, &bi2);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_add\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	failures += check_ehbigint_hex(&bi3, str_3);
@@ -344,13 +361,15 @@ int test_inc(void)
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	err = ehbi_inc(&bi1, &bi2);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_inc\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	failures += check_ehbigint_hex(&bi1, str_3);
@@ -368,7 +387,8 @@ int test_inc(void)
 	err += ehbi_inc(&bi1, &bi2);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_inc\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_ehbigint_dec(&bi1, "3163531728");
 
@@ -377,7 +397,8 @@ int test_inc(void)
 	err += ehbi_inc(&bi1, &bi2);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_inc\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_ehbigint_dec(&bi1, "255");
 
@@ -408,13 +429,15 @@ int test_dec(void)
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	err = ehbi_dec(&bi1, &bi2);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_inc\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	failures += check_ehbigint_hex(&bi1, str_3);
@@ -443,13 +466,15 @@ int test_inc_ul(void)
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	err = ehbi_inc_ul(&bi1, (unsigned long)0xFFFFFFFF);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_inc_ul\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	failures += check_ehbigint_hex(&bi1, str_3);
@@ -489,27 +514,31 @@ int test_equals(void)
 	err += ehbi_from_hex_string(&bi3, str_3, strlen(str_3));
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	result = ehbi_equals(&bi1, &bi1, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_equals\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 1);
 
 	result = ehbi_equals(&bi1, &bi2, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_equals\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 1);
 
 	result = ehbi_equals(&bi1, &bi3, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_equals\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 0);
 
@@ -548,101 +577,117 @@ int test_compare(void)
 	err += ehbi_from_hex_string(&bi3, str_3, strlen(str_3));
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	result = ehbi_compare(&bi1, &bi1, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_compare\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 0);
 	result = ehbi_less_than(&bi1, &bi1, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_less_than\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 0);
 	result = ehbi_greater_than(&bi1, &bi1, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_greater_than\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 0);
 
 	result = ehbi_compare(&bi1, &bi2, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_compare\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, -1);
 	result = ehbi_less_than(&bi1, &bi2, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_less_than\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 1);
 	result = ehbi_greater_than(&bi1, &bi2, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_greater_than\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 0);
 
 	result = ehbi_compare(&bi2, &bi1, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_compare\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 1);
 	result = ehbi_less_than(&bi2, &bi1, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_less_than\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 0);
 	result = ehbi_greater_than(&bi2, &bi1, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_greater_than\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 1);
 
 	result = ehbi_compare(&bi1, &bi3, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_compare\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 1);
 	result = ehbi_less_than(&bi1, &bi3, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_less_than\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 0);
 	result = ehbi_greater_than(&bi1, &bi3, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_greater_than\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 1);
 
 	result = ehbi_compare(&bi3, &bi1, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_compare\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, -1);
 	result = ehbi_less_than(&bi3, &bi1, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_less_than\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 1);
 	result = ehbi_greater_than(&bi3, &bi1, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_greater_than\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 0);
 
@@ -675,48 +720,55 @@ int test_compare2(void)
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	result = ehbi_compare(&bi1, &bi2, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_compare\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 1);
 
 	result = ehbi_less_than(&bi1, &bi2, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_less_than\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 0);
 
 	result = ehbi_greater_than(&bi1, &bi2, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_greater_than\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 1);
 
 	result = ehbi_compare(&bi2, &bi1, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_compare\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, -1);
 
 	result = ehbi_less_than(&bi2, &bi1, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_less_than\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 1);
 
 	result = ehbi_greater_than(&bi2, &bi1, &err);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_greater_than\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_int(result, 0);
 
@@ -757,13 +809,15 @@ int test_subtract(void)
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	err = ehbi_subtract(&bi3, &bi1, &bi2);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_subtract\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	failures += check_ehbigint_hex(&bi3, str_3);
@@ -771,7 +825,8 @@ int test_subtract(void)
 	err = ehbi_subtract(&bi3, &bi2, &bi1);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_subtract\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	failures += check_ehbigint_hex(&bi3, str_4);
@@ -806,6 +861,8 @@ int test_div(void)
 	char expected[BUFLEN];
 	char *str;
 
+	failures = 0;
+
 	numerator.bytes = bytes_numerator;
 	numerator.bytes_len = 10;
 	numerator.bytes_used = 0;
@@ -826,23 +883,24 @@ int test_div(void)
 	err = ehbi_from_hex_string(&numerator, as_string, strlen(as_string));
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	sprintf(as_string, "0x%04X", idenominator);
 	err = ehbi_from_hex_string(&denominator, as_string, strlen(as_string));
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	err = ehbi_div(&quotient, &remainder, &numerator, &denominator);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_div\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
-
-	failures = 0;
 
 	sprintf(expected, "0x%04X", iquotient);
 	failures += check_ehbigint_hex(&quotient, expected);
@@ -860,7 +918,8 @@ int test_div(void)
 		LOG_ERROR3
 		    ("error %d ehbi_from_decimal_string(&numerator, %s, %lu)\n",
 		     err, str, (unsigned long)strlen(str));
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	str = "33554393";
 	denominator.bytes_used = 0;
@@ -868,7 +927,8 @@ int test_div(void)
 	err = ehbi_div(&quotient, &remainder, &numerator, &denominator);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_div\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	failures += check_ehbigint_dec(&quotient, "151658");
@@ -905,14 +965,16 @@ int test_set()
 	err = ehbi_set_ul(&a_bigint, three);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_set_ul\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_ehbigint_hex(&a_bigint, "0x03");
 
 	err = ehbi_set(&b_bigint, &a_bigint);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_set_ul\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_ehbigint_hex(&b_bigint, "0x03");
 
@@ -953,13 +1015,15 @@ int test_mul()
 	err = ehbi_set_ul(&a_bigint, 9415273);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_set_ul\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	err = ehbi_set_ul(&b_bigint, 252533);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_set_ul\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	result.bytes = result_bytes;
@@ -1013,19 +1077,22 @@ int test_scenario_mul_mod(void)
 	err = ehbi_set_ul(&bx, x);
 	if (err) {
 		LOG_ERROR2("ehbi_set_ul (%lu) error: %d\n", x, err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	y = 252533;
 	err = ehbi_set_ul(&by, y);
 	if (err) {
 		LOG_ERROR2("ehbi_set_ul (%lu) error: %d\n", y, err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	z = 33554393;
 	err = ehbi_set_ul(&bz, z);
 	if (err) {
 		LOG_ERROR2("ehbi_set_ul (%lu) error: %d\n", z, err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 
 	/* 20151125 * 252533 == 5088824049625 */
@@ -1033,7 +1100,8 @@ int test_scenario_mul_mod(void)
 	err = ehbi_mul(&bresult, &bx, &by);
 	if (err) {
 		LOG_ERROR3("ehbi_mul (%lu * %lu) error: %d\n", x, y, err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_ehbigint_dec(&bresult, expect_mul);
 
@@ -1057,14 +1125,16 @@ int test_scenario_mul_mod(void)
 	result = ehbigint_to_unsigned_long(&bquot, &err);
 	if (err) {
 		LOG_ERROR1("ehbigint_to_unsigned_long(quot) error: %d\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_unsigned_long(result, 151658);
 
 	result = ehbigint_to_unsigned_long(&brem, &err);
 	if (err) {
 		LOG_ERROR1("ehbigint_to_unsigned_long(rem) error: %d\n", err);
-		return 1;
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
 	}
 	failures += check_unsigned_long(result, 31916031);
 

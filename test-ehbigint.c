@@ -12,14 +12,45 @@
 
 #define LOG_ERROR1(format, arg) \
 	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg)
+#define LOG_ERROR3(format, arg1, arg2, arg3) \
+	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg1, arg2, arg3)
+
+#define BUFLEN 80
+
+int check_ehbigint_dec(struct ehbigint *val, const char *expected)
+{
+	int err;
+	char actual[BUFLEN];
+
+	err = ehbi_to_decimal_string(val, actual, BUFLEN);
+	if (err) {
+		LOG_ERROR1("error %d ehbi_to_decimal_string\n", err);
+		return 1;
+	}
+
+	return check_str(actual, expected);
+}
+
+int check_ehbigint_hex(struct ehbigint *val, const char *expected)
+{
+	int err;
+	char actual[BUFLEN];
+
+	err = ehbi_to_hex_string(val, actual, BUFLEN);
+	if (err) {
+		LOG_ERROR1("error %d ehbi_to_hex_string\n", err);
+		return 1;
+	}
+
+	return check_str(actual, expected);
+}
 
 int test_to_string()
 {
-	int err, failures;
+	int failures;
 
 	unsigned char bytes[4] = { 0x00, 0x01, 0x00, 0x45 };
 	struct ehbigint a_bigint;
-	char as_string[80];
 
 	failures = 0;
 
@@ -27,19 +58,8 @@ int test_to_string()
 	a_bigint.bytes_len = 4;
 	a_bigint.bytes_used = 3;
 
-	err = ehbi_to_hex_string(&a_bigint, as_string, 80);
-	if (err) {
-		LOG_ERROR1("error %d ehbi_to_hex_string\n", err);
-		return 1;
-	}
-	failures += check_str(as_string, "0x010045");
-
-	err = ehbi_to_decimal_string(&a_bigint, as_string, 80);
-	if (err) {
-		LOG_ERROR1("error %d ehbi_to_decimal_string\n", err);
-		return 1;
-	}
-	failures += check_str(as_string, "65605");
+	failures += check_ehbigint_hex(&a_bigint, "0x010045");
+	failures += check_ehbigint_dec(&a_bigint, "65605");
 
 	return failures;
 }
@@ -79,7 +99,7 @@ int test_decimal_to_hex(void)
 	failures += check_str(buf, "0x04A0D58CBFD9");
 
 	if (failures) {
-		LOG_ERROR1("%d failures in check_decimal_to_hex\n", failures);
+		LOG_ERROR1("%d failures in test_decimal_to_hex\n", failures);
 	}
 
 	return failures;
@@ -111,7 +131,7 @@ int test_hex_to_decimal(void)
 	failures += check_str(buf, "65543");
 
 	if (failures) {
-		LOG_ERROR1("%d failures in check_hex_to_decimal\n", failures);
+		LOG_ERROR1("%d failures in test_hex_to_decimal\n", failures);
 	}
 
 	return failures;
@@ -144,7 +164,7 @@ int test_decimal_to_hex_to_decimal_loop(void)
 	}
 
 	if (failures) {
-		LOG_ERROR1("%d failures in check_hex_to_decimal\n", failures);
+		LOG_ERROR1("%d failures in test_hex_to_decimal\n", failures);
 	}
 
 	return failures;
@@ -154,7 +174,6 @@ int test_from_hex_to_hex_round_trip(void)
 {
 	int err, failures;
 	unsigned char bytes_buf[20];
-	char as_string[80];
 
 	/*         char *u64_max =   "0xFFFFFFFFFFFFFFFF" */
 	const char *expected_str = "0x123456789ABCDEF012";
@@ -174,17 +193,10 @@ int test_from_hex_to_hex_round_trip(void)
 		return 1;
 	}
 
-	err = ehbi_to_hex_string(&a_bigint, as_string, 80);
-	if (err) {
-		LOG_ERROR1("error %d returned from ehbi_to_hex_string\n", err);
-		return 1;
-	}
-
-	failures += check_str(as_string, expected_str);
+	failures += check_ehbigint_hex(&a_bigint, expected_str);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in check_string_round_trip\n",
-			   failures);
+		LOG_ERROR1("%d failures in test_string_round_trip\n", failures);
 	}
 
 	return failures;
@@ -194,7 +206,7 @@ int test_from_decimal_to_decimal_round_trip(void)
 {
 	int err, failures;
 	unsigned char bytes_buf[20];
-	char as_string[80];
+	char as_string[BUFLEN];
 
 	/*   const char *u64_max =    "18446744073709551615" */
 	const char *expected_str = "12345678901234567890000";
@@ -214,7 +226,7 @@ int test_from_decimal_to_decimal_round_trip(void)
 		return 1;
 	}
 
-	err = ehbi_to_decimal_string(&a_bigint, as_string, 80);
+	err = ehbi_to_decimal_string(&a_bigint, as_string, BUFLEN);
 	if (err) {
 		LOG_ERROR1("error %d ehbi_to_decimal_string\n", err);
 		return 1;
@@ -236,7 +248,6 @@ int test_add(void)
 	unsigned char bytes_buf1[20];
 	unsigned char bytes_buf2[20];
 	unsigned char bytes_buf3[20];
-	char as_string[80];
 	struct ehbigint bi1, bi2, bi3;
 
 	/*  char *u64_max =   "0xFFFFFFFFFFFFFFFF" */
@@ -268,16 +279,10 @@ int test_add(void)
 		return 1;
 	}
 
-	err = ehbi_to_hex_string(&bi3, as_string, 80);
-	if (err) {
-		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
-		return 1;
-	}
-
-	failures += check_str(as_string, str_3);
+	failures += check_ehbigint_hex(&bi3, str_3);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in check_add\n", failures);
+		LOG_ERROR1("%d failures in test_add\n", failures);
 	}
 
 	return failures;
@@ -288,7 +293,6 @@ int test_inc(void)
 	int err, failures;
 	unsigned char bytes_buf1[20];
 	unsigned char bytes_buf2[20];
-	char hex[80], dec[80];
 	struct ehbigint bi1, bi2;
 
 	/*  char *u64_max = "0xFFFFFFFFFFFFFFFF" */
@@ -317,54 +321,33 @@ int test_inc(void)
 		return 1;
 	}
 
-	err = ehbi_to_hex_string(&bi1, hex, 80);
-	if (err) {
-		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
-		return 1;
-	}
-
-	failures += check_str(hex, str_3);
+	failures += check_ehbigint_hex(&bi1, str_3);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in check_inc\n", failures);
+		LOG_ERROR1("%d failures in test_inc\n", failures);
 	}
 
 	/*
 	   $ echo "9415273 + 3154116455" | bc
 	   3163531728
 	 */
-	ehbi_set_ul(&bi1, 9415273UL);
-	ehbi_set_ul(&bi2, 3154116455UL);
-	err = ehbi_inc(&bi1, &bi2);
+	err = ehbi_set_ul(&bi1, 9415273UL);
+	err += ehbi_set_ul(&bi2, 3154116455UL);
+	err += ehbi_inc(&bi1, &bi2);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_inc\n", err);
 		return 1;
 	}
-	err = ehbi_to_hex_string(&bi1, hex, 80);
-	if (err) {
-		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
-		return 1;
-	}
-	err = ehbi_hex_to_decimal(hex, 80, dec, 80);
-	if (err) {
-		LOG_ERROR1("error %d ehbi_hex_to_decimal\n", err);
-		return 1;
-	}
-	failures += check_str(dec, "3163531728");
+	failures += check_ehbigint_dec(&bi1, "3163531728");
 
-	ehbi_set_ul(&bi1, 254);
-	ehbi_set_ul(&bi2, 1);
-	err = ehbi_inc(&bi1, &bi2);
+	err = ehbi_set_ul(&bi1, 254);
+	err += ehbi_set_ul(&bi2, 1);
+	err += ehbi_inc(&bi1, &bi2);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_inc\n", err);
 		return 1;
 	}
-	err = ehbi_to_decimal_string(&bi1, dec, 80);
-	if (err) {
-		LOG_ERROR1("error %d ehbi_to_decimal_string\n", err);
-		return 1;
-	}
-	failures += check_str(dec, "255");
+	failures += check_ehbigint_dec(&bi1, "255");
 
 	return failures;
 }
@@ -374,7 +357,6 @@ int test_dec(void)
 	int err, failures;
 	unsigned char bytes_buf1[20];
 	unsigned char bytes_buf2[20];
-	char as_string[80];
 	struct ehbigint bi1, bi2;
 
 	/*  char *u64_max = "0xFFFFFFFFFFFFFFFF" */
@@ -403,16 +385,10 @@ int test_dec(void)
 		return 1;
 	}
 
-	err = ehbi_to_hex_string(&bi1, as_string, 80);
-	if (err) {
-		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
-		return 1;
-	}
-
-	failures += check_str(as_string, str_3);
+	failures += check_ehbigint_hex(&bi1, str_3);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in check_inc\n", failures);
+		LOG_ERROR1("%d failures in test_inc\n", failures);
 	}
 
 	return failures;
@@ -422,7 +398,6 @@ int test_inc_ul(void)
 {
 	int err, failures;
 	unsigned char bytes_buf1[20];
-	char as_string[80];
 	struct ehbigint bi1;
 
 	const char *str_1 = "0x700000000000000001";
@@ -445,16 +420,10 @@ int test_inc_ul(void)
 		return 1;
 	}
 
-	err = ehbi_to_hex_string(&bi1, as_string, 80);
-	if (err) {
-		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
-		return 1;
-	}
-
-	failures += check_str(as_string, str_3);
+	failures += check_ehbigint_hex(&bi1, str_3);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in check_inc_ul\n", failures);
+		LOG_ERROR1("%d failures in test_inc_ul\n", failures);
 	}
 
 	return failures;
@@ -513,7 +482,7 @@ int test_equals(void)
 	failures += check_int(result, 0);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in check_equals\n", failures);
+		LOG_ERROR1("%d failures in test_equals\n", failures);
 	}
 
 	return failures;
@@ -646,7 +615,7 @@ int test_compare(void)
 	failures += check_int(result, 0);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in check_compare\n", failures);
+		LOG_ERROR1("%d failures in test_compare\n", failures);
 	}
 
 	return failures;
@@ -720,7 +689,7 @@ int test_compare2(void)
 	failures += check_int(result, 0);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in check_compare\n", failures);
+		LOG_ERROR1("%d failures in test_compare\n", failures);
 	}
 
 	return failures;
@@ -732,7 +701,6 @@ int test_subtract(void)
 	unsigned char bytes_buf1[20];
 	unsigned char bytes_buf2[20];
 	unsigned char bytes_buf3[14];
-	char as_string[80];
 	struct ehbigint bi1, bi2, bi3;
 
 	/*  char *u64_max =    "0xFFFFFFFFFFFFFFFF" */
@@ -766,13 +734,7 @@ int test_subtract(void)
 		return 1;
 	}
 
-	err = ehbi_to_hex_string(&bi3, as_string, 80);
-	if (err) {
-		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
-		return 1;
-	}
-
-	failures += check_str(as_string, str_3);
+	failures += check_ehbigint_hex(&bi3, str_3);
 
 	err = ehbi_subtract(&bi3, &bi2, &bi1);
 	if (err) {
@@ -780,16 +742,10 @@ int test_subtract(void)
 		return 1;
 	}
 
-	err = ehbi_to_hex_string(&bi3, as_string, 80);
-	if (err) {
-		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
-		return 1;
-	}
-
-	failures += check_str(as_string, str_4);
+	failures += check_ehbigint_hex(&bi3, str_4);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in check_subtract\n", failures);
+		LOG_ERROR1("%d failures in test_subtract\n", failures);
 	}
 
 	return failures;
@@ -814,8 +770,8 @@ int test_div(void)
 	struct ehbigint quotient;
 	struct ehbigint remainder;
 
-	char as_string[80];
-	char expected[80];
+	char as_string[BUFLEN];
+	char expected[BUFLEN];
 	char *str;
 
 	numerator.bytes = bytes_numerator;
@@ -856,21 +812,11 @@ int test_div(void)
 
 	failures = 0;
 
-	err = ehbi_to_hex_string(&quotient, as_string, 80);
-	if (err) {
-		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
-		return 1;
-	}
 	sprintf(expected, "0x%04X", iquotient);
-	failures += check_str(as_string, expected);
+	failures += check_ehbigint_hex(&quotient, expected);
 
-	err = ehbi_to_hex_string(&remainder, as_string, 80);
-	if (err) {
-		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
-		return 1;
-	}
 	sprintf(expected, "0x%04X", iremainder);
-	failures += check_str(as_string, expected);
+	failures += check_ehbigint_hex(&remainder, expected);
 
 	/*
 	   lldiv_t result = lldiv(5088824049625,33554393);
@@ -879,9 +825,9 @@ int test_div(void)
 	str = "5088824049625";
 	err = ehbi_from_decimal_string(&numerator, str, strlen(str));
 	if (err) {
-		fprintf(stderr,
-			"error %d ehbi_from_decimal_string(&numerator, %s, %lu)\n",
-			err, str, (unsigned long)strlen(str));
+		LOG_ERROR3
+		    ("error %d ehbi_from_decimal_string(&numerator, %s, %lu)\n",
+		     err, str, (unsigned long)strlen(str));
 		return 1;
 	}
 	str = "33554393";
@@ -892,21 +838,12 @@ int test_div(void)
 		LOG_ERROR1("error %d from ehbi_div\n", err);
 		return 1;
 	}
-	err = ehbi_to_decimal_string(&quotient, as_string, 80);
-	if (err) {
-		LOG_ERROR1("error %d ehbi_to_decimal_string\n", err);
-		return 1;
-	}
-	failures += check_str(as_string, "151658");
-	err = ehbi_to_decimal_string(&remainder, as_string, 80);
-	if (err) {
-		LOG_ERROR1("error %d ehbi_to_decimal_string\n", err);
-		return 1;
-	}
-	failures += check_str(as_string, "31916031");
+
+	failures += check_ehbigint_dec(&quotient, "151658");
+	failures += check_ehbigint_dec(&remainder, "31916031");
 
 	if (failures) {
-		LOG_ERROR1("%d failures in check_div\n", failures);
+		LOG_ERROR1("%d failures in test_div\n", failures);
 	}
 
 	return failures;
@@ -918,7 +855,6 @@ int test_set()
 
 	unsigned char a_bytes[10];
 	struct ehbigint a_bigint;
-	char as_string[80];
 	unsigned long three = 3;
 
 	unsigned char b_bytes[10];
@@ -939,24 +875,19 @@ int test_set()
 		LOG_ERROR1("error %d from ehbi_set_ul\n", err);
 		return 1;
 	}
-	err = ehbi_to_hex_string(&a_bigint, as_string, 80);
-	if (err) {
-		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
-		return 1;
-	}
-	failures += check_str(as_string, "0x03");
+	failures += check_ehbigint_hex(&a_bigint, "0x03");
 
 	err = ehbi_set(&b_bigint, &a_bigint);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_set_ul\n", err);
 		return 1;
 	}
-	err = ehbi_to_hex_string(&b_bigint, as_string, 80);
-	if (err) {
-		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
-		return 1;
+	failures += check_ehbigint_hex(&b_bigint, "0x03");
+
+	if (failures) {
+		LOG_ERROR1("%d failures in test_set\n", failures);
 	}
-	failures += check_str(as_string, "0x03");
+
 	return failures;
 }
 
@@ -970,7 +901,6 @@ int test_mul()
 
 	unsigned char a_bytes[16];
 	struct ehbigint a_bigint;
-	char hex[80], dec[80];
 
 	unsigned char b_bytes[16];
 	struct ehbigint b_bigint;
@@ -1004,17 +934,11 @@ int test_mul()
 	result.bytes_len = 16;
 	err = ehbi_mul(&result, &a_bigint, &b_bigint);
 
-	err = ehbi_to_hex_string(&result, hex, 80);
-	if (err) {
-		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
-		return 1;
+	failures += check_ehbigint_dec(&result, "2377667136509");
+
+	if (failures) {
+		LOG_ERROR1("%d failures in test_mul\n", failures);
 	}
-	err = ehbi_hex_to_decimal(hex, 80, dec, 80);
-	if (err) {
-		LOG_ERROR1("error %d from ehbi_hex_to_decimal\n", err);
-		return 1;
-	}
-	failures += check_str(dec, "2377667136509");
 
 	return failures;
 }

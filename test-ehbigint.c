@@ -4,7 +4,16 @@
 
 #include "ehbigint.h"
 
-int check_to_string()
+#define STDERR_FILE_LINE_FUNC \
+	fprintf(stderr, "%s:%d%s%s%s: ", __FILE__, __LINE__, \
+	(ECHECK_FUNC == NULL) ? "" : ":", \
+	(ECHECK_FUNC == NULL) ? "" : ECHECK_FUNC, \
+	(ECHECK_FUNC == NULL) ? "" : "()")
+
+#define LOG_ERROR1(format, arg) \
+	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg)
+
+int test_to_string()
 {
 	int err, failures;
 
@@ -20,14 +29,14 @@ int check_to_string()
 
 	err = ehbi_to_hex_string(&a_bigint, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d ehbi_to_hex_string\n", err);
+		LOG_ERROR1("error %d ehbi_to_hex_string\n", err);
 		return 1;
 	}
 	failures += check_str(as_string, "0x010045");
 
 	err = ehbi_to_decimal_string(&a_bigint, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d ehbi_to_decimal_string\n", err);
+		LOG_ERROR1("error %d ehbi_to_decimal_string\n", err);
 		return 1;
 	}
 	failures += check_str(as_string, "65605");
@@ -35,7 +44,7 @@ int check_to_string()
 	return failures;
 }
 
-int check_decimal_to_hex(void)
+int test_decimal_to_hex(void)
 {
 	int err, failures;
 	char buf[20];
@@ -46,7 +55,7 @@ int check_decimal_to_hex(void)
 	err = ehbi_decimal_to_hex("275", 3, buf, 20);
 
 	if (err) {
-		fprintf(stderr, "error %d ehbi_decimal_to_hex\n", err);
+		LOG_ERROR1("error %d ehbi_decimal_to_hex\n", err);
 		return 1;
 	}
 
@@ -55,7 +64,7 @@ int check_decimal_to_hex(void)
 	err = ehbi_decimal_to_hex("65543", 10, buf, 20);
 
 	if (err) {
-		fprintf(stderr, "error %d ehbi_decimal_to_hex\n", err);
+		LOG_ERROR1("error %d ehbi_decimal_to_hex\n", err);
 		return 1;
 	}
 
@@ -64,20 +73,19 @@ int check_decimal_to_hex(void)
 	str = "5088824049625";
 	err = ehbi_decimal_to_hex(str, strlen(str), buf, 20);
 	if (err) {
-		fprintf(stderr, "error %d ehbi_decimal_to_hex\n", err);
+		LOG_ERROR1("error %d ehbi_decimal_to_hex\n", err);
 		return 1;
 	}
 	failures += check_str(buf, "0x04A0D58CBFD9");
 
 	if (failures) {
-		fprintf(stderr, "%d failures in check_decimal_to_hex\n",
-			failures);
+		LOG_ERROR1("%d failures in check_decimal_to_hex\n", failures);
 	}
 
 	return failures;
 }
 
-int check_hex_to_decimal(void)
+int test_hex_to_decimal(void)
 {
 	int err, failures;
 	char buf[20];
@@ -87,7 +95,7 @@ int check_hex_to_decimal(void)
 	err = ehbi_hex_to_decimal("0x113", 5, buf, 20);
 
 	if (err) {
-		fprintf(stderr, "error %d ehbi_hex_to_decimal\n", err);
+		LOG_ERROR1("error %d ehbi_hex_to_decimal\n", err);
 		return 1;
 	}
 
@@ -96,21 +104,20 @@ int check_hex_to_decimal(void)
 	err = ehbi_hex_to_decimal("0x10007", 10, buf, 20);
 
 	if (err) {
-		fprintf(stderr, "error %d ehbi_hex_to_decimal\n", err);
+		LOG_ERROR1("error %d ehbi_hex_to_decimal\n", err);
 		return 1;
 	}
 
 	failures += check_str(buf, "65543");
 
 	if (failures) {
-		fprintf(stderr, "%d failures in check_hex_to_decimal\n",
-			failures);
+		LOG_ERROR1("%d failures in check_hex_to_decimal\n", failures);
 	}
 
 	return failures;
 }
 
-int check_decimal_to_hex_to_decimal_loop(void)
+int test_decimal_to_hex_to_decimal_loop(void)
 {
 	int failures;
 	int i;
@@ -137,14 +144,13 @@ int check_decimal_to_hex_to_decimal_loop(void)
 	}
 
 	if (failures) {
-		fprintf(stderr, "%d failures in check_hex_to_decimal\n",
-			failures);
+		LOG_ERROR1("%d failures in check_hex_to_decimal\n", failures);
 	}
 
 	return failures;
 }
 
-int check_from_hex_to_hex_round_trip(void)
+int test_from_hex_to_hex_round_trip(void)
 {
 	int err, failures;
 	unsigned char bytes_buf[20];
@@ -163,29 +169,28 @@ int check_from_hex_to_hex_round_trip(void)
 	    ehbi_from_hex_string(&a_bigint, expected_str, strlen(expected_str));
 
 	if (err) {
-		fprintf(stderr, "error %d returned from ehbi_from_hex_string\n",
-			err);
+		LOG_ERROR1("error %d returned from ehbi_from_hex_string\n",
+			   err);
 		return 1;
 	}
 
 	err = ehbi_to_hex_string(&a_bigint, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d returned from ehbi_to_hex_string\n",
-			err);
+		LOG_ERROR1("error %d returned from ehbi_to_hex_string\n", err);
 		return 1;
 	}
 
 	failures += check_str(as_string, expected_str);
 
 	if (failures) {
-		fprintf(stderr, "%d failures in check_string_round_trip\n",
-			failures);
+		LOG_ERROR1("%d failures in check_string_round_trip\n",
+			   failures);
 	}
 
 	return failures;
 }
 
-int check_from_decimal_to_decimal_round_trip(void)
+int test_from_decimal_to_decimal_round_trip(void)
 {
 	int err, failures;
 	unsigned char bytes_buf[20];
@@ -205,27 +210,27 @@ int check_from_decimal_to_decimal_round_trip(void)
 				     strlen(expected_str));
 
 	if (err) {
-		fprintf(stderr, "error %d ehbi_from_decimal_string\n", err);
+		LOG_ERROR1("error %d ehbi_from_decimal_string\n", err);
 		return 1;
 	}
 
 	err = ehbi_to_decimal_string(&a_bigint, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d ehbi_to_decimal_string\n", err);
+		LOG_ERROR1("error %d ehbi_to_decimal_string\n", err);
 		return 1;
 	}
 
 	failures += check_str(as_string, expected_str);
 
 	if (failures) {
-		fprintf(stderr, "%d failures in "
-			"check_decimal_to_decimal_round_trip\n", failures);
+		LOG_ERROR1("%d failures in "
+			   "check_decimal_to_decimal_round_trip\n", failures);
 	}
 
 	return failures;
 }
 
-int check_add(void)
+int test_add(void)
 {
 	int err, failures;
 	unsigned char bytes_buf1[20];
@@ -253,32 +258,32 @@ int check_add(void)
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_from_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
 		return 1;
 	}
 
 	err = ehbi_add(&bi3, &bi1, &bi2);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_add\n", err);
+		LOG_ERROR1("error %d from ehbi_add\n", err);
 		return 1;
 	}
 
 	err = ehbi_to_hex_string(&bi3, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
 		return 1;
 	}
 
 	failures += check_str(as_string, str_3);
 
 	if (failures) {
-		fprintf(stderr, "%d failures in check_add\n", failures);
+		LOG_ERROR1("%d failures in check_add\n", failures);
 	}
 
 	return failures;
 }
 
-int check_inc(void)
+int test_inc(void)
 {
 	int err, failures;
 	unsigned char bytes_buf1[20];
@@ -302,26 +307,26 @@ int check_inc(void)
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_from_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
 		return 1;
 	}
 
 	err = ehbi_inc(&bi1, &bi2);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_inc\n", err);
+		LOG_ERROR1("error %d from ehbi_inc\n", err);
 		return 1;
 	}
 
 	err = ehbi_to_hex_string(&bi1, hex, 80);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
 		return 1;
 	}
 
 	failures += check_str(hex, str_3);
 
 	if (failures) {
-		fprintf(stderr, "%d failures in check_inc\n", failures);
+		LOG_ERROR1("%d failures in check_inc\n", failures);
 	}
 
 	/*
@@ -332,17 +337,17 @@ int check_inc(void)
 	ehbi_set_ul(&bi2, 3154116455UL);
 	err = ehbi_inc(&bi1, &bi2);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_inc\n", err);
+		LOG_ERROR1("error %d from ehbi_inc\n", err);
 		return 1;
 	}
 	err = ehbi_to_hex_string(&bi1, hex, 80);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
 		return 1;
 	}
 	err = ehbi_hex_to_decimal(hex, 80, dec, 80);
 	if (err) {
-		fprintf(stderr, "error %d ehbi_hex_to_decimal\n", err);
+		LOG_ERROR1("error %d ehbi_hex_to_decimal\n", err);
 		return 1;
 	}
 	failures += check_str(dec, "3163531728");
@@ -351,12 +356,12 @@ int check_inc(void)
 	ehbi_set_ul(&bi2, 1);
 	err = ehbi_inc(&bi1, &bi2);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_inc\n", err);
+		LOG_ERROR1("error %d from ehbi_inc\n", err);
 		return 1;
 	}
 	err = ehbi_to_decimal_string(&bi1, dec, 80);
 	if (err) {
-		fprintf(stderr, "error %d ehbi_to_decimal_string\n", err);
+		LOG_ERROR1("error %d ehbi_to_decimal_string\n", err);
 		return 1;
 	}
 	failures += check_str(dec, "255");
@@ -364,7 +369,7 @@ int check_inc(void)
 	return failures;
 }
 
-int check_dec(void)
+int test_dec(void)
 {
 	int err, failures;
 	unsigned char bytes_buf1[20];
@@ -388,32 +393,32 @@ int check_dec(void)
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_from_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
 		return 1;
 	}
 
 	err = ehbi_dec(&bi1, &bi2);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_inc\n", err);
+		LOG_ERROR1("error %d from ehbi_inc\n", err);
 		return 1;
 	}
 
 	err = ehbi_to_hex_string(&bi1, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
 		return 1;
 	}
 
 	failures += check_str(as_string, str_3);
 
 	if (failures) {
-		fprintf(stderr, "%d failures in check_inc\n", failures);
+		LOG_ERROR1("%d failures in check_inc\n", failures);
 	}
 
 	return failures;
 }
 
-int check_inc_ul(void)
+int test_inc_ul(void)
 {
 	int err, failures;
 	unsigned char bytes_buf1[20];
@@ -430,32 +435,32 @@ int check_inc_ul(void)
 
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_from_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
 		return 1;
 	}
 
 	err = ehbi_inc_ul(&bi1, (unsigned long)0xFFFFFFFF);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_inc_ul\n", err);
+		LOG_ERROR1("error %d from ehbi_inc_ul\n", err);
 		return 1;
 	}
 
 	err = ehbi_to_hex_string(&bi1, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
 		return 1;
 	}
 
 	failures += check_str(as_string, str_3);
 
 	if (failures) {
-		fprintf(stderr, "%d failures in check_inc_ul\n", failures);
+		LOG_ERROR1("%d failures in check_inc_ul\n", failures);
 	}
 
 	return failures;
 }
 
-int check_equals(void)
+int test_equals(void)
 {
 	int err, failures, result;
 	unsigned char bytes_buf1[20];
@@ -482,39 +487,39 @@ int check_equals(void)
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
 	err += ehbi_from_hex_string(&bi3, str_3, strlen(str_3));
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_from_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
 		return 1;
 	}
 
 	result = ehbi_equals(&bi1, &bi1, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_equals\n", err);
+		LOG_ERROR1("error %d from ehbi_equals\n", err);
 		return 1;
 	}
 	failures += check_int(result, 1);
 
 	result = ehbi_equals(&bi1, &bi2, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_equals\n", err);
+		LOG_ERROR1("error %d from ehbi_equals\n", err);
 		return 1;
 	}
 	failures += check_int(result, 1);
 
 	result = ehbi_equals(&bi1, &bi3, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_equals\n", err);
+		LOG_ERROR1("error %d from ehbi_equals\n", err);
 		return 1;
 	}
 	failures += check_int(result, 0);
 
 	if (failures) {
-		fprintf(stderr, "%d failures in check_equals\n", failures);
+		LOG_ERROR1("%d failures in check_equals\n", failures);
 	}
 
 	return failures;
 }
 
-int check_compare(void)
+int test_compare(void)
 {
 	int err, failures, result;
 	unsigned char bytes_buf1[20];
@@ -541,113 +546,113 @@ int check_compare(void)
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
 	err += ehbi_from_hex_string(&bi3, str_3, strlen(str_3));
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_from_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
 		return 1;
 	}
 
 	result = ehbi_compare(&bi1, &bi1, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_compare\n", err);
+		LOG_ERROR1("error %d from ehbi_compare\n", err);
 		return 1;
 	}
 	failures += check_int(result, 0);
 	result = ehbi_less_than(&bi1, &bi1, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_less_than\n", err);
+		LOG_ERROR1("error %d from ehbi_less_than\n", err);
 		return 1;
 	}
 	failures += check_int(result, 0);
 	result = ehbi_greater_than(&bi1, &bi1, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_greater_than\n", err);
+		LOG_ERROR1("error %d from ehbi_greater_than\n", err);
 		return 1;
 	}
 	failures += check_int(result, 0);
 
 	result = ehbi_compare(&bi1, &bi2, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_compare\n", err);
+		LOG_ERROR1("error %d from ehbi_compare\n", err);
 		return 1;
 	}
 	failures += check_int(result, -1);
 	result = ehbi_less_than(&bi1, &bi2, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_less_than\n", err);
+		LOG_ERROR1("error %d from ehbi_less_than\n", err);
 		return 1;
 	}
 	failures += check_int(result, 1);
 	result = ehbi_greater_than(&bi1, &bi2, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_greater_than\n", err);
+		LOG_ERROR1("error %d from ehbi_greater_than\n", err);
 		return 1;
 	}
 	failures += check_int(result, 0);
 
 	result = ehbi_compare(&bi2, &bi1, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_compare\n", err);
+		LOG_ERROR1("error %d from ehbi_compare\n", err);
 		return 1;
 	}
 	failures += check_int(result, 1);
 	result = ehbi_less_than(&bi2, &bi1, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_less_than\n", err);
+		LOG_ERROR1("error %d from ehbi_less_than\n", err);
 		return 1;
 	}
 	failures += check_int(result, 0);
 	result = ehbi_greater_than(&bi2, &bi1, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_greater_than\n", err);
+		LOG_ERROR1("error %d from ehbi_greater_than\n", err);
 		return 1;
 	}
 	failures += check_int(result, 1);
 
 	result = ehbi_compare(&bi1, &bi3, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_compare\n", err);
+		LOG_ERROR1("error %d from ehbi_compare\n", err);
 		return 1;
 	}
 	failures += check_int(result, 1);
 	result = ehbi_less_than(&bi1, &bi3, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_less_than\n", err);
+		LOG_ERROR1("error %d from ehbi_less_than\n", err);
 		return 1;
 	}
 	failures += check_int(result, 0);
 	result = ehbi_greater_than(&bi1, &bi3, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_greater_than\n", err);
+		LOG_ERROR1("error %d from ehbi_greater_than\n", err);
 		return 1;
 	}
 	failures += check_int(result, 1);
 
 	result = ehbi_compare(&bi3, &bi1, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_compare\n", err);
+		LOG_ERROR1("error %d from ehbi_compare\n", err);
 		return 1;
 	}
 	failures += check_int(result, -1);
 	result = ehbi_less_than(&bi3, &bi1, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_less_than\n", err);
+		LOG_ERROR1("error %d from ehbi_less_than\n", err);
 		return 1;
 	}
 	failures += check_int(result, 1);
 	result = ehbi_greater_than(&bi3, &bi1, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_greater_than\n", err);
+		LOG_ERROR1("error %d from ehbi_greater_than\n", err);
 		return 1;
 	}
 	failures += check_int(result, 0);
 
 	if (failures) {
-		fprintf(stderr, "%d failures in check_compare\n", failures);
+		LOG_ERROR1("%d failures in check_compare\n", failures);
 	}
 
 	return failures;
 }
 
-int check_compare2(void)
+int test_compare2(void)
 {
 	int err, failures, result;
 	unsigned char bytes_buf1[20];
@@ -668,60 +673,60 @@ int check_compare2(void)
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_from_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
 		return 1;
 	}
 
 	result = ehbi_compare(&bi1, &bi2, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_compare\n", err);
+		LOG_ERROR1("error %d from ehbi_compare\n", err);
 		return 1;
 	}
 	failures += check_int(result, 1);
 
 	result = ehbi_less_than(&bi1, &bi2, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_less_than\n", err);
+		LOG_ERROR1("error %d from ehbi_less_than\n", err);
 		return 1;
 	}
 	failures += check_int(result, 0);
 
 	result = ehbi_greater_than(&bi1, &bi2, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_greater_than\n", err);
+		LOG_ERROR1("error %d from ehbi_greater_than\n", err);
 		return 1;
 	}
 	failures += check_int(result, 1);
 
 	result = ehbi_compare(&bi2, &bi1, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_compare\n", err);
+		LOG_ERROR1("error %d from ehbi_compare\n", err);
 		return 1;
 	}
 	failures += check_int(result, -1);
 
 	result = ehbi_less_than(&bi2, &bi1, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_less_than\n", err);
+		LOG_ERROR1("error %d from ehbi_less_than\n", err);
 		return 1;
 	}
 	failures += check_int(result, 1);
 
 	result = ehbi_greater_than(&bi2, &bi1, &err);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_greater_than\n", err);
+		LOG_ERROR1("error %d from ehbi_greater_than\n", err);
 		return 1;
 	}
 	failures += check_int(result, 0);
 
 	if (failures) {
-		fprintf(stderr, "%d failures in check_compare\n", failures);
+		LOG_ERROR1("%d failures in check_compare\n", failures);
 	}
 
 	return failures;
 }
 
-int check_subtract(void)
+int test_subtract(void)
 {
 	int err, failures;
 	unsigned char bytes_buf1[20];
@@ -751,19 +756,19 @@ int check_subtract(void)
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_from_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
 		return 1;
 	}
 
 	err = ehbi_subtract(&bi3, &bi1, &bi2);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_subtract\n", err);
+		LOG_ERROR1("error %d from ehbi_subtract\n", err);
 		return 1;
 	}
 
 	err = ehbi_to_hex_string(&bi3, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
 		return 1;
 	}
 
@@ -771,26 +776,26 @@ int check_subtract(void)
 
 	err = ehbi_subtract(&bi3, &bi2, &bi1);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_subtract\n", err);
+		LOG_ERROR1("error %d from ehbi_subtract\n", err);
 		return 1;
 	}
 
 	err = ehbi_to_hex_string(&bi3, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
 		return 1;
 	}
 
 	failures += check_str(as_string, str_4);
 
 	if (failures) {
-		fprintf(stderr, "%d failures in check_subtract\n", failures);
+		LOG_ERROR1("%d failures in check_subtract\n", failures);
 	}
 
 	return failures;
 }
 
-int check_div(void)
+int test_div(void)
 {
 	int err, failures;
 
@@ -832,20 +837,20 @@ int check_div(void)
 	sprintf(as_string, "0x%04X", inumerator);
 	err = ehbi_from_hex_string(&numerator, as_string, strlen(as_string));
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_from_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
 		return 1;
 	}
 
 	sprintf(as_string, "0x%04X", idenominator);
 	err = ehbi_from_hex_string(&denominator, as_string, strlen(as_string));
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_from_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
 		return 1;
 	}
 
 	err = ehbi_div(&quotient, &remainder, &numerator, &denominator);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_div\n", err);
+		LOG_ERROR1("error %d from ehbi_div\n", err);
 		return 1;
 	}
 
@@ -853,7 +858,7 @@ int check_div(void)
 
 	err = ehbi_to_hex_string(&quotient, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
 		return 1;
 	}
 	sprintf(expected, "0x%04X", iquotient);
@@ -861,7 +866,7 @@ int check_div(void)
 
 	err = ehbi_to_hex_string(&remainder, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
 		return 1;
 	}
 	sprintf(expected, "0x%04X", iremainder);
@@ -884,30 +889,30 @@ int check_div(void)
 	ehbi_from_decimal_string(&denominator, str, strlen(str));
 	err = ehbi_div(&quotient, &remainder, &numerator, &denominator);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_div\n", err);
+		LOG_ERROR1("error %d from ehbi_div\n", err);
 		return 1;
 	}
 	err = ehbi_to_decimal_string(&quotient, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d ehbi_to_decimal_string\n", err);
+		LOG_ERROR1("error %d ehbi_to_decimal_string\n", err);
 		return 1;
 	}
 	failures += check_str(as_string, "151658");
 	err = ehbi_to_decimal_string(&remainder, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d ehbi_to_decimal_string\n", err);
+		LOG_ERROR1("error %d ehbi_to_decimal_string\n", err);
 		return 1;
 	}
 	failures += check_str(as_string, "31916031");
 
 	if (failures) {
-		fprintf(stderr, "%d failures in check_div\n", failures);
+		LOG_ERROR1("%d failures in check_div\n", failures);
 	}
 
 	return failures;
 }
 
-int check_set()
+int test_set()
 {
 	int err, failures;
 
@@ -931,31 +936,31 @@ int check_set()
 
 	err = ehbi_set_ul(&a_bigint, three);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_set_ul\n", err);
+		LOG_ERROR1("error %d from ehbi_set_ul\n", err);
 		return 1;
 	}
 	err = ehbi_to_hex_string(&a_bigint, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
 		return 1;
 	}
 	failures += check_str(as_string, "0x03");
 
 	err = ehbi_set(&b_bigint, &a_bigint);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_set_ul\n", err);
+		LOG_ERROR1("error %d from ehbi_set_ul\n", err);
 		return 1;
 	}
 	err = ehbi_to_hex_string(&b_bigint, as_string, 80);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
 		return 1;
 	}
 	failures += check_str(as_string, "0x03");
 	return failures;
 }
 
-int check_mul()
+int test_mul()
 {
 	/*
 	   $ bc <<< "9415273 * 252533"
@@ -985,13 +990,13 @@ int check_mul()
 
 	err = ehbi_set_ul(&a_bigint, 9415273);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_set_ul\n", err);
+		LOG_ERROR1("error %d from ehbi_set_ul\n", err);
 		return 1;
 	}
 
 	err = ehbi_set_ul(&b_bigint, 252533);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_set_ul\n", err);
+		LOG_ERROR1("error %d from ehbi_set_ul\n", err);
 		return 1;
 	}
 
@@ -1001,12 +1006,12 @@ int check_mul()
 
 	err = ehbi_to_hex_string(&result, hex, 80);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_to_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_to_hex_string\n", err);
 		return 1;
 	}
 	err = ehbi_hex_to_decimal(hex, 80, dec, 80);
 	if (err) {
-		fprintf(stderr, "error %d from ehbi_hex_to_decimal\n", err);
+		LOG_ERROR1("error %d from ehbi_hex_to_decimal\n", err);
 		return 1;
 	}
 	failures += check_str(dec, "2377667136509");
@@ -1020,26 +1025,26 @@ int main(void)
 
 	failures = 0;
 
-	failures += check_to_string();
-	failures += check_decimal_to_hex();
-	failures += check_hex_to_decimal();
-	failures += check_decimal_to_hex_to_decimal_loop();
-	failures += check_from_hex_to_hex_round_trip();
-	failures += check_from_decimal_to_decimal_round_trip();
-	failures += check_add();
-	failures += check_inc();
-	failures += check_inc_ul();
-	failures += check_equals();
-	failures += check_compare();
-	failures += check_compare2();
-	failures += check_subtract();
-	failures += check_dec();
-	failures += check_div();
-	failures += check_set();
-	failures += check_mul();
+	failures += test_to_string();
+	failures += test_decimal_to_hex();
+	failures += test_hex_to_decimal();
+	failures += test_decimal_to_hex_to_decimal_loop();
+	failures += test_from_hex_to_hex_round_trip();
+	failures += test_from_decimal_to_decimal_round_trip();
+	failures += test_add();
+	failures += test_inc();
+	failures += test_inc_ul();
+	failures += test_equals();
+	failures += test_compare();
+	failures += test_compare2();
+	failures += test_subtract();
+	failures += test_dec();
+	failures += test_div();
+	failures += test_set();
+	failures += test_mul();
 
 	if (failures) {
-		fprintf(stderr, "%d failures in total\n", failures);
+		LOG_ERROR1("%d failures in total\n", failures);
 	}
 	return failures;
 }

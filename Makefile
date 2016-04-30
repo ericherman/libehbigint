@@ -40,8 +40,10 @@ CSTD_CFLAGS=-std=c89 -DEHBI_ENSURE_POSIX=1
 #CSTD_CFLAGS=-std=c11
 
 ifeq ("$(DEBUG)", "")
+RUN_PROBLEM_TESTS=0
 DEBUG_CFLAGS=-ggdb -O3
 else
+RUN_PROBLEM_TESTS=1
 DEBUG_CFLAGS=-ggdb -O0
 endif
 
@@ -105,7 +107,7 @@ demo: $(OUT)
 	./$(OUT) 132904811234120000312412 + 123412413132500
 
 check: $(TEST_OUT)
-	./$(TEST_OUT)-static
+	./$(TEST_OUT)-static $(RUN_PROBLEM_TESTS)
 	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) ./$(TEST_OUT)-dynamic
 	@echo "Success."
 

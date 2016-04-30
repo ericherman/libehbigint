@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <echeck.h>
+#include <stdlib.h>
+#include <errno.h>
 
 #include "ehbigint.h"
 
@@ -12,8 +14,15 @@
 
 #define LOG_ERROR1(format, arg) \
 	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg)
+
+#define LOG_ERROR2(format, arg1, arg2) \
+	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg1, arg2)
+
 #define LOG_ERROR3(format, arg1, arg2, arg3) \
 	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg1, arg2, arg3)
+
+#define LOG_ERROR4(format, arg1, arg2, arg3, arg4) \
+	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg1, arg2, arg3, arg4)
 
 #define BUFLEN 80
 
@@ -43,6 +52,29 @@ int check_ehbigint_hex(struct ehbigint *val, const char *expected)
 	}
 
 	return check_str(actual, expected);
+}
+
+unsigned long ehbigint_to_unsigned_long(struct ehbigint *val, int *err)
+{
+	int base;
+	char dec[BUFLEN];
+	char *endptr;
+	unsigned long result;
+
+	*err = ehbi_to_decimal_string(val, dec, BUFLEN);
+	if (*err) {
+		LOG_ERROR1("error %d ehbi_to_decimal_string\n", *err);
+		return 0;
+	}
+	base = 10;
+	errno = 0;
+	result = strtoul(dec, &endptr, base);
+	*err = errno;
+	if (*err || (endptr && strlen(endptr) > 0)) {
+		LOG_ERROR4("strtoul('%s'); (invalid:'%s') (%d: %s)\n", dec,
+			   endptr, *err, strerror(*err));
+	}
+	return result;
 }
 
 int test_to_string()
@@ -943,10 +975,112 @@ int test_mul()
 	return failures;
 }
 
-int main(void)
+int test_scenario_mul_mod(void)
 {
+	int err, failures;
+	struct ehbigint bx, by, bz, bresult, bquot, brem;
+	unsigned long x, y, z, result;
+	unsigned char xb[16], yb[16], zb[16], resb[16], quotb[16], remb[16];
+	char *expect_mul;
+
+	failures = 0;
+
+	bx.bytes = xb;
+	bx.bytes_len = 16;
+	bx.bytes_used = 0;
+
+	by.bytes = yb;
+	by.bytes_len = 16;
+	by.bytes_used = 0;
+
+	bz.bytes = zb;
+	bz.bytes_len = 16;
+	bz.bytes_used = 0;
+
+	bresult.bytes = resb;
+	bresult.bytes_len = 16;
+	bresult.bytes_used = 0;
+
+	bquot.bytes = quotb;
+	bquot.bytes_len = 16;
+	bquot.bytes_used = 0;
+
+	brem.bytes = remb;
+	brem.bytes_len = 16;
+	brem.bytes_used = 0;
+
+	x = 20151125;
+	err = ehbi_set_ul(&bx, x);
+	if (err) {
+		LOG_ERROR2("ehbi_set_ul (%lu) error: %d\n", x, err);
+		return 1;
+	}
+	y = 252533;
+	err = ehbi_set_ul(&by, y);
+	if (err) {
+		LOG_ERROR2("ehbi_set_ul (%lu) error: %d\n", y, err);
+		return 1;
+	}
+	z = 33554393;
+	err = ehbi_set_ul(&bz, z);
+	if (err) {
+		LOG_ERROR2("ehbi_set_ul (%lu) error: %d\n", z, err);
+		return 1;
+	}
+
+	/* 20151125 * 252533 == 5088824049625 */
+	expect_mul = "5088824049625";
+	err = ehbi_mul(&bresult, &bx, &by);
+	if (err) {
+		LOG_ERROR3("ehbi_mul (%lu * %lu) error: %d\n", x, y, err);
+		return 1;
+	}
+	failures += check_ehbigint_dec(&bresult, expect_mul);
+
+	/*
+	   r = lldiv(5088824049625, 33554393);
+	   r.quot: 151658, r.rem: 31916031
+	 */
+	err = ehbi_div(&bquot, &brem, &bresult, &bz);
+	if (err) {
+		LOG_ERROR3("ehbi_div: (%s/%lu) error: %d\n", expect_mul, z,
+			   err);
+	}
+	if (brem.bytes_used > sizeof(unsigned long)) {
+		LOG_ERROR2
+		    ("brem.bytes_used > sizeof(unsigned long)(%lu > %lu)\n",
+		     (unsigned long)brem.bytes_used,
+		     (unsigned long)sizeof(unsigned long));
+		failures += 1;
+	}
+
+	result = ehbigint_to_unsigned_long(&bquot, &err);
+	if (err) {
+		LOG_ERROR1("ehbigint_to_unsigned_long(quot) error: %d\n", err);
+		return 1;
+	}
+	failures += check_unsigned_long(result, 151658);
+
+	result = ehbigint_to_unsigned_long(&brem, &err);
+	if (err) {
+		LOG_ERROR1("ehbigint_to_unsigned_long(rem) error: %d\n", err);
+		return 1;
+	}
+	failures += check_unsigned_long(result, 31916031);
+
+	if (failures) {
+		LOG_ERROR1("%d failures in test_scenario_mul_mod\n", failures);
+	}
+
+	return failures;
+}
+
+int main(int argc, char **argv)
+{
+	int run_known_failing_tests;
 	int failures;
 
+	run_known_failing_tests = (argc > 1) ? atoi(argv[1]) : 0;
 	failures = 0;
 
 	failures += test_to_string();
@@ -967,8 +1101,13 @@ int main(void)
 	failures += test_set();
 	failures += test_mul();
 
+	if (run_known_failing_tests) {
+		failures += test_scenario_mul_mod();
+	}
+
 	if (failures) {
 		LOG_ERROR1("%d failures in total\n", failures);
 	}
+
 	return failures;
 }

@@ -6,10 +6,13 @@
 
 #include "ehbigint.h"
 
+#define TEST_FUNC \
+	((ECHECK_FUNC == NULL) ? "" : ECHECK_FUNC)
+
 #define STDERR_FILE_LINE_FUNC \
 	fprintf(stderr, "%s:%d%s%s%s: ", __FILE__, __LINE__, \
 	(ECHECK_FUNC == NULL) ? "" : ":", \
-	(ECHECK_FUNC == NULL) ? "" : ECHECK_FUNC, \
+	TEST_FUNC, \
 	(ECHECK_FUNC == NULL) ? "" : "()")
 
 #define LOG_ERROR(format) \
@@ -27,34 +30,43 @@
 #define LOG_ERROR4(format, arg1, arg2, arg3, arg4) \
 	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg1, arg2, arg3, arg4)
 
+#define VERBOSE_ANNOUNCE(verbose) \
+	if (verbose) { fprintf(stderr, "starting %s\n", TEST_FUNC); }
+
 #define BUFLEN 80
 
-int check_ehbigint_dec(struct ehbigint *val, const char *expected)
+int check_ehbigint_dec(struct ehbigint *val, const char *expected, int line,
+		       const char *msg)
 {
 	int err;
 	char actual[BUFLEN];
+	char buf[BUFLEN];
 
+	sprintf(buf, "%s:%d", msg, line);
 	err = ehbi_to_decimal_string(val, actual, BUFLEN);
 	if (err) {
-		LOG_ERROR1("error %d ehbi_to_decimal_string\n", err);
+		LOG_ERROR2("error %d ehbi_to_decimal_string (%s)\n", err, buf);
 		return 1;
 	}
 
-	return check_str(actual, expected);
+	return check_str_m(actual, expected, buf);
 }
 
-int check_ehbigint_hex(struct ehbigint *val, const char *expected)
+int check_ehbigint_hex(struct ehbigint *val, const char *expected, int line,
+		       const char *msg)
 {
 	int err;
 	char actual[BUFLEN];
+	char buf[BUFLEN];
 
+	sprintf(buf, "%s:%d", msg, line);
 	err = ehbi_to_hex_string(val, actual, BUFLEN);
 	if (err) {
-		LOG_ERROR1("error %d ehbi_to_hex_string\n", err);
+		LOG_ERROR2("error %d ehbi_to_hex_string (%s)\n", err, buf);
 		return 1;
 	}
 
-	return check_str(actual, expected);
+	return check_str_m(actual, expected, buf);
 }
 
 unsigned long ehbigint_to_unsigned_long(struct ehbigint *val, int *err)
@@ -80,21 +92,23 @@ unsigned long ehbigint_to_unsigned_long(struct ehbigint *val, int *err)
 	return result;
 }
 
-int test_to_string()
+int test_to_string(int verbose)
 {
 	int failures;
 
 	unsigned char bytes[4] = { 0x00, 0x01, 0x00, 0x45 };
 	struct ehbigint a_bigint;
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	a_bigint.bytes = bytes;
 	a_bigint.bytes_len = 4;
 	a_bigint.bytes_used = 3;
 
-	failures += check_ehbigint_hex(&a_bigint, "0x010045");
-	failures += check_ehbigint_dec(&a_bigint, "65605");
+	failures +=
+	    check_ehbigint_hex(&a_bigint, "0x010045", __LINE__, TEST_FUNC);
+	failures += check_ehbigint_dec(&a_bigint, "65605", __LINE__, TEST_FUNC);
 
 	if (failures) {
 		LOG_ERROR1("%d failures in test_to_string\n", failures);
@@ -103,12 +117,13 @@ int test_to_string()
 	return failures;
 }
 
-int test_decimal_to_hex(void)
+int test_decimal_to_hex(int verbose)
 {
 	int err, failures;
 	char buf[20];
 	const char *str;
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	err = ehbi_decimal_to_hex("275", 3, buf, 20);
@@ -147,11 +162,12 @@ int test_decimal_to_hex(void)
 	return failures;
 }
 
-int test_hex_to_decimal(void)
+int test_hex_to_decimal(int verbose)
 {
 	int err, failures;
 	char buf[20];
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	err = ehbi_hex_to_decimal("0x113", 5, buf, 20);
@@ -181,7 +197,7 @@ int test_hex_to_decimal(void)
 	return failures;
 }
 
-int test_decimal_to_hex_to_decimal_loop(void)
+int test_decimal_to_hex_to_decimal_loop(int verbose)
 {
 	int failures;
 	int i;
@@ -191,6 +207,7 @@ int test_decimal_to_hex_to_decimal_loop(void)
 	char *numv[] = { "1", "10", "275", "65543", "17", "1025", "106" };
 	int numc = 7;
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	for (i = 0; i < numc; ++i) {
@@ -214,7 +231,7 @@ int test_decimal_to_hex_to_decimal_loop(void)
 	return failures;
 }
 
-int test_from_hex_to_hex_round_trip(void)
+int test_from_hex_to_hex_round_trip(int verbose)
 {
 	int err, failures;
 	unsigned char bytes_buf[20];
@@ -226,6 +243,7 @@ int test_from_hex_to_hex_round_trip(void)
 	a_bigint.bytes = bytes_buf;
 	a_bigint.bytes_len = 20;
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	err =
@@ -238,7 +256,8 @@ int test_from_hex_to_hex_round_trip(void)
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_hex(&a_bigint, expected_str);
+	failures +=
+	    check_ehbigint_hex(&a_bigint, expected_str, __LINE__, TEST_FUNC);
 
 	if (failures) {
 		LOG_ERROR1("%d failures in test_string_round_trip\n", failures);
@@ -247,7 +266,7 @@ int test_from_hex_to_hex_round_trip(void)
 	return failures;
 }
 
-int test_from_decimal_to_decimal_round_trip(void)
+int test_from_decimal_to_decimal_round_trip(int verbose)
 {
 	int err, failures;
 	unsigned char bytes_buf[20];
@@ -260,6 +279,7 @@ int test_from_decimal_to_decimal_round_trip(void)
 	a_bigint.bytes = bytes_buf;
 	a_bigint.bytes_len = 20;
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	err =
@@ -289,7 +309,7 @@ int test_from_decimal_to_decimal_round_trip(void)
 	return failures;
 }
 
-int test_add(void)
+int test_add(int verbose)
 {
 	int err, failures;
 	unsigned char bytes_buf1[20];
@@ -302,6 +322,7 @@ int test_add(void)
 	const char *str_2 = "0x32000020000000000A";
 	const char *str_3 = "0x01240001100000000014";
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	bi1.bytes = bytes_buf1;
@@ -328,7 +349,7 @@ int test_add(void)
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_hex(&bi3, str_3);
+	failures += check_ehbigint_hex(&bi3, str_3, __LINE__, TEST_FUNC);
 
 	if (failures) {
 		LOG_ERROR1("%d failures in test_add\n", failures);
@@ -337,7 +358,7 @@ int test_add(void)
 	return failures;
 }
 
-int test_inc(void)
+int test_inc(int verbose)
 {
 	int err, failures;
 	unsigned char bytes_buf1[20];
@@ -349,6 +370,7 @@ int test_inc(void)
 	const char *str_2 = "0x00100000100000000001";
 	const char *str_3 = "0x01000001000000000002";
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	bi1.bytes = bytes_buf1;
@@ -372,7 +394,7 @@ int test_inc(void)
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_hex(&bi1, str_3);
+	failures += check_ehbigint_hex(&bi1, str_3, __LINE__, TEST_FUNC);
 
 	if (failures) {
 		LOG_ERROR1("%d failures in test_inc\n", failures);
@@ -390,7 +412,7 @@ int test_inc(void)
 		LOG_ERROR("Aborting test\n");
 		return (1 + failures);
 	}
-	failures += check_ehbigint_dec(&bi1, "3163531728");
+	failures += check_ehbigint_dec(&bi1, "3163531728", __LINE__, TEST_FUNC);
 
 	err = ehbi_set_ul(&bi1, 254);
 	err += ehbi_set_ul(&bi2, 1);
@@ -400,12 +422,12 @@ int test_inc(void)
 		LOG_ERROR("Aborting test\n");
 		return (1 + failures);
 	}
-	failures += check_ehbigint_dec(&bi1, "255");
+	failures += check_ehbigint_dec(&bi1, "255", __LINE__, TEST_FUNC);
 
 	return failures;
 }
 
-int test_dec(void)
+int test_dec(int verbose)
 {
 	int err, failures;
 	unsigned char bytes_buf1[20];
@@ -417,6 +439,7 @@ int test_dec(void)
 	const char *str_2 = "0x100000100000000001";
 	const char *str_3 = "0x600001F00000000000";
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	bi1.bytes = bytes_buf1;
@@ -440,7 +463,7 @@ int test_dec(void)
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_hex(&bi1, str_3);
+	failures += check_ehbigint_hex(&bi1, str_3, __LINE__, TEST_FUNC);
 
 	if (failures) {
 		LOG_ERROR1("%d failures in test_inc\n", failures);
@@ -449,7 +472,7 @@ int test_dec(void)
 	return failures;
 }
 
-int test_inc_ul(void)
+int test_inc_ul(int verbose)
 {
 	int err, failures;
 	unsigned char bytes_buf1[20];
@@ -458,6 +481,7 @@ int test_inc_ul(void)
 	const char *str_1 = "0x700000000000000001";
 	const char *str_3 = "0x700000000100000000";
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	bi1.bytes = bytes_buf1;
@@ -477,7 +501,7 @@ int test_inc_ul(void)
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_hex(&bi1, str_3);
+	failures += check_ehbigint_hex(&bi1, str_3, __LINE__, TEST_FUNC);
 
 	if (failures) {
 		LOG_ERROR1("%d failures in test_inc_ul\n", failures);
@@ -486,7 +510,7 @@ int test_inc_ul(void)
 	return failures;
 }
 
-int test_equals(void)
+int test_equals(int verbose)
 {
 	int err, failures, result;
 	unsigned char bytes_buf1[20];
@@ -498,6 +522,7 @@ int test_equals(void)
 	const char *str_2 = "0x720000F";
 	const char *str_3 = "0x0F";
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	bi1.bytes = bytes_buf1;
@@ -549,7 +574,7 @@ int test_equals(void)
 	return failures;
 }
 
-int test_compare(void)
+int test_compare(int verbose)
 {
 	int err, failures, result;
 	unsigned char bytes_buf1[20];
@@ -561,6 +586,7 @@ int test_compare(void)
 	const char *str_2 = "0x6F000000000";
 	const char *str_3 = "0x7F";
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	bi1.bytes = bytes_buf1;
@@ -698,7 +724,7 @@ int test_compare(void)
 	return failures;
 }
 
-int test_compare2(void)
+int test_compare2(int verbose)
 {
 	int err, failures, result;
 	unsigned char bytes_buf1[20];
@@ -708,6 +734,7 @@ int test_compare2(void)
 	const char *str_1 = "0x00F513";
 	const char *str_2 = "0x00023B";
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	bi1.bytes = bytes_buf1;
@@ -779,7 +806,7 @@ int test_compare2(void)
 	return failures;
 }
 
-int test_subtract(void)
+int test_subtract(int verbose)
 {
 	int err, failures;
 	unsigned char bytes_buf1[20];
@@ -794,6 +821,7 @@ int test_subtract(void)
 
 	const char *str_4 = "0xF3FFEFF300002201FE00";
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	bi1.bytes = bytes_buf1;
@@ -820,7 +848,7 @@ int test_subtract(void)
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_hex(&bi3, str_3);
+	failures += check_ehbigint_hex(&bi3, str_3, __LINE__, TEST_FUNC);
 
 	err = ehbi_subtract(&bi3, &bi2, &bi1);
 	if (err) {
@@ -829,7 +857,7 @@ int test_subtract(void)
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_hex(&bi3, str_4);
+	failures += check_ehbigint_hex(&bi3, str_4, __LINE__, TEST_FUNC);
 
 	if (failures) {
 		LOG_ERROR1("%d failures in test_subtract\n", failures);
@@ -838,14 +866,14 @@ int test_subtract(void)
 	return failures;
 }
 
-int test_div(void)
+int test_div(int verbose)
 {
 	int err, failures;
 
-	int inumerator = 287713;
-	int idenominator = 571;
-	int iquotient = 503;
-	int iremainder = 500;
+	unsigned long ulnumerator = 287713;
+	unsigned long uldenominator = 571;
+	unsigned long uliquotient = 503;
+	unsigned long ulremainder = 500;
 
 	unsigned char bytes_numerator[10];
 	unsigned char bytes_denominator[10];
@@ -861,6 +889,7 @@ int test_div(void)
 	char expected[BUFLEN];
 	char *str;
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	numerator.bytes = bytes_numerator;
@@ -879,18 +908,35 @@ int test_div(void)
 	remainder.bytes_len = 10;
 	remainder.bytes_used = 0;
 
-	sprintf(as_string, "0x%04X", inumerator);
-	err = ehbi_from_hex_string(&numerator, as_string, strlen(as_string));
+	sprintf(as_string, "%lu", ulnumerator);
+	err =
+	    ehbi_from_decimal_string(&numerator, as_string, strlen(as_string));
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
 		LOG_ERROR("Aborting test\n");
 		return (1 + failures);
 	}
+	failures +=
+	    check_ehbigint_dec(&numerator, as_string, __LINE__, TEST_FUNC);
+	if (failures) {
+		LOG_ERROR1("round trip failed %lu\n", ulnumerator);
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
+	}
 
-	sprintf(as_string, "0x%04X", idenominator);
-	err = ehbi_from_hex_string(&denominator, as_string, strlen(as_string));
+	sprintf(as_string, "%lu", uldenominator);
+	err =
+	    ehbi_from_decimal_string(&denominator, as_string,
+				     strlen(as_string));
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
+	}
+	failures +=
+	    check_ehbigint_dec(&denominator, as_string, __LINE__, TEST_FUNC);
+	if (failures) {
+		LOG_ERROR1("round trip failed %lu\n", uldenominator);
 		LOG_ERROR("Aborting test\n");
 		return (1 + failures);
 	}
@@ -902,11 +948,13 @@ int test_div(void)
 		return (1 + failures);
 	}
 
-	sprintf(expected, "0x%04X", iquotient);
-	failures += check_ehbigint_hex(&quotient, expected);
+	sprintf(expected, "%lu", uliquotient);
+	failures +=
+	    check_ehbigint_dec(&quotient, expected, __LINE__, TEST_FUNC);
 
-	sprintf(expected, "0x%04X", iremainder);
-	failures += check_ehbigint_hex(&remainder, expected);
+	sprintf(expected, "%lu", ulremainder);
+	failures +=
+	    check_ehbigint_dec(&remainder, expected, __LINE__, TEST_FUNC);
 
 	/*
 	   lldiv_t result = lldiv(5088824049625,33554393);
@@ -931,8 +979,10 @@ int test_div(void)
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_dec(&quotient, "151658");
-	failures += check_ehbigint_dec(&remainder, "31916031");
+	failures +=
+	    check_ehbigint_dec(&quotient, "151658", __LINE__, TEST_FUNC);
+	failures +=
+	    check_ehbigint_dec(&remainder, "31916031", __LINE__, TEST_FUNC);
 
 	if (failures) {
 		LOG_ERROR1("%d failures in test_div\n", failures);
@@ -941,7 +991,7 @@ int test_div(void)
 	return failures;
 }
 
-int test_set()
+int test_set(int verbose)
 {
 	int err, failures;
 
@@ -952,6 +1002,7 @@ int test_set()
 	unsigned char b_bytes[10];
 	struct ehbigint b_bigint;
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	a_bigint.bytes = a_bytes;
@@ -968,7 +1019,7 @@ int test_set()
 		LOG_ERROR("Aborting test\n");
 		return (1 + failures);
 	}
-	failures += check_ehbigint_hex(&a_bigint, "0x03");
+	failures += check_ehbigint_hex(&a_bigint, "0x03", __LINE__, TEST_FUNC);
 
 	err = ehbi_set(&b_bigint, &a_bigint);
 	if (err) {
@@ -976,7 +1027,7 @@ int test_set()
 		LOG_ERROR("Aborting test\n");
 		return (1 + failures);
 	}
-	failures += check_ehbigint_hex(&b_bigint, "0x03");
+	failures += check_ehbigint_hex(&b_bigint, "0x03", __LINE__, TEST_FUNC);
 
 	if (failures) {
 		LOG_ERROR1("%d failures in test_set\n", failures);
@@ -985,7 +1036,7 @@ int test_set()
 	return failures;
 }
 
-int test_mul()
+int test_mul(int verbose)
 {
 	/*
 	   $ bc <<< "9415273 * 252533"
@@ -993,15 +1044,20 @@ int test_mul()
 	 */
 	int err, failures;
 
+	unsigned long aul;
 	unsigned char a_bytes[16];
 	struct ehbigint a_bigint;
 
+	unsigned long bul;
 	unsigned char b_bytes[16];
 	struct ehbigint b_bigint;
 
 	unsigned char result_bytes[16];
 	struct ehbigint result;
 
+	char buf[80];
+
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	a_bigint.bytes = a_bytes;
@@ -1012,25 +1068,46 @@ int test_mul()
 	b_bigint.bytes_len = 16;
 	b_bigint.bytes_used = 0;
 
-	err = ehbi_set_ul(&a_bigint, 9415273);
+	aul = 9415273;
+	sprintf(buf, "%lu", aul);
+	err = ehbi_set_ul(&a_bigint, aul);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_set_ul\n", err);
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
+	}
+	failures += check_ehbigint_dec(&a_bigint, buf, __LINE__, TEST_FUNC);
+	if (failures) {
+		LOG_ERROR1("assign failed %s\n", buf);
 		LOG_ERROR("Aborting test\n");
 		return (1 + failures);
 	}
 
-	err = ehbi_set_ul(&b_bigint, 252533);
+	bul = 252533;
+	sprintf(buf, "%lu", bul);
+	err = ehbi_set_ul(&b_bigint, bul);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_set_ul\n", err);
 		LOG_ERROR("Aborting test\n");
 		return (1 + failures);
 	}
+	failures += check_ehbigint_dec(&b_bigint, buf, __LINE__, TEST_FUNC);
+	if (failures) {
+		LOG_ERROR1("assign failed %s\n", buf);
+		LOG_ERROR("Aborting test\n");
+		return (1 + failures);
+	}
+
 
 	result.bytes = result_bytes;
 	result.bytes_len = 16;
 	err = ehbi_mul(&result, &a_bigint, &b_bigint);
+	if (err) {
+		LOG_ERROR1("error %d from ehbi_mul\n", err);
+	}
 
-	failures += check_ehbigint_dec(&result, "2377667136509");
+	failures +=
+	    check_ehbigint_dec(&result, "2377667136509", __LINE__, TEST_FUNC);
 
 	if (failures) {
 		LOG_ERROR1("%d failures in test_mul\n", failures);
@@ -1039,7 +1116,7 @@ int test_mul()
 	return failures;
 }
 
-int test_scenario_mul_mod(void)
+int test_scenario_mul_mod(int verbose)
 {
 	int err, failures;
 	struct ehbigint bx, by, bz, bresult, bquot, brem;
@@ -1047,6 +1124,7 @@ int test_scenario_mul_mod(void)
 	unsigned char xb[16], yb[16], zb[16], resb[16], quotb[16], remb[16];
 	char *expect_mul;
 
+	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	bx.bytes = xb;
@@ -1099,11 +1177,12 @@ int test_scenario_mul_mod(void)
 	expect_mul = "5088824049625";
 	err = ehbi_mul(&bresult, &bx, &by);
 	if (err) {
-		LOG_ERROR3("ehbi_mul (%lu * %lu) error: %d\n", x, y, err);
+		LOG_ERROR3("ehbi_mul (%lu * %lu), error: %d\n", x, y, err);
 		LOG_ERROR("Aborting test\n");
 		return (1 + failures);
 	}
-	failures += check_ehbigint_dec(&bresult, expect_mul);
+	failures +=
+	    check_ehbigint_dec(&bresult, expect_mul, __LINE__, TEST_FUNC);
 
 	/*
 	   r = lldiv(5088824049625, 33554393);
@@ -1114,11 +1193,11 @@ int test_scenario_mul_mod(void)
 		LOG_ERROR3("ehbi_div: (%s/%lu) error: %d\n", expect_mul, z,
 			   err);
 	}
-	if (brem.bytes_used > sizeof(unsigned long)) {
+	if (brem.bytes_used > (1 + sizeof(unsigned long))) {
 		LOG_ERROR2
 		    ("brem.bytes_used > sizeof(unsigned long)(%lu > %lu)\n",
 		     (unsigned long)brem.bytes_used,
-		     (unsigned long)sizeof(unsigned long));
+		     (unsigned long)(1 + sizeof(unsigned long)));
 		failures += 1;
 	}
 
@@ -1147,33 +1226,31 @@ int test_scenario_mul_mod(void)
 
 int main(int argc, char **argv)
 {
-	int run_known_failing_tests;
-	int failures;
+	int v, failures;
 
-	run_known_failing_tests = (argc > 1) ? atoi(argv[1]) : 0;
+	v = (argc > 1) ? atoi(argv[1]) : 0;
+
+	VERBOSE_ANNOUNCE(v);
 	failures = 0;
 
-	failures += test_to_string();
-	failures += test_decimal_to_hex();
-	failures += test_hex_to_decimal();
-	failures += test_decimal_to_hex_to_decimal_loop();
-	failures += test_from_hex_to_hex_round_trip();
-	failures += test_from_decimal_to_decimal_round_trip();
-	failures += test_add();
-	failures += test_inc();
-	failures += test_inc_ul();
-	failures += test_equals();
-	failures += test_compare();
-	failures += test_compare2();
-	failures += test_subtract();
-	failures += test_dec();
-	failures += test_div();
-	failures += test_set();
-	failures += test_mul();
-
-	if (run_known_failing_tests) {
-		failures += test_scenario_mul_mod();
-	}
+	failures += test_decimal_to_hex(v);
+	failures += test_hex_to_decimal(v);
+	failures += test_decimal_to_hex_to_decimal_loop(v);
+	failures += test_to_string(v);
+	failures += test_from_hex_to_hex_round_trip(v);
+	failures += test_from_decimal_to_decimal_round_trip(v);
+	failures += test_add(v);
+	failures += test_inc(v);
+	failures += test_inc_ul(v);
+	failures += test_equals(v);
+	failures += test_compare(v);
+	failures += test_compare2(v);
+	failures += test_subtract(v);
+	failures += test_dec(v);
+	failures += test_set(v);
+	failures += test_mul(v);
+	failures += test_div(v);
+	failures += test_scenario_mul_mod(v);
 
 	if (failures) {
 		LOG_ERROR1("%d failures in total\n", failures);

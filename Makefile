@@ -40,10 +40,10 @@ CSTD_CFLAGS=-std=c89 -DEHBI_ENSURE_POSIX=1
 #CSTD_CFLAGS=-std=c11
 
 ifeq ("$(DEBUG)", "")
-RUN_PROBLEM_TESTS=0
+VERBOSE_ANNOUNCE=0
 DEBUG_CFLAGS=-ggdb -O3
 else
-RUN_PROBLEM_TESTS=1
+VERBOSE_ANNOUNCE=1
 DEBUG_CFLAGS=-ggdb -O0
 endif
 
@@ -81,6 +81,8 @@ default: $(OUT)
 .c.o:
 	$(CC) -c -fPIC $(CFLAGS) $< -o $@
 
+all: $(OUT) $(TEST_OUT) demo
+
 $(SO_NAME): $(LIB_OBJ)
 	$(CC) $(SHAREDFLAGS) -o $(SO_NAME).1.0 $(SO_OBJS)
 	ln -sf ./$(SO_NAME).1.0 ./$(SO_NAME).1
@@ -107,7 +109,7 @@ demo: $(OUT)
 	./$(OUT) 132904811234120000312412 + 123412413132500
 
 check: $(TEST_OUT)
-	./$(TEST_OUT)-static $(RUN_PROBLEM_TESTS)
+	./$(TEST_OUT)-static $(VERBOSE_ANNOUNCE)
 	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) ./$(TEST_OUT)-dynamic
 	@echo "Success."
 

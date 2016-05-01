@@ -10,6 +10,22 @@
 #include <string.h>
 #include <execinfo.h>
 #include <alloca.h>
+#include <stdarg.h>
+
+int ehbi_debug_log_level = 0;
+
+int debugf(int level, const char *fmt, ...)
+{
+	va_list ap;
+	int r;
+	if (ehbi_debug_log_level >= level) {
+		va_start(ap, fmt);
+		r = vfprintf(stderr, fmt, ap);
+		va_end(ap);
+		return r;
+	}
+	return 0;
+}
 
 static int nibble_to_hex(unsigned char nibble, char *c)
 {
@@ -142,8 +158,9 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 	}
 
 	/* let's just zero out the rest of the bytes, for easier debug */
+	high = ((i < bi->bytes_len) && (bi->bytes[i] > 0x7F)) ? 0xFF : 0x00;
 	while (i-- > 0) {
-		bi->bytes[i] = (bi->bytes[i + 1] > 0x7F) ? 0xFF : 0;
+		bi->bytes[i] = high;
 	}
 
 	return EHBI_SUCCESS;
@@ -169,15 +186,43 @@ int ehbi_from_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 	return ehbi_from_hex_string(bi, hex, size);
 }
 
+static int ehbi_zero(struct ehbigint *bi)
+{
+	size_t i;
+	if (bi == 0) {
+		EHBI_LOG_ERROR0("Null struct");
+		return EHBI_NULL_STRUCT;
+	}
+	if (bi->bytes == 0) {
+		EHBI_LOG_ERROR0("Null bytes[]");
+		return EHBI_NULL_BYTES;
+	}
+
+	for (i = 0; i < bi->bytes_len; ++i) {
+		bi->bytes[i] = 0x00;
+	}
+	bi->bytes_used = 1;
+
+	return EHBI_SUCCESS;
+}
+
 int ehbi_set_ul(struct ehbigint *bi, unsigned long val)
 {
-	bi->bytes_used = 0;
+	int err;
+	err = ehbi_zero(bi);
+	if (err) {
+		return err;
+	}
 	return ehbi_inc_ul(bi, val);
 }
 
 int ehbi_set(struct ehbigint *bi, struct ehbigint *val)
 {
-	bi->bytes_used = 0;
+	int err;
+	err = ehbi_zero(bi);
+	if (err) {
+		return err;
+	}
 	return ehbi_inc(bi, val);
 }
 
@@ -310,8 +355,8 @@ int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 	size_t size;
 	int err;
 	struct ehbigint bidx, *t1, zero, one;
-	unsigned char zero_bytes[sizeof(unsigned long)];
-	unsigned char one_bytes[sizeof(unsigned long)];
+	unsigned char zero_bytes[2];
+	unsigned char one_bytes[2];
 	unsigned char *bi_bytes;
 
 	if (res == 0 || bi1 == 0 || bi2 == 0) {
@@ -329,15 +374,19 @@ int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 	}
 
 	zero.bytes = zero_bytes;
-	zero.bytes_len = sizeof(unsigned long);
-	err = ehbi_set_ul(&zero, 0);
+	zero.bytes_len = 2;
+	err = ehbi_zero(&zero);
 	if (err) {
 		return err;
 	}
 
 	one.bytes = one_bytes;
-	one.bytes_len = sizeof(unsigned long);
-	err = ehbi_set_ul(&one, 1);
+	one.bytes_len = 2;
+	err = ehbi_zero(&one);
+	if (err) {
+		return err;
+	}
+	err = ehbi_inc_ul(&one, 1);
 	if (err) {
 		return err;
 	}
@@ -582,7 +631,11 @@ int ehbi_subtract(struct ehbigint *res, struct ehbigint *bi1,
 		} else {
 			a = bi1->bytes[bi1->bytes_len - i];
 		}
-		b = (bi2->bytes_used < i) ? 0 : bi2->bytes[bi2->bytes_len - i];
+		if ((bi2->bytes_used < i) || (i > bi2->bytes_len)) {
+			b = 0;
+		} else {
+			b = bi2->bytes[bi2->bytes_len - i];
+		}
 		c = c + (a - b);
 
 		if (i > res->bytes_len) {
@@ -609,10 +662,24 @@ int ehbi_subtract(struct ehbigint *res, struct ehbigint *bi1,
 	return EHBI_SUCCESS;
 }
 
+int ehbi_is_negative(struct ehbigint *bi)
+{
+	if (bi == NULL || bi->bytes_used == 0) {
+		return 0;
+	}
+
+	if (bi->bytes[0] > 0x7F) {
+		return 1;
+	}
+
+	return 0;
+}
+
 int ehbi_compare(struct ehbigint *bi1, struct ehbigint *bi2, int *err)
 {
 	size_t i;
 	unsigned char a, b;
+	int b1_pos, b2_pos;
 
 	if (bi1 == 0 || bi2 == 0 || err == 0) {
 		EHBI_LOG_ERROR0("Null argument(s)");
@@ -623,19 +690,27 @@ int ehbi_compare(struct ehbigint *bi1, struct ehbigint *bi2, int *err)
 	}
 
 	*err = EHBI_SUCCESS;
+
+	b1_pos = !ehbi_is_negative(bi1);
+	b2_pos = !ehbi_is_negative(bi2);
+
+	if (b1_pos != b2_pos) {
+		return b1_pos ? 1 : -1;
+	}
+
 	if (bi1->bytes_used > bi2->bytes_used) {
-		return 1;
+		return b1_pos ? 1 : -1;
 	} else if (bi1->bytes_used < bi2->bytes_used) {
-		return -1;
+		return b1_pos ? -1 : 1;
 	}
 
 	for (i = 0; i < bi1->bytes_used; ++i) {
 		a = bi1->bytes[(bi1->bytes_len - bi1->bytes_used) + i];
 		b = bi2->bytes[(bi2->bytes_len - bi2->bytes_used) + i];
 		if (a > b) {
-			return 1;
+			return b1_pos ? 1 : -1;
 		} else if (a < b) {
-			return -1;
+			return b1_pos ? -1 : 1;
 		}
 	}
 	return 0;

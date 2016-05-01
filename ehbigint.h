@@ -102,6 +102,12 @@ int ehbi_subtract(struct ehbigint *res, struct ehbigint *bi1,
 int ehbi_equals(struct ehbigint *bi1, struct ehbigint *bi2, int *err);
 
 /*
+   returns 1 if the high used byte is greather than 7F
+   returns 0 otherwise
+*/
+int ehbi_is_negative(struct ehbigint *bi);
+
+/*
    returns 1 if the first parameter is less than the second
    returns 0 otherwise
    populates the contents of err with 0 on success or error_code on error
@@ -190,6 +196,14 @@ void ehbi_log_backtrace(FILE *log);
 #define EHBI_LOG_ERROR2(format, arg1, arg2) \
  fprintf(EHBI_LOG_FILE, "%s:%d: ", __FILE__, __LINE__); \
  fprintf(EHBI_LOG_FILE, format, arg1, arg2); \
+ fprintf(EHBI_LOG_FILE, "\n"); \
+ ehbi_log_backtrace(EHBI_LOG_FILE)
+#endif
+
+#ifndef EHBI_LOG_ERROR3
+#define EHBI_LOG_ERROR3(format, arg1, arg2, arg3) \
+ fprintf(EHBI_LOG_FILE, "%s:%d: ", __FILE__, __LINE__); \
+ fprintf(EHBI_LOG_FILE, format, arg1, arg2, arg3); \
  fprintf(EHBI_LOG_FILE, "\n"); \
  ehbi_log_backtrace(EHBI_LOG_FILE)
 #endif

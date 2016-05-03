@@ -1098,7 +1098,6 @@ int test_mul(int verbose)
 		return (1 + failures);
 	}
 
-
 	result.bytes = result_bytes;
 	result.bytes_len = 16;
 	err = ehbi_mul(&result, &a_bigint, &b_bigint);

@@ -39,6 +39,12 @@ OBJ=$(OUT).o
 CSTD_CFLAGS=-std=c89 -DEHBI_ENSURE_POSIX=1
 #CSTD_CFLAGS=-std=c11
 
+ifeq ("$(NOALLOCA)", "")
+ALLOCA_FLAGS=
+else
+ALLOCA_FLAGS=-DEHBI_NO_ALLOCA=1
+endif
+
 ifeq ("$(DEBUG)", "")
 VERBOSE_ANNOUNCE=0
 DEBUG_CFLAGS=-ggdb -O3
@@ -49,7 +55,7 @@ endif
 
 NOISY_CFLAGS=-Wall -Wextra -pedantic -Werror
 
-CFLAGS += $(CSTD_CFLAGS) $(DEBUG_CFLAGS) $(NOISY_CFLAGS)
+CFLAGS += $(CSTD_CFLAGS) $(DEBUG_CFLAGS) $(NOISY_CFLAGS) $(ALLOCA_FLAGS)
 LDFLAGS += -L. -l$(LIB_NAME) -rdynamic
 CC=gcc
 

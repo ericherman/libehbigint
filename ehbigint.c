@@ -9,8 +9,35 @@
 
 #include <string.h>
 #include <execinfo.h>
-#include <alloca.h>
 #include <stdarg.h>
+
+#ifdef EHBI_NO_ALLOCA
+static void ehbi_do_stack_free(void *ptr, size_t size)
+{
+	if (size == 0) {
+		EHBI_LOG_ERROR2("size is 0? (%p, %lu)\n", ptr,
+				(unsigned long)size);
+	}
+	free(ptr);
+}
+
+#define ehbi_stack_alloc malloc
+#define ehbi_stack_alloc_str "malloc"
+#define ehbi_stack_free ehbi_do_stack_free
+#else
+#include <alloca.h>
+static void ehbi_no_stack_free(void *ptr, size_t size)
+{
+	if (size == 0) {
+		EHBI_LOG_ERROR2("size is 0? (%p, %lu)\n", ptr,
+				(unsigned long)size);
+	}
+}
+
+#define ehbi_stack_alloc alloca
+#define ehbi_stack_alloc_str "alloca"
+#define ehbi_stack_free ehbi_no_stack_free
+#endif
 
 int ehbi_debug_log_level = 0;
 
@@ -173,9 +200,9 @@ int ehbi_from_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 	int err;
 
 	size = strlen("0x00") + len + 1;
-	hex = alloca(size);
+	hex = ehbi_stack_alloc(size);
 	if (!hex) {
-		EHBI_LOG_ERROR1("Could not alloca(%lu) bytes on stack",
+		EHBI_LOG_ERROR2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
 				(unsigned long)size);
 		return EHBI_STACK_TOO_SMALL;
 	}
@@ -183,7 +210,9 @@ int ehbi_from_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 	if (err) {
 		return err;
 	}
-	return ehbi_from_hex_string(bi, hex, size);
+	err = ehbi_from_hex_string(bi, hex, size);
+	ehbi_stack_free(hex, size);
+	return err;
 }
 
 static int ehbi_zero(struct ehbigint *bi)
@@ -284,9 +313,9 @@ int ehbi_to_decimal_string(struct ehbigint *bi, char *buf, size_t len)
 	int err;
 
 	size = strlen("0x00") + (2 * bi->bytes_used) + 1;
-	hex = alloca(size);
+	hex = ehbi_stack_alloc(size);
 	if (!hex) {
-		EHBI_LOG_ERROR1("Could not alloca(%lu) bytes on stack",
+		EHBI_LOG_ERROR2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
 				(unsigned long)size);
 		return EHBI_STACK_TOO_SMALL;
 	}
@@ -294,7 +323,9 @@ int ehbi_to_decimal_string(struct ehbigint *bi, char *buf, size_t len)
 	if (err) {
 		return err;
 	}
-	return ehbi_hex_to_decimal(hex, size, buf, len);
+	err = ehbi_hex_to_decimal(hex, size, buf, len);
+	ehbi_stack_free(hex, size);
+	return err;
 }
 
 int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
@@ -397,9 +428,9 @@ int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 	}
 
 	size = bi2->bytes_used;
-	bi_bytes = alloca(size);
+	bi_bytes = ehbi_stack_alloc(size);
 	if (!bi_bytes) {
-		EHBI_LOG_ERROR1("Could not alloca(%lu) bytes on stack",
+		EHBI_LOG_ERROR2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
 				(unsigned long)size);
 		return EHBI_STACK_TOO_SMALL;
 	}
@@ -423,6 +454,7 @@ int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 			return err;
 		}
 	}
+	ehbi_stack_free(bi_bytes, size);
 	return err;
 }
 

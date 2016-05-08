@@ -8,6 +8,11 @@ struct ehbigint {
 	unsigned char *bytes;
 	size_t bytes_len;
 	size_t bytes_used;
+#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
+	char *dec_str;
+	size_t dec_str_len;
+	unsigned char dec_str_ok;
+#endif
 };
 
 /*

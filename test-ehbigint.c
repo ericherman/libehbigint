@@ -3,6 +3,7 @@
 #include <echeck.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <gmp.h>
 
 #include "ehbigint.h"
 
@@ -1109,11 +1110,154 @@ int test_scenario_mul_mod(int verbose)
 	return failures;
 }
 
+#define BILEN 10
+int test_compare_with_gmp(int verbose, int max_iterations)
+{
+	int failures, i;
+	char ebuf[80];
+	char gbuf[80];
+	char *in_str;
+	struct ehbigint in, mul, res, mod, quot, rem;
+	unsigned char in_bytes[BILEN], mul_bytes[BILEN], res_bytes[BILEN];
+	unsigned char mod_bytes[BILEN], quot_bytes[BILEN], rem_bytes[BILEN];
+
+	mpz_t gin, gmul, gres, gmod, gquot, grem;
+
+	VERBOSE_ANNOUNCE(verbose);
+
+	failures = 0;
+
+	in.bytes = in_bytes;
+	mul.bytes = mul_bytes;
+	res.bytes = res_bytes;
+	mod.bytes = mod_bytes;
+	quot.bytes = quot_bytes;
+	rem.bytes = rem_bytes;
+
+	in.bytes_len = BILEN;
+	mul.bytes_len = BILEN;
+	res.bytes_len = BILEN;
+	mod.bytes_len = BILEN;
+	quot.bytes_len = BILEN;
+	rem.bytes_len = BILEN;
+
+	in.bytes_used = 0;
+	mul.bytes_used = 0;
+	res.bytes_used = 0;
+	mod.bytes_used = 0;
+	quot.bytes_used = 0;
+	rem.bytes_used = 0;
+
+	ehbi_set_ul(&in, 0);
+	ehbi_set_ul(&mul, 252533);
+	ehbi_set_ul(&res, 0);
+	ehbi_set_ul(&mod, 33554393);
+	ehbi_set_ul(&quot, 0);
+	ehbi_set_ul(&rem, 0);
+
+	mpz_init(gin);
+	mpz_init(gmul);
+	mpz_set_ui(gmul, 252533);
+	mpz_init(gres);
+	mpz_init(gmod);
+	mpz_set_ui(gmod, 33554393);
+	mpz_init(gquot);
+	mpz_init(grem);
+
+	in_str = "20151125";
+
+	for (i = 1; ((i < max_iterations) && (failures == 0)); ++i) {
+		/* ours */
+		if (verbose) {
+			fprintf(stderr, "%d:%s\n", i, in_str);
+		}
+
+		mpz_set_str(gin, in_str, 10);
+		ehbi_from_decimal_string(&in, in_str, strlen(in_str));
+
+		mpz_get_str(gbuf, 10, gin);
+		ehbi_to_decimal_string(&in, ebuf, 80);
+		failures += check_str_m(ebuf, gbuf, "from_decimal_string");
+
+		mpz_mul(gres, gin, gmul);
+		ehbi_mul(&res, &in, &mul);
+
+		mpz_get_str(gbuf, 10, gres);
+		ehbi_to_decimal_string(&res, ebuf, 80);
+		failures += check_str_m(ebuf, gbuf, "ehbi_mul");
+
+		mpz_tdiv_qr(gquot, grem, gres, gmod);
+		ehbi_div(&quot, &rem, &res, &mod);
+
+		mpz_get_str(gbuf, 10, gquot);
+		ehbi_to_decimal_string(&quot, ebuf, 80);
+		failures += check_str_m(ebuf, gbuf, "ehbi_div (quot)");
+		mpz_get_str(gbuf, 10, grem);
+		ehbi_to_decimal_string(&rem, ebuf, 80);
+		failures += check_str_m(ebuf, gbuf, "ehbi_div (rem)");
+
+		mpz_get_str(gbuf, 10, grem);
+
+		failures += check_str(gbuf, ebuf);
+		if (failures) {
+			LOG_ERROR2("iteration %d: in_str: %s\n", i, in_str);
+
+			mpz_get_str(gbuf, 10, gin);
+			ehbi_to_decimal_string(&in, ebuf, 80);
+			LOG_ERROR1("\t in: %s\n", ebuf);
+			LOG_ERROR1("\tgin: %s\n", gbuf);
+
+			mpz_get_str(gbuf, 10, gmul);
+			ehbi_to_decimal_string(&mul, ebuf, 80);
+			LOG_ERROR1("\t mul: %s\n", ebuf);
+			LOG_ERROR1("\tgmul: %s\n", gbuf);
+
+			mpz_get_str(gbuf, 10, gres);
+			ehbi_to_decimal_string(&res, ebuf, 80);
+			LOG_ERROR1("\t res: %s\n", ebuf);
+			LOG_ERROR1("\tgres: %s\n", gbuf);
+
+			mpz_get_str(gbuf, 10, gmod);
+			ehbi_to_decimal_string(&mod, ebuf, 80);
+			LOG_ERROR1("\t mod: %s\n", ebuf);
+			LOG_ERROR1("\tgmod: %s\n", gbuf);
+
+			mpz_get_str(gbuf, 10, gquot);
+			ehbi_to_decimal_string(&quot, ebuf, 80);
+			LOG_ERROR1("\t quot: %s\n", ebuf);
+			LOG_ERROR1("\tgquot: %s\n", gbuf);
+
+			mpz_get_str(gbuf, 10, grem);
+			ehbi_to_decimal_string(&rem, ebuf, 80);
+			LOG_ERROR1("\t rem: %s\n", ebuf);
+			LOG_ERROR1("\tgrem: %s\n", gbuf);
+
+			goto mpz_clean_up;
+		}
+		in_str = ebuf;
+	}
+
+mpz_clean_up:
+	mpz_clear(gin);
+	mpz_clear(gmul);
+	mpz_clear(gres);
+	mpz_clear(gmod);
+	mpz_clear(gquot);
+	mpz_clear(grem);
+
+	if (failures) {
+		LOG_ERROR("failure in test_compare_with_gmp\n");
+	}
+
+	return failures;
+}
+
 int main(int argc, char **argv)
 {
-	int v, failures;
+	int v, failures, slow_iterations;
 
 	v = (argc > 1) ? atoi(argv[1]) : 0;
+	slow_iterations = (argc > 2) ? atoi(argv[2]) : 10;
 
 	VERBOSE_ANNOUNCE(v);
 	failures = 0;
@@ -1133,6 +1277,7 @@ int main(int argc, char **argv)
 	failures += test_mul(v);
 	failures += test_div(v);
 	failures += test_scenario_mul_mod(v);
+	failures += test_compare_with_gmp(v, slow_iterations);
 
 	if (failures) {
 		LOG_ERROR1("%d failures in total\n", failures);

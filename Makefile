@@ -65,7 +65,7 @@ NOISY_CFLAGS=-Wall -Wextra -pedantic -Werror
 
 CFLAGS += $(CSTD_CFLAGS) $(DEBUG_CFLAGS) $(NOISY_CFLAGS) $(ALLOCA_FLAGS)
 LDFLAGS += -L. $(EHSTR_LDFLAGS) $(ECHECK_LDFLAGS) -rdynamic
-LDADD += -l$(LIB_NAME) $(EHSTR_LDADD) $(ECHECK_LDADD)
+LDADD += -l$(LIB_NAME) $(EHSTR_LDADD) $(ECHECK_LDADD) -lgmp
 
 CC=gcc
 
@@ -115,7 +115,7 @@ $(TEST_OUT): $(LIB_NAME)
 	$(CC) -c $(INCLUDES) $(ECHECK_INCLUDES) $(CFLAGS) \
 		$(TEST_SRC) -o $(TEST_OBJ)
 	$(CC) $(TEST_OBJ) $(A_NAME) $(A_FILES) $(ECHECK_A_FILES) \
-		-o $(TEST_OUT)-static
+		-o $(TEST_OUT)-static -lgmp
 	$(CC) $(TEST_OBJ) $(LDFLAGS) -o $(TEST_OUT)-dynamic $(LDADD)
 
 $(OUT): $(LIB_NAME)
@@ -126,7 +126,7 @@ demo: $(OUT)
 	./$(OUT) 132904811234120000312412 + 123412413132500
 
 check: $(TEST_OUT)
-	./$(TEST_OUT)-static $(VERBOSE_ANNOUNCE)
+	./$(TEST_OUT)-static $(VERBOSE_ANNOUNCE) $(SLOW_TESTS)
 	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) ./$(TEST_OUT)-dynamic
 	@echo "Success."
 

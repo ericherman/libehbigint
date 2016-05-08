@@ -129,20 +129,6 @@ int ehbi_greater_than(struct ehbigint *bi1, struct ehbigint *bi2, int *err);
 */
 int ehbi_compare(struct ehbigint *bi1, struct ehbigint *bi2, int *err);
 
-/*
-   converts an arbitrarily long string of decimal digits into hex
-   returns 0 on success or error_code on error
-*/
-int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
-			size_t buf_len);
-
-/*
-   converts an arbitrarily long string of hex digits into decimal
-   returns 0 on success or error_code on error
-*/
-int ehbi_hex_to_decimal(const char *hex_str, size_t hex_len, char *buf,
-			size_t buf_len);
-
 /* error codes */
 enum {
 	EHBI_SUCCESS = 0,

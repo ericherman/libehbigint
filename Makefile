@@ -1,10 +1,16 @@
 LIB_NAME=ehbigint
 
-AUX_INCLUDES=-I ../libecheck
-AUX_A_FILES=../libecheck/libecheck.a
-AUX_LDFLAGS=-L../libecheck -lecheck
-AUX_LD_LIBRARY_PATHS=:../libecheck
+EHSTR_INCLUDES=-I ../libehstr
+EHSTR_A_FILES=../libehstr/libehstr.a
+EHSTR_LDFLAGS=-L../libehstr
+EHSTR_LDADD=-lehstr
+EHSTR_LD_LIBRARY_PATHS=:../libehstr
 
+ECHECK_INCLUDES=-I ../libecheck
+ECHECK_A_FILES=../libecheck/libecheck.a
+ECHECK_LDFLAGS=-L../libecheck
+ECHECK_LDADD=-lecheck
+ECHECK_LD_LIBRARY_PATHS=:../libecheck
 
 UNAME := $(shell uname)
 
@@ -27,7 +33,9 @@ endif
 
 A_NAME=lib$(LIB_NAME).a
 
-INCLUDES=-I.
+INCLUDES=-I. $(EHSTR_INCLUDES)
+A_FILES=$(EHSTR_A_FILES)
+
 TEST_OUT=test-$(LIB_NAME)
 TEST_SRC=$(TEST_OUT).c
 TEST_OBJ=$(TEST_OUT).o
@@ -56,7 +64,9 @@ endif
 NOISY_CFLAGS=-Wall -Wextra -pedantic -Werror
 
 CFLAGS += $(CSTD_CFLAGS) $(DEBUG_CFLAGS) $(NOISY_CFLAGS) $(ALLOCA_FLAGS)
-LDFLAGS += -L. -l$(LIB_NAME) -rdynamic
+LDFLAGS += -L. $(EHSTR_LDFLAGS) $(ECHECK_LDFLAGS) -rdynamic
+LDADD += -l$(LIB_NAME) $(EHSTR_LDADD) $(ECHECK_LDADD)
+
 CC=gcc
 
 # extracted from https://github.com/torvalds/linux/blob/master/scripts/Lindent
@@ -79,13 +89,13 @@ ifneq ($(strip $(srcdir)),)
    VPATH::=$(srcdir)
 endif
 
-LD_LIBRARY_PATH=.$(AUX_LD_LIBRARY_PATHS)
+LD_LIBRARY_PATH=.$(EHSTR_LD_LIBRARY_PATHS)$(ECHECK_LD_LIBRARY_PATHS)
 
 #default: $(LIB_NAME)
 default: $(OUT)
 
 .c.o:
-	$(CC) -c -fPIC $(CFLAGS) $< -o $@
+	$(CC) -c $(INCLUDES) -fPIC $(CFLAGS) $< -o $@
 
 all: $(OUT) $(TEST_OUT) demo
 
@@ -102,14 +112,15 @@ $(LIB_NAME): $(SO_NAME) $(A_NAME)
 	@ls -1 $(SO_NAME)* *.a
 
 $(TEST_OUT): $(LIB_NAME)
-	$(CC) -c $(INCLUDES) $(AUX_INCLUDES) $(CFLAGS) \
+	$(CC) -c $(INCLUDES) $(ECHECK_INCLUDES) $(CFLAGS) \
 		$(TEST_SRC) -o $(TEST_OBJ)
-	$(CC) $(TEST_OBJ) $(A_NAME) $(AUX_A_FILES) -o $(TEST_OUT)-static
-	$(CC) $(TEST_OBJ) $(LDFLAGS) $(AUX_LDFLAGS) -o $(TEST_OUT)-dynamic
+	$(CC) $(TEST_OBJ) $(A_NAME) $(A_FILES) $(ECHECK_A_FILES) \
+		-o $(TEST_OUT)-static
+	$(CC) $(TEST_OBJ) $(LDFLAGS) -o $(TEST_OUT)-dynamic $(LDADD)
 
 $(OUT): $(LIB_NAME)
 	$(CC) -c $(INCLUDES) $(CFLAGS) $(SRC) -o $(OBJ)
-	$(CC) $(OBJ) -o $(OUT)
+	$(CC) $(OBJ) $(A_FILES) -o $(OUT)
 
 demo: $(OUT)
 	./$(OUT) 132904811234120000312412 + 123412413132500

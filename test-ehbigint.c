@@ -117,120 +117,6 @@ int test_to_string(int verbose)
 	return failures;
 }
 
-int test_decimal_to_hex(int verbose)
-{
-	int err, failures;
-	char buf[20];
-	const char *str;
-
-	VERBOSE_ANNOUNCE(verbose);
-	failures = 0;
-
-	err = ehbi_decimal_to_hex("275", 3, buf, 20);
-
-	if (err) {
-		LOG_ERROR1("error %d ehbi_decimal_to_hex\n", err);
-		LOG_ERROR("Aborting test\n");
-		return (1 + failures);
-	}
-
-	failures += check_str(buf, "0x0113");
-
-	err = ehbi_decimal_to_hex("65543", 10, buf, 20);
-
-	if (err) {
-		LOG_ERROR1("error %d ehbi_decimal_to_hex\n", err);
-		LOG_ERROR("Aborting test\n");
-		return (1 + failures);
-	}
-
-	failures += check_str(buf, "0x010007");
-
-	str = "5088824049625";
-	err = ehbi_decimal_to_hex(str, strlen(str), buf, 20);
-	if (err) {
-		LOG_ERROR1("error %d ehbi_decimal_to_hex\n", err);
-		LOG_ERROR("Aborting test\n");
-		return (1 + failures);
-	}
-	failures += check_str(buf, "0x04A0D58CBFD9");
-
-	if (failures) {
-		LOG_ERROR1("%d failures in test_decimal_to_hex\n", failures);
-	}
-
-	return failures;
-}
-
-int test_hex_to_decimal(int verbose)
-{
-	int err, failures;
-	char buf[20];
-
-	VERBOSE_ANNOUNCE(verbose);
-	failures = 0;
-
-	err = ehbi_hex_to_decimal("0x113", 5, buf, 20);
-
-	if (err) {
-		LOG_ERROR1("error %d ehbi_hex_to_decimal\n", err);
-		LOG_ERROR("Aborting test\n");
-		return (1 + failures);
-	}
-
-	failures += check_str(buf, "275");
-
-	err = ehbi_hex_to_decimal("0x10007", 10, buf, 20);
-
-	if (err) {
-		LOG_ERROR1("error %d ehbi_hex_to_decimal\n", err);
-		LOG_ERROR("Aborting test\n");
-		return (1 + failures);
-	}
-
-	failures += check_str(buf, "65543");
-
-	if (failures) {
-		LOG_ERROR1("%d failures in test_hex_to_decimal\n", failures);
-	}
-
-	return failures;
-}
-
-int test_decimal_to_hex_to_decimal_loop(int verbose)
-{
-	int failures;
-	int i;
-	char buf[100];
-	char hex[100];
-	char dec[100];
-	char *numv[] = { "1", "10", "275", "65543", "17", "1025", "106" };
-	int numc = 7;
-
-	VERBOSE_ANNOUNCE(verbose);
-	failures = 0;
-
-	for (i = 0; i < numc; ++i) {
-		ehbi_decimal_to_hex(numv[i], strlen(numv[i]), hex, 100);
-		ehbi_hex_to_decimal(hex, 100, dec, 100);
-		failures += check_str(dec, numv[i]);
-	}
-
-	/* lets just do a bunch */
-	for (i = 1; i < 1000001; i += 25) {
-		sprintf(buf, "%d", i);
-		ehbi_decimal_to_hex(buf, strlen(buf), hex, 100);
-		ehbi_hex_to_decimal(hex, 100, dec, 100);
-		failures += check_str(dec, buf);
-	}
-
-	if (failures) {
-		LOG_ERROR1("%d failures in test_hex_to_decimal\n", failures);
-	}
-
-	return failures;
-}
-
 int test_from_hex_to_hex_round_trip(int verbose)
 {
 	int err, failures;
@@ -1232,9 +1118,6 @@ int main(int argc, char **argv)
 	VERBOSE_ANNOUNCE(v);
 	failures = 0;
 
-	failures += test_decimal_to_hex(v);
-	failures += test_hex_to_decimal(v);
-	failures += test_decimal_to_hex_to_decimal_loop(v);
 	failures += test_to_string(v);
 	failures += test_from_hex_to_hex_round_trip(v);
 	failures += test_from_decimal_to_decimal_round_trip(v);

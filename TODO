@@ -1,5 +1,3 @@
-* use the hex_to_decimal and decimal_to_hex functions in libehstr
-
 * compare understands negative numbers, but little else in the library does
   e.g. hex_to_decimal and decimal_to_hex do not understand negative numbers
        (treats as unsigned)

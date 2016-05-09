@@ -46,13 +46,15 @@ int debugf(int level, const char *fmt, ...)
 {
 	va_list ap;
 	int r;
-	if (ehbi_debug_log_level >= level) {
-		va_start(ap, fmt);
-		r = vfprintf(stderr, fmt, ap);
-		va_end(ap);
-		return r;
+
+	if (ehbi_debug_log_level < level) {
+		return 0;
 	}
-	return 0;
+
+	va_start(ap, fmt);
+	r = vfprintf(stderr, fmt, ap);
+	va_end(ap);
+	return r;
 }
 
 static int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
@@ -87,6 +89,55 @@ static int to_hex(unsigned char byte, char *high, char *low)
 	err += nibble_to_hex((byte & 0x0F), low);
 
 	return err;
+}
+
+void ehbi_debug_to_string(int level, struct ehbigint *bi, const char *name)
+{
+	char *buf, h, l;
+	size_t size, i;
+
+	if (ehbi_debug_log_level < level) {
+		return;
+	}
+
+	fprintf(stderr,
+		"%s (%p) => {\n\tbytes => (%p),\n" "\tbytes_len => %lu,\n"
+		"\tbytes_used => %lu,\n", name, (void *)bi,
+		(void *)bi->bytes, (unsigned long)bi->bytes_len,
+		(unsigned long)bi->bytes_used);
+
+	fprintf(stderr, "\tused  => ");
+	for (i = bi->bytes_len; i > 0; --i) {
+		fprintf(stderr, "%s", i > bi->bytes_used ? "XX" : "__");
+	}
+	fprintf(stderr, ",\n");
+
+	fprintf(stderr, "\tbytes => ");
+	for (i = bi->bytes_len; i > 0; --i) {
+		h = '?';
+		l = '?';
+		to_hex(bi->bytes[bi->bytes_len - i], &h, &l);
+		fprintf(stderr, "%c%c", h, l);
+	}
+	fprintf(stderr, ",\n");
+
+	size = 5 + (4 * bi->bytes_used);
+	buf = malloc(size);
+	if (!buf) {
+		fprintf(stderr, "malloc(%lu) failed\n", (unsigned long)size);
+		exit(EXIT_FAILURE);
+	}
+	fprintf(stderr, "\thex => ");
+	for (i = 0; i < (bi->bytes_len - bi->bytes_used); ++i) {
+		fprintf(stderr, "  ");
+	}
+	ehbi_to_hex_string(bi, buf, size);
+	fprintf(stderr, "%s,\n", buf);
+
+	ehbi_to_decimal_string(bi, buf, size);
+	fprintf(stderr, "\tdec => %s,\n", buf);
+
+	fprintf(stderr, "}\n");
 }
 
 static int from_hex_nibble(unsigned char *nibble, char c)

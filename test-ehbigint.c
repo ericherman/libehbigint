@@ -99,9 +99,6 @@ int test_to_string(int verbose)
 
 	unsigned char bytes[4] = { 0x00, 0x01, 0x00, 0x45 };
 	struct ehbigint a_bigint;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str[BUFLEN];
-#endif
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
@@ -109,11 +106,7 @@ int test_to_string(int verbose)
 	a_bigint.bytes = bytes;
 	a_bigint.bytes_len = 4;
 	a_bigint.bytes_used = 3;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	a_bigint.dec_str = dec_str;
-	a_bigint.dec_str_len = BUFLEN;
-	a_bigint.dec_str_ok = 0;
-#endif
+
 	failures +=
 	    check_ehbigint_hex(&a_bigint, "0x010045", __LINE__, TEST_FUNC);
 	failures += check_ehbigint_dec(&a_bigint, "65605", __LINE__, TEST_FUNC);
@@ -134,17 +127,9 @@ int test_from_hex_to_hex_round_trip(int verbose)
 	const char *expected_str = "0x123456789ABCDEF012";
 
 	struct ehbigint a_bigint;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str[BUFLEN];
-#endif
 
 	a_bigint.bytes = bytes_buf;
 	a_bigint.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	a_bigint.dec_str = dec_str;
-	a_bigint.dec_str_len = BUFLEN;
-	a_bigint.dec_str_ok = 0;
-#endif
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
@@ -174,21 +159,15 @@ int test_from_decimal_to_decimal_round_trip(int verbose)
 	int err, failures;
 	unsigned char bytes_buf[20];
 	char as_string[BUFLEN];
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str[BUFLEN];
-#endif
 
 	/*   const char *u64_max =    "18446744073709551615" */
 	const char *expected_str = "12345678901234567890000";
 
 	struct ehbigint a_bigint;
+
 	a_bigint.bytes = bytes_buf;
 	a_bigint.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	a_bigint.dec_str = dec_str;
-	a_bigint.dec_str_len = BUFLEN;
-	a_bigint.dec_str_ok = 0;
-#endif
+
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
@@ -226,11 +205,6 @@ int test_add(int verbose)
 	unsigned char bytes_buf2[20];
 	unsigned char bytes_buf3[20];
 	struct ehbigint bi1, bi2, bi3;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str1[BUFLEN];
-	char dec_str2[BUFLEN];
-	char dec_str3[BUFLEN];
-#endif
 
 	/*  char *u64_max =   "0xFFFFFFFFFFFFFFFF" */
 	const char *str_1 = "0x00F20000F0000000000A";
@@ -242,27 +216,12 @@ int test_add(int verbose)
 
 	bi1.bytes = bytes_buf1;
 	bi1.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi1.dec_str = dec_str1;
-	bi1.dec_str_len = BUFLEN;
-	bi1.dec_str_ok = 0;
-#endif
 
 	bi2.bytes = bytes_buf2;
 	bi2.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi2.dec_str = dec_str2;
-	bi2.dec_str_len = BUFLEN;
-	bi2.dec_str_ok = 0;
-#endif
 
 	bi3.bytes = bytes_buf3;
 	bi3.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi3.dec_str = dec_str3;
-	bi3.dec_str_len = BUFLEN;
-	bi3.dec_str_ok = 0;
-#endif
 
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
@@ -294,10 +253,6 @@ int test_inc(int verbose)
 	unsigned char bytes_buf1[20];
 	unsigned char bytes_buf2[20];
 	struct ehbigint bi1, bi2;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str1[BUFLEN];
-	char dec_str2[BUFLEN];
-#endif
 
 	/*  char *u64_max = "0xFFFFFFFFFFFFFFFF" */
 	const char *str_1 = "0x00F00000F00000000001";
@@ -309,19 +264,9 @@ int test_inc(int verbose)
 
 	bi1.bytes = bytes_buf1;
 	bi1.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi1.dec_str = dec_str1;
-	bi1.dec_str_len = BUFLEN;
-	bi1.dec_str_ok = 0;
-#endif
 
 	bi2.bytes = bytes_buf2;
 	bi2.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi2.dec_str = dec_str2;
-	bi2.dec_str_len = BUFLEN;
-	bi2.dec_str_ok = 0;
-#endif
 
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
@@ -377,9 +322,6 @@ int test_dec(int verbose)
 	unsigned char bytes_buf1[20];
 	unsigned char bytes_buf2[20];
 	struct ehbigint bi1, bi2;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str1[BUFLEN], dec_str2[BUFLEN];
-#endif
 
 	/*  char *u64_max = "0xFFFFFFFFFFFFFFFF" */
 	const char *str_1 = "0x700002000000000001";
@@ -391,19 +333,9 @@ int test_dec(int verbose)
 
 	bi1.bytes = bytes_buf1;
 	bi1.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi1.dec_str = dec_str1;
-	bi1.dec_str_len = BUFLEN;
-	bi1.dec_str_ok = 0;
-#endif
 
 	bi2.bytes = bytes_buf2;
 	bi2.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi2.dec_str = dec_str2;
-	bi2.dec_str_len = BUFLEN;
-	bi2.dec_str_ok = 0;
-#endif
 
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
@@ -434,9 +366,6 @@ int test_inc_ul(int verbose)
 	int err, failures;
 	unsigned char bytes_buf1[20];
 	struct ehbigint bi1;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str1[BUFLEN];
-#endif
 
 	const char *str_1 = "0x700000000000000001";
 	const char *str_3 = "0x700000000100000000";
@@ -446,11 +375,6 @@ int test_inc_ul(int verbose)
 
 	bi1.bytes = bytes_buf1;
 	bi1.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi1.dec_str = dec_str1;
-	bi1.dec_str_len = BUFLEN;
-	bi1.dec_str_ok = 0;
-#endif
 
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	if (err) {
@@ -482,9 +406,6 @@ int test_equals(int verbose)
 	unsigned char bytes_buf2[10];
 	unsigned char bytes_buf3[20];
 	struct ehbigint bi1, bi2, bi3;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str1[BUFLEN], dec_str2[BUFLEN], dec_str3[BUFLEN];
-#endif
 
 	const char *str_1 = "0x720000F";
 	const char *str_2 = "0x720000F";
@@ -495,27 +416,12 @@ int test_equals(int verbose)
 
 	bi1.bytes = bytes_buf1;
 	bi1.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi1.dec_str = dec_str1;
-	bi1.dec_str_len = BUFLEN;
-	bi1.dec_str_ok = 0;
-#endif
 
 	bi2.bytes = bytes_buf2;
 	bi2.bytes_len = 10;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi2.dec_str = dec_str2;
-	bi2.dec_str_len = BUFLEN;
-	bi2.dec_str_ok = 0;
-#endif
 
 	bi3.bytes = bytes_buf3;
 	bi3.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi3.dec_str = dec_str3;
-	bi3.dec_str_len = BUFLEN;
-	bi3.dec_str_ok = 0;
-#endif
 
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
@@ -564,9 +470,6 @@ int test_compare(int verbose)
 	unsigned char bytes_buf2[10];
 	unsigned char bytes_buf3[20];
 	struct ehbigint bi1, bi2, bi3;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str1[BUFLEN], dec_str2[BUFLEN], dec_str3[BUFLEN];
-#endif
 
 	const char *str_1 = "0x60000000000";
 	const char *str_2 = "0x6F000000000";
@@ -577,27 +480,12 @@ int test_compare(int verbose)
 
 	bi1.bytes = bytes_buf1;
 	bi1.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi1.dec_str = dec_str1;
-	bi1.dec_str_len = BUFLEN;
-	bi1.dec_str_ok = 0;
-#endif
 
 	bi2.bytes = bytes_buf2;
 	bi2.bytes_len = 10;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi2.dec_str = dec_str2;
-	bi2.dec_str_len = BUFLEN;
-	bi2.dec_str_ok = 0;
-#endif
 
 	bi3.bytes = bytes_buf3;
 	bi3.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi3.dec_str = dec_str3;
-	bi3.dec_str_len = BUFLEN;
-	bi3.dec_str_ok = 0;
-#endif
 
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
@@ -731,9 +619,6 @@ int test_compare2(int verbose)
 	unsigned char bytes_buf1[20];
 	unsigned char bytes_buf2[10];
 	struct ehbigint bi1, bi2;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str1[BUFLEN], dec_str2[BUFLEN];
-#endif
 
 	const char *str_1 = "0x00F513";
 	const char *str_2 = "0x00023B";
@@ -743,19 +628,9 @@ int test_compare2(int verbose)
 
 	bi1.bytes = bytes_buf1;
 	bi1.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi1.dec_str = dec_str1;
-	bi1.dec_str_len = BUFLEN;
-	bi1.dec_str_ok = 0;
-#endif
 
 	bi2.bytes = bytes_buf2;
 	bi2.bytes_len = 10;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi2.dec_str = dec_str2;
-	bi2.dec_str_len = BUFLEN;
-	bi2.dec_str_ok = 0;
-#endif
 
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
@@ -827,9 +702,6 @@ int test_subtract(int verbose)
 	unsigned char bytes_buf2[20];
 	unsigned char bytes_buf3[14];
 	struct ehbigint bi1, bi2, bi3;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str1[BUFLEN], dec_str2[BUFLEN], dec_str3[BUFLEN];
-#endif
 
 	/*  char *u64_max =    "0xFFFFFFFFFFFFFFFF" */
 	const char *str_1 = "0x0F20100F00002202040A";
@@ -843,27 +715,12 @@ int test_subtract(int verbose)
 
 	bi1.bytes = bytes_buf1;
 	bi1.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi1.dec_str = dec_str1;
-	bi1.dec_str_len = BUFLEN;
-	bi1.dec_str_ok = 0;
-#endif
 
 	bi2.bytes = bytes_buf2;
 	bi2.bytes_len = 20;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi2.dec_str = dec_str2;
-	bi2.dec_str_len = BUFLEN;
-	bi2.dec_str_ok = 0;
-#endif
 
 	bi3.bytes = bytes_buf3;
 	bi3.bytes_len = 14;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi3.dec_str = dec_str3;
-	bi3.dec_str_len = BUFLEN;
-	bi3.dec_str_ok = 0;
-#endif
 
 	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
@@ -917,13 +774,6 @@ int test_div(int verbose)
 	struct ehbigint quotient;
 	struct ehbigint remainder;
 
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str_numerator[BUFLEN];
-	char dec_str_denominator[BUFLEN];
-	char dec_str_quotient[BUFLEN];
-	char dec_str_remainder[BUFLEN];
-#endif
-
 	char as_string[BUFLEN];
 	char expected[BUFLEN];
 	char *str;
@@ -934,38 +784,18 @@ int test_div(int verbose)
 	numerator.bytes = bytes_numerator;
 	numerator.bytes_len = 10;
 	numerator.bytes_used = 0;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	numerator.dec_str = dec_str_numerator;
-	numerator.dec_str_len = BUFLEN;
-	numerator.dec_str_ok = 0;
-#endif
 
 	denominator.bytes = bytes_denominator;
 	denominator.bytes_len = 10;
 	denominator.bytes_used = 0;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	denominator.dec_str = dec_str_denominator;
-	denominator.dec_str_len = BUFLEN;
-	denominator.dec_str_ok = 0;
-#endif
 
 	quotient.bytes = bytes_quotient;
 	quotient.bytes_len = 10;
 	quotient.bytes_used = 0;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	quotient.dec_str = dec_str_quotient;
-	quotient.dec_str_len = BUFLEN;
-	quotient.dec_str_ok = 0;
-#endif
 
 	remainder.bytes = bytes_remainder;
 	remainder.bytes_len = 10;
 	remainder.bytes_used = 0;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	remainder.dec_str = dec_str_remainder;
-	remainder.dec_str_len = BUFLEN;
-	remainder.dec_str_ok = 0;
-#endif
 
 	sprintf(as_string, "%lu", ulnumerator);
 	err =
@@ -1061,30 +891,16 @@ int test_set(int verbose)
 	unsigned char b_bytes[10];
 	struct ehbigint b_bigint;
 
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str_a[BUFLEN], dec_str_b[BUFLEN];
-#endif
-
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	a_bigint.bytes = a_bytes;
 	a_bigint.bytes_len = 10;
 	a_bigint.bytes_used = 0;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	a_bigint.dec_str = dec_str_a;
-	a_bigint.dec_str_len = BUFLEN;
-	a_bigint.dec_str_ok = 0;
-#endif
 
 	b_bigint.bytes = b_bytes;
 	b_bigint.bytes_len = 10;
 	b_bigint.bytes_used = 0;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	b_bigint.dec_str = dec_str_b;
-	b_bigint.dec_str_len = BUFLEN;
-	b_bigint.dec_str_ok = 0;
-#endif
 
 	err = ehbi_set_ul(&a_bigint, three);
 	if (err) {
@@ -1129,9 +945,6 @@ int test_mul(int verbose)
 	struct ehbigint result;
 
 	char buf[BUFLEN];
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str_a[BUFLEN], dec_str_b[BUFLEN], dec_str_res[BUFLEN];;
-#endif
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
@@ -1139,28 +952,13 @@ int test_mul(int verbose)
 	a_bigint.bytes = a_bytes;
 	a_bigint.bytes_len = 16;
 	a_bigint.bytes_used = 0;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	a_bigint.dec_str = dec_str_a;
-	a_bigint.dec_str_len = BUFLEN;
-	a_bigint.dec_str_ok = 0;
-#endif
 
 	b_bigint.bytes = b_bytes;
 	b_bigint.bytes_len = 16;
 	b_bigint.bytes_used = 0;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	b_bigint.dec_str = dec_str_b;
-	b_bigint.dec_str_len = BUFLEN;
-	b_bigint.dec_str_ok = 0;
-#endif
 
 	result.bytes = result_bytes;
 	result.bytes_len = 16;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	result.dec_str = dec_str_res;
-	result.dec_str_len = BUFLEN;
-	result.dec_str_ok = 0;
-#endif
 
 	aul = 9415273;
 	sprintf(buf, "%lu", aul);
@@ -1215,67 +1013,32 @@ int test_scenario_mul_mod(int verbose)
 	unsigned char xb[16], yb[16], zb[16], resb[16], quotb[16], remb[16];
 	char *expect_mul;
 
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str_bx[BUFLEN], dec_str_by[BUFLEN], dec_str_bz[BUFLEN];
-	char dec_str_bres[BUFLEN], dec_str_bquot[BUFLEN], dec_str_brem[BUFLEN];
-#endif
-
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	bx.bytes = xb;
 	bx.bytes_len = 16;
 	bx.bytes_used = 0;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bx.dec_str = dec_str_bx;
-	bx.dec_str_len = BUFLEN;
-	bx.dec_str_ok = 0;
-#endif
 
 	by.bytes = yb;
 	by.bytes_len = 16;
 	by.bytes_used = 0;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	by.dec_str = dec_str_by;
-	by.dec_str_len = BUFLEN;
-	by.dec_str_ok = 0;
-#endif
 
 	bz.bytes = zb;
 	bz.bytes_len = 16;
 	bz.bytes_used = 0;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bz.dec_str = dec_str_bz;
-	bz.dec_str_len = BUFLEN;
-	bz.dec_str_ok = 0;
-#endif
 
 	bresult.bytes = resb;
 	bresult.bytes_len = 16;
 	bresult.bytes_used = 0;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bresult.dec_str = dec_str_bres;
-	bresult.dec_str_len = BUFLEN;
-	bresult.dec_str_ok = 0;
-#endif
 
 	bquot.bytes = quotb;
 	bquot.bytes_len = 16;
 	bquot.bytes_used = 0;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bquot.dec_str = dec_str_bquot;
-	bquot.dec_str_len = BUFLEN;
-	bquot.dec_str_ok = 0;
-#endif
 
 	brem.bytes = remb;
 	brem.bytes_len = 16;
 	brem.bytes_used = 0;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	brem.dec_str = dec_str_brem;
-	brem.dec_str_len = BUFLEN;
-	brem.dec_str_ok = 0;
-#endif
 
 	x = 20151125;
 	err = ehbi_set_ul(&bx, x);
@@ -1360,10 +1123,6 @@ int test_compare_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 	struct ehbigint ein, emul, eres, ediv, equot, erem;
 	unsigned char in_bytes[BILEN], mul_bytes[BILEN], res_bytes[BILEN];
 	unsigned char div_bytes[BILEN], quot_bytes[BILEN], rem_bytes[BILEN];
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str_in[BILEN], dec_str_mul[BILEN], dec_str_res[BILEN];
-	char dec_str_div[BILEN], dec_str_quot[BILEN], dec_str_rem[BILEN];
-#endif
 
 	mpz_t gin, gmul, gres, gdiv, gquot, grem;
 
@@ -1394,29 +1153,6 @@ int test_compare_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 	equot.bytes_used = 0;
 	erem.bytes_used = 0;
 
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	ein.dec_str = dec_str_in;
-	emul.dec_str = dec_str_mul;
-	eres.dec_str = dec_str_res;
-	ediv.dec_str = dec_str_div;
-	equot.dec_str = dec_str_quot;
-	erem.dec_str = dec_str_rem;
-
-	ein.dec_str_ok = 0;
-	emul.dec_str_ok = 0;
-	eres.dec_str_ok = 0;
-	ediv.dec_str_ok = 0;
-	equot.dec_str_ok = 0;
-	erem.dec_str_ok = 0;
-
-	ein.dec_str_len = BUFLEN;
-	emul.dec_str_len = BUFLEN;
-	eres.dec_str_len = BUFLEN;
-	ediv.dec_str_len = BUFLEN;
-	equot.dec_str_len = BUFLEN;
-	erem.dec_str_len = BUFLEN;
-#endif
-
 	ehbi_set_ul(&ein, 0);
 	ehbi_set_ul(&emul, 252533);
 	ehbi_set_ul(&eres, 0);
@@ -1432,7 +1168,6 @@ int test_compare_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 	mpz_set_ui(gdiv, 33554393);
 	mpz_init(gquot);
 	mpz_init(grem);
-
 
 	for (i = 1; ((i < max_iterations) && (failures == 0)); ++i) {
 		/* ours */

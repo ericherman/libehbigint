@@ -132,40 +132,6 @@ static int from_hex(unsigned char *byte, char high, char low)
 	return EHBI_SUCCESS;
 }
 
-static int ehbi_invalidate_dec_str(struct ehbigint *bi)
-{
-	if (bi == 0) {
-		EHBI_LOG_ERROR0("Null struct");
-		return EHBI_NULL_STRUCT;
-	}
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bi->dec_str_ok = 0;
-#endif
-	return EHBI_SUCCESS;
-}
-
-static int ehbi_set_dec_str(struct ehbigint *bi)
-{
-	int err;
-
-	if (bi == 0) {
-		EHBI_LOG_ERROR0("Null struct");
-		return EHBI_NULL_STRUCT;
-	}
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-
-	if (bi->dec_str == NULL) {
-		bi->dec_str_ok = 0;
-		return EHBI_NULL_STRING;
-	}
-	err = ehbi_to_decimal_string(bi, bi->dec_str, bi->dec_str_len);
-	bi->dec_str_ok = (err == 0) ? 1 : 0;
-#else
-	err = EHBI_SUCCESS;
-#endif
-	return err;
-}
-
 int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 {
 	size_t i, j;
@@ -188,7 +154,6 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 		return EHBI_ZERO_LEN_STRING;
 	}
 
-	ehbi_invalidate_dec_str(bi);
 	/* ignore characters starting with the first NULL in string */
 	for (i = 1; i < str_len; ++i) {
 		if (str[i] == 0) {
@@ -232,7 +197,6 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 		bi->bytes[i] = high;
 	}
 
-	ehbi_set_dec_str(bi);
 	return EHBI_SUCCESS;
 }
 
@@ -270,14 +234,11 @@ static int ehbi_zero(struct ehbigint *bi)
 		return EHBI_NULL_BYTES;
 	}
 
-	ehbi_invalidate_dec_str(bi);
-
 	for (i = 0; i < bi->bytes_len; ++i) {
 		bi->bytes[i] = 0x00;
 	}
 	bi->bytes_used = 1;
 
-	ehbi_set_dec_str(bi);
 	return EHBI_SUCCESS;
 }
 
@@ -385,8 +346,6 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 		return EHBI_NULL_ARGS;
 	}
 
-	ehbi_invalidate_dec_str(res);
-
 	if (bi1->bytes_used < bi2->bytes_used) {
 		tmp = bi1;
 		bi1 = bi2;
@@ -426,7 +385,6 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 		}
 	}
 
-	ehbi_set_dec_str(res);
 	return EHBI_SUCCESS;
 }
 
@@ -437,10 +395,6 @@ int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 	struct ehbigint bidx, *t1, zero, one;
 	unsigned char zero_bytes[2];
 	unsigned char one_bytes[2];
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char zero_dec_str[10];
-	char one_dec_str[10];
-#endif
 
 	if (res == 0 || bi1 == 0 || bi2 == 0) {
 		EHBI_LOG_ERROR0("Null argument(s)");
@@ -458,11 +412,6 @@ int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 
 	zero.bytes = zero_bytes;
 	zero.bytes_len = 2;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	zero.dec_str = zero_dec_str;
-	zero.dec_str_len = 10;
-	zero.dec_str_ok = 0;
-#endif
 	err = ehbi_zero(&zero);
 	if (err) {
 		return err;
@@ -470,11 +419,6 @@ int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 
 	one.bytes = one_bytes;
 	one.bytes_len = 2;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	one.dec_str = one_dec_str;
-	one.dec_str_len = 10;
-	one.dec_str_ok = 0;
-#endif
 	err = ehbi_zero(&one);
 	if (err) {
 		return err;
@@ -503,11 +447,6 @@ int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 		return EHBI_STACK_TOO_SMALL;
 	}
 	bidx.bytes_len = size;
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	bidx.dec_str = ehbi_stack_alloc(size * 3);
-	bidx.dec_str_len = size * 3;
-	bidx.dec_str_ok = 0;
-#endif
 
 	err = ehbi_set(&bidx, bi2);
 	if (err) {
@@ -527,11 +466,6 @@ int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 		}
 	}
 	ehbi_stack_free(bidx.bytes, size);
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	if (bidx.dec_str != NULL) {
-		ehbi_stack_free(bidx.dec_str, bidx.dec_str_len);
-	}
-#endif
 	return err;
 }
 
@@ -591,8 +525,6 @@ int ehbi_inc(struct ehbigint *bi, struct ehbigint *val)
 		return EHBI_BYTES_TOO_SMALL;
 	}
 
-	ehbi_invalidate_dec_str(bi);
-
 	c = 0;
 
 	for (i = 1; i <= val->bytes_used; ++i) {
@@ -633,7 +565,6 @@ int ehbi_inc(struct ehbigint *bi, struct ehbigint *val)
 		bi->bytes[bi->bytes_len - bi->bytes_used] = 0x00;
 	}
 
-	ehbi_set_dec_str(bi);
 	return EHBI_SUCCESS;
 }
 
@@ -642,19 +573,11 @@ int ehbi_inc_ul(struct ehbigint *bi, unsigned long val)
 	size_t i, j;
 	unsigned char c;
 	unsigned char bytes[1 + sizeof(unsigned long)];
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	char dec_str[3 * (1 + sizeof(unsigned long))];
-#endif
 	struct ehbigint temp;
 
 	temp.bytes = bytes;
 	temp.bytes_len = 1 + sizeof(unsigned long);
 	temp.bytes_used = sizeof(unsigned long);
-#ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	temp.dec_str = dec_str;
-	temp.dec_str_len = 3 * (1 + sizeof(unsigned long));
-	temp.dec_str_ok = 0;
-#endif
 
 	temp.bytes[0] = 0x00;
 	for (i = 0; i < temp.bytes_used; ++i) {
@@ -673,7 +596,6 @@ int ehbi_inc_ul(struct ehbigint *bi, unsigned long val)
 		++temp.bytes_used;
 	}
 
-	ehbi_set_dec_str(&temp);
 	return ehbi_inc(bi, &temp);
 }
 
@@ -687,7 +609,6 @@ int ehbi_dec(struct ehbigint *bi, struct ehbigint *val)
 		return EHBI_NULL_ARGS;
 	}
 
-	ehbi_invalidate_dec_str(bi);
 	c = 0;
 	for (i = 1; i <= val->bytes_used; ++i) {
 		a = (bi->bytes_used < i) ? 0 : bi->bytes[bi->bytes_len - i];
@@ -720,7 +641,6 @@ int ehbi_dec(struct ehbigint *bi, struct ehbigint *val)
 	}
 	bi->bytes_used = bi->bytes_len - i;
 
-	ehbi_set_dec_str(bi);
 	return EHBI_SUCCESS;
 }
 
@@ -741,7 +661,6 @@ int ehbi_subtract(struct ehbigint *res, struct ehbigint *bi1,
 		max_len = bi2->bytes_used;
 	}
 
-	ehbi_invalidate_dec_str(res);
 	res->bytes_used = 0;
 	c = 0;
 	for (i = 1; i <= max_len; ++i) {
@@ -778,7 +697,6 @@ int ehbi_subtract(struct ehbigint *res, struct ehbigint *bi1,
 		}
 	}
 
-	ehbi_set_dec_str(res);
 	return EHBI_SUCCESS;
 }
 

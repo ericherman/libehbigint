@@ -1351,87 +1351,88 @@ int test_scenario_mul_mod(int verbose)
 }
 
 #define BILEN 10
-int test_compare_with_gmp(int verbose, int max_iterations)
+int test_compare_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 {
 	int failures, i, err;
 	char ebuf[BUFLEN];
 	char gbuf[BUFLEN];
 	char *in_str;
-	struct ehbigint in, mul, res, mod, quot, rem;
+	struct ehbigint ein, emul, eres, ediv, equot, erem;
 	unsigned char in_bytes[BILEN], mul_bytes[BILEN], res_bytes[BILEN];
-	unsigned char mod_bytes[BILEN], quot_bytes[BILEN], rem_bytes[BILEN];
+	unsigned char div_bytes[BILEN], quot_bytes[BILEN], rem_bytes[BILEN];
 #ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
 	char dec_str_in[BILEN], dec_str_mul[BILEN], dec_str_res[BILEN];
-	char dec_str_mod[BILEN], dec_str_quot[BILEN], dec_str_rem[BILEN];
+	char dec_str_div[BILEN], dec_str_quot[BILEN], dec_str_rem[BILEN];
 #endif
 
-	mpz_t gin, gmul, gres, gmod, gquot, grem;
+	mpz_t gin, gmul, gres, gdiv, gquot, grem;
 
 	VERBOSE_ANNOUNCE(verbose);
 
 	failures = 0;
 
-	in.bytes = in_bytes;
-	mul.bytes = mul_bytes;
-	res.bytes = res_bytes;
-	mod.bytes = mod_bytes;
-	quot.bytes = quot_bytes;
-	rem.bytes = rem_bytes;
+	in_str = cmp_init_val == NULL ? "20151125" : cmp_init_val;
 
-	in.bytes_len = BILEN;
-	mul.bytes_len = BILEN;
-	res.bytes_len = BILEN;
-	mod.bytes_len = BILEN;
-	quot.bytes_len = BILEN;
-	rem.bytes_len = BILEN;
+	ein.bytes = in_bytes;
+	emul.bytes = mul_bytes;
+	eres.bytes = res_bytes;
+	ediv.bytes = div_bytes;
+	equot.bytes = quot_bytes;
+	erem.bytes = rem_bytes;
 
-	in.bytes_used = 0;
-	mul.bytes_used = 0;
-	res.bytes_used = 0;
-	mod.bytes_used = 0;
-	quot.bytes_used = 0;
-	rem.bytes_used = 0;
+	ein.bytes_len = BILEN;
+	emul.bytes_len = BILEN;
+	eres.bytes_len = BILEN;
+	ediv.bytes_len = BILEN;
+	equot.bytes_len = BILEN;
+	erem.bytes_len = BILEN;
+
+	ein.bytes_used = 0;
+	emul.bytes_used = 0;
+	eres.bytes_used = 0;
+	ediv.bytes_used = 0;
+	equot.bytes_used = 0;
+	erem.bytes_used = 0;
 
 #ifdef EHBI_KEEP_AND_RECALC_DEBUG_DEC_STRINGS_SLOW_BREAKS_ABI
-	in.dec_str = dec_str_in;
-	mul.dec_str = dec_str_mul;
-	res.dec_str = dec_str_res;
-	mod.dec_str = dec_str_mod;
-	quot.dec_str = dec_str_quot;
-	rem.dec_str = dec_str_rem;
+	ein.dec_str = dec_str_in;
+	emul.dec_str = dec_str_mul;
+	eres.dec_str = dec_str_res;
+	ediv.dec_str = dec_str_div;
+	equot.dec_str = dec_str_quot;
+	erem.dec_str = dec_str_rem;
 
-	in.dec_str_ok = 0;
-	mul.dec_str_ok = 0;
-	res.dec_str_ok = 0;
-	mod.dec_str_ok = 0;
-	quot.dec_str_ok = 0;
-	rem.dec_str_ok = 0;
+	ein.dec_str_ok = 0;
+	emul.dec_str_ok = 0;
+	eres.dec_str_ok = 0;
+	ediv.dec_str_ok = 0;
+	equot.dec_str_ok = 0;
+	erem.dec_str_ok = 0;
 
-	in.dec_str_len = BUFLEN;
-	mul.dec_str_len = BUFLEN;
-	res.dec_str_len = BUFLEN;
-	mod.dec_str_len = BUFLEN;
-	quot.dec_str_len = BUFLEN;
-	rem.dec_str_len = BUFLEN;
+	ein.dec_str_len = BUFLEN;
+	emul.dec_str_len = BUFLEN;
+	eres.dec_str_len = BUFLEN;
+	ediv.dec_str_len = BUFLEN;
+	equot.dec_str_len = BUFLEN;
+	erem.dec_str_len = BUFLEN;
 #endif
 
-	ehbi_set_ul(&in, 0);
-	ehbi_set_ul(&mul, 252533);
-	ehbi_set_ul(&res, 0);
-	ehbi_set_ul(&mod, 33554393);
-	ehbi_set_ul(&quot, 0);
-	ehbi_set_ul(&rem, 0);
+	ehbi_set_ul(&ein, 0);
+	ehbi_set_ul(&emul, 252533);
+	ehbi_set_ul(&eres, 0);
+	ehbi_set_ul(&ediv, 33554393);
+	ehbi_set_ul(&equot, 0);
+	ehbi_set_ul(&erem, 0);
 
 	mpz_init(gin);
 	mpz_init(gmul);
 	mpz_set_ui(gmul, 252533);
 	mpz_init(gres);
-	mpz_init(gmod);
-	mpz_set_ui(gmod, 33554393);
+	mpz_init(gdiv);
+	mpz_set_ui(gdiv, 33554393);
 	mpz_init(gquot);
 	mpz_init(grem);
 
-	in_str = "20151125";
 
 	for (i = 1; ((i < max_iterations) && (failures == 0)); ++i) {
 		/* ours */
@@ -1440,83 +1441,81 @@ int test_compare_with_gmp(int verbose, int max_iterations)
 		}
 
 		mpz_set_str(gin, in_str, 10);
-		err = ehbi_from_decimal_string(&in, in_str, strlen(in_str));
+		err = ehbi_from_decimal_string(&ein, in_str, strlen(in_str));
 		if (err) {
 			LOG_ERROR1("ehbi_from_decimal_string error: %d\n", err);
 		}
 
 		mpz_get_str(gbuf, 10, gin);
-		err = ehbi_to_decimal_string(&in, ebuf, BUFLEN);
+		err = ehbi_to_decimal_string(&ein, ebuf, BUFLEN);
 		if (err) {
 			LOG_ERROR1("ehbi_to_decimal_string error: %d\n", err);
 		}
 		failures += check_str_m(ebuf, gbuf, "from_decimal_string");
 
 		mpz_mul(gres, gin, gmul);
-		err = ehbi_mul(&res, &in, &mul);
+		err = ehbi_mul(&eres, &ein, &emul);
 		if (err) {
 			LOG_ERROR1("ehbi_mul error: %d\n", err);
 		}
 
 		mpz_get_str(gbuf, 10, gres);
-		err = ehbi_to_decimal_string(&res, ebuf, BUFLEN);
+		err = ehbi_to_decimal_string(&eres, ebuf, BUFLEN);
 		if (err) {
 			LOG_ERROR1("ehbi_to_decimal_string error: %d\n", err);
 		}
 		failures += check_str_m(ebuf, gbuf, "ehbi_mul");
 
-		mpz_tdiv_qr(gquot, grem, gres, gmod);
-		err = ehbi_div(&quot, &rem, &res, &mod);
+		mpz_tdiv_qr(gquot, grem, gres, gdiv);
+		err = ehbi_div(&equot, &erem, &eres, &ediv);
 		if (err) {
 			LOG_ERROR1("ehbi_div error: %d\n", err);
 		}
 
 		mpz_get_str(gbuf, 10, gquot);
-		err = ehbi_to_decimal_string(&quot, ebuf, BUFLEN);
+		err = ehbi_to_decimal_string(&equot, ebuf, BUFLEN);
 		if (err) {
 			LOG_ERROR1("ehbi_to_decimal_string error: %d\n", err);
 		}
 		failures += check_str_m(ebuf, gbuf, "ehbi_div (quot)");
 		mpz_get_str(gbuf, 10, grem);
-		err = ehbi_to_decimal_string(&rem, ebuf, BUFLEN);
+		err = ehbi_to_decimal_string(&erem, ebuf, BUFLEN);
 		if (err) {
 			LOG_ERROR1("ehbi_to_decimal_string error: %d\n", err);
 		}
 		failures += check_str_m(ebuf, gbuf, "ehbi_div (rem)");
-		mpz_get_str(gbuf, 10, grem);
-		failures += check_str(gbuf, ebuf);
 
 		if (failures) {
 			LOG_ERROR2("iteration %d: in_str: %s\n", i, in_str);
 
 			mpz_get_str(gbuf, 10, gin);
-			ehbi_to_decimal_string(&in, ebuf, BUFLEN);
-			LOG_ERROR1("\t in: %s\n", ebuf);
+			ehbi_to_decimal_string(&ein, ebuf, BUFLEN);
+			LOG_ERROR1("\tein: %s\n", ebuf);
 			LOG_ERROR1("\tgin: %s\n", gbuf);
 
 			mpz_get_str(gbuf, 10, gmul);
-			ehbi_to_decimal_string(&mul, ebuf, BUFLEN);
-			LOG_ERROR1("\t mul: %s\n", ebuf);
+			ehbi_to_decimal_string(&emul, ebuf, BUFLEN);
+			LOG_ERROR1("\temul: %s\n", ebuf);
 			LOG_ERROR1("\tgmul: %s\n", gbuf);
 
 			mpz_get_str(gbuf, 10, gres);
-			ehbi_to_decimal_string(&res, ebuf, BUFLEN);
-			LOG_ERROR1("\t res: %s\n", ebuf);
+			ehbi_to_decimal_string(&eres, ebuf, BUFLEN);
+			LOG_ERROR1("\teres: %s\n", ebuf);
 			LOG_ERROR1("\tgres: %s\n", gbuf);
 
-			mpz_get_str(gbuf, 10, gmod);
-			ehbi_to_decimal_string(&mod, ebuf, BUFLEN);
-			LOG_ERROR1("\t mod: %s\n", ebuf);
-			LOG_ERROR1("\tgmod: %s\n", gbuf);
+			mpz_get_str(gbuf, 10, gdiv);
+			ehbi_to_decimal_string(&ediv, ebuf, BUFLEN);
+			LOG_ERROR1("\tediv: %s\n", ebuf);
+			LOG_ERROR1("\tgdiv: %s\n", gbuf);
 
 			mpz_get_str(gbuf, 10, gquot);
-			ehbi_to_decimal_string(&quot, ebuf, BUFLEN);
-			LOG_ERROR1("\t quot: %s\n", ebuf);
+			ehbi_to_decimal_string(&equot, ebuf, BUFLEN);
+			LOG_ERROR1("\tequot: %s\n", ebuf);
 			LOG_ERROR1("\tgquot: %s\n", gbuf);
 
 			mpz_get_str(gbuf, 10, grem);
-			ehbi_to_decimal_string(&rem, ebuf, BUFLEN);
-			LOG_ERROR1("\t rem: %s\n", ebuf);
+			ehbi_to_decimal_string(&erem, ebuf, BUFLEN);
+			LOG_ERROR1("\terem: %s\n", ebuf);
 			LOG_ERROR1("\tgrem: %s\n", gbuf);
 
 			goto mpz_clean_up;
@@ -1528,7 +1527,7 @@ mpz_clean_up:
 	mpz_clear(gin);
 	mpz_clear(gmul);
 	mpz_clear(gres);
-	mpz_clear(gmod);
+	mpz_clear(gdiv);
 	mpz_clear(gquot);
 	mpz_clear(grem);
 
@@ -1542,9 +1541,11 @@ mpz_clean_up:
 int main(int argc, char **argv)
 {
 	int v, failures, slow_iterations;
+	char *cmp_init_val;
 
 	v = (argc > 1) ? atoi(argv[1]) : 0;
 	slow_iterations = (argc > 2) ? atoi(argv[2]) : 10;
+	cmp_init_val = (argc > 3) ? argv[3] : NULL;
 
 	VERBOSE_ANNOUNCE(v);
 	failures = 0;
@@ -1564,7 +1565,7 @@ int main(int argc, char **argv)
 	failures += test_mul(v);
 	failures += test_div(v);
 	failures += test_scenario_mul_mod(v);
-	failures += test_compare_with_gmp(v, slow_iterations);
+	failures += test_compare_with_gmp(v, slow_iterations, cmp_init_val);
 
 	if (failures) {
 		LOG_ERROR1("%d failures in total\n", failures);

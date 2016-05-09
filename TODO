@@ -1,7 +1,3 @@
-* fix a known failure
-
-     ./test-ehbigint-static 1 2 10634954
-
 * add "const" to parameters which are not expected to change
 
 * compare understands negative numbers, but little else in the library does

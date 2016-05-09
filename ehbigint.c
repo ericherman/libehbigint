@@ -691,6 +691,10 @@ int ehbi_dec(struct ehbigint *bi, struct ehbigint *val)
 		}
 	}
 	bi->bytes_used = bi->bytes_len - i;
+	if ((bi->bytes_used < bi->bytes_len) && (bi->bytes[0] != 0xFF)
+	    && (bi->bytes[i] > 0x7F) && (i > 0) && (bi->bytes[i - 1] == 0x00)) {
+		++bi->bytes_used;
+	}
 
 	return EHBI_SUCCESS;
 }

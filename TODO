@@ -1,5 +1,3 @@
-* fix printing of ehbigint with a value of zero
-
 * add "const" to parameters which are not expected to change
 
 * compare understands negative numbers, but little else in the library does

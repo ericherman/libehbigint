@@ -973,6 +973,34 @@ int test_set(int verbose)
 	return failures;
 }
 
+int test_set_ul(int verbose)
+{
+	int failures;
+
+	unsigned char bytes[4];
+	struct ehbigint bi;
+
+	VERBOSE_ANNOUNCE(verbose);
+	failures = 0;
+
+	bi.bytes = bytes;
+	bi.bytes_len = 4;
+
+	ehbi_set_ul(&bi, 0);
+	failures += check_ehbigint_hex(&bi, "0x00", __LINE__, TEST_FUNC);
+	failures += check_ehbigint_dec(&bi, "0", __LINE__, TEST_FUNC);
+
+	ehbi_set_ul(&bi, 1234567890);
+	failures += check_ehbigint_hex(&bi, "0x499602D2", __LINE__, TEST_FUNC);
+	failures += check_ehbigint_dec(&bi, "1234567890", __LINE__, TEST_FUNC);
+
+	if (failures) {
+		LOG_ERROR1("%d failures in test_to_string\n", failures);
+	}
+
+	return failures;
+}
+
 int test_mul(int verbose)
 {
 	/*
@@ -1345,6 +1373,7 @@ int main(int argc, char **argv)
 	failures += test_dec(v);
 	failures += test_dec_corner_case(v);
 	failures += test_set(v);
+	failures += test_set_ul(v);
 	failures += test_mul(v);
 	failures += test_div(v);
 	failures += test_scenario_mul_mod(v);

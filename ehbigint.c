@@ -303,7 +303,7 @@ int ehbi_set_ul(struct ehbigint *bi, unsigned long val)
 	return ehbi_inc_ul(bi, val);
 }
 
-int ehbi_set(struct ehbigint *bi, struct ehbigint *val)
+int ehbi_set(struct ehbigint *bi, const struct ehbigint *val)
 {
 	int err;
 	err = ehbi_zero(bi);
@@ -313,7 +313,7 @@ int ehbi_set(struct ehbigint *bi, struct ehbigint *val)
 	return ehbi_inc(bi, val);
 }
 
-int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len)
+int ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len)
 {
 	int err;
 	size_t i, j;
@@ -364,7 +364,7 @@ int ehbi_to_hex_string(struct ehbigint *bi, char *buf, size_t buf_len)
 	return EHBI_SUCCESS;
 }
 
-int ehbi_to_decimal_string(struct ehbigint *bi, char *buf, size_t len)
+int ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len)
 {
 	char *hex;
 	size_t size;
@@ -386,11 +386,12 @@ int ehbi_to_decimal_string(struct ehbigint *bi, char *buf, size_t len)
 	return err;
 }
 
-int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
+int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
+	     const struct ehbigint *bi2)
 {
 	size_t i;
 	unsigned char a, b, c;
-	struct ehbigint *tmp;
+	const struct ehbigint *tmp;
 
 	if (res == 0 || bi1 == 0 || bi2 == 0) {
 		EHBI_LOG_ERROR0("Null argument(s)");
@@ -439,11 +440,13 @@ int ehbi_add(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 	return EHBI_SUCCESS;
 }
 
-int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
+int ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
+	     const struct ehbigint *bi2)
 {
 	size_t size;
 	int err;
-	struct ehbigint bidx, *t1, zero, one;
+	struct ehbigint bidx, zero, one;
+	const struct ehbigint *t1;
 	unsigned char zero_bytes[2];
 	unsigned char one_bytes[2];
 
@@ -521,7 +524,8 @@ int ehbi_mul(struct ehbigint *res, struct ehbigint *bi1, struct ehbigint *bi2)
 }
 
 int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
-	     struct ehbigint *numerator, struct ehbigint *denominator)
+	     const struct ehbigint *numerator,
+	     const struct ehbigint *denominator)
 {
 	int err;
 
@@ -562,7 +566,7 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	return EHBI_SUCCESS;
 }
 
-int ehbi_inc(struct ehbigint *bi, struct ehbigint *val)
+int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 {
 	size_t i;
 	unsigned char a, b, c;
@@ -650,7 +654,7 @@ int ehbi_inc_ul(struct ehbigint *bi, unsigned long val)
 	return ehbi_inc(bi, &temp);
 }
 
-int ehbi_dec(struct ehbigint *bi, struct ehbigint *val)
+int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 {
 	size_t i, j;
 	unsigned char a, b, c;
@@ -699,8 +703,8 @@ int ehbi_dec(struct ehbigint *bi, struct ehbigint *val)
 	return EHBI_SUCCESS;
 }
 
-int ehbi_subtract(struct ehbigint *res, struct ehbigint *bi1,
-		  struct ehbigint *bi2)
+int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
+		  const struct ehbigint *bi2)
 {
 	size_t i, max_len;
 	unsigned char a, b, c;
@@ -755,7 +759,7 @@ int ehbi_subtract(struct ehbigint *res, struct ehbigint *bi1,
 	return EHBI_SUCCESS;
 }
 
-int ehbi_is_negative(struct ehbigint *bi)
+int ehbi_is_negative(const struct ehbigint *bi)
 {
 	if (bi == NULL || bi->bytes_used == 0) {
 		return 0;
@@ -768,7 +772,8 @@ int ehbi_is_negative(struct ehbigint *bi)
 	return 0;
 }
 
-int ehbi_compare(struct ehbigint *bi1, struct ehbigint *bi2, int *err)
+int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
+		 int *err)
 {
 	size_t i;
 	unsigned char a, b;
@@ -809,17 +814,20 @@ int ehbi_compare(struct ehbigint *bi1, struct ehbigint *bi2, int *err)
 	return 0;
 }
 
-int ehbi_equals(struct ehbigint *bi1, struct ehbigint *bi2, int *err)
+int ehbi_equals(const struct ehbigint *bi1, const struct ehbigint *bi2,
+		int *err)
 {
 	return ((ehbi_compare(bi1, bi2, err) == 0) && (*err == EHBI_SUCCESS));
 }
 
-int ehbi_less_than(struct ehbigint *bi1, struct ehbigint *bi2, int *err)
+int ehbi_less_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
+		   int *err)
 {
 	return ((ehbi_compare(bi1, bi2, err) < 0) && (*err == EHBI_SUCCESS));
 }
 
-int ehbi_greater_than(struct ehbigint *bi1, struct ehbigint *bi2, int *err)
+int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
+		      int *err)
 {
 	return ((ehbi_compare(bi1, bi2, err) > 0) && (*err == EHBI_SUCCESS));
 }

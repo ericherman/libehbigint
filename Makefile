@@ -135,6 +135,7 @@ tidy:
 	$(LINDENT) \
 		-T size_t \
 		-T FILE \
+		-T ehbigint \
 		*.h *.c
 
 clean:
@@ -143,6 +144,8 @@ clean:
 		$(TEST_OUT)-static $(TEST_OUT)-dynamic \
 		bi-calc
 
+spotless:
+	rm -rfv `cat .gitignore`
 
 install: $(LIB_NAME)
 	@echo "Installing $(LIB_NAME) $(UNAME) libraries in $(LIBDIR)"

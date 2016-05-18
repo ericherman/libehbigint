@@ -22,10 +22,10 @@ SHAREDFLAGS = -shared
 SHAREDEXT = so
 endif
 
-LIB_SRC=$(LIB_NAME).c
-LIB_HDR=$(LIB_NAME).h
+LIB_SRC=src/$(LIB_NAME).c
+LIB_HDR=src/$(LIB_NAME).h
 LIB_OBJ=$(LIB_SRC:.c=.o)
-SO_OBJS=$(LIB_NAME).o
+SO_OBJS=src/$(LIB_NAME).o
 SO_NAME=lib$(LIB_NAME).$(SHAREDEXT)
 ifneq ($(UNAME), Darwin)
     SHAREDFLAGS += -Wl,-soname,$(SO_NAME)
@@ -37,12 +37,12 @@ INCLUDES=-I. $(EHSTR_INCLUDES)
 A_FILES=$(EHSTR_A_FILES)
 
 TEST_OUT=test-$(LIB_NAME)
-TEST_SRC=$(TEST_OUT).c
-TEST_OBJ=$(TEST_OUT).o
+TEST_SRC=tests/$(TEST_OUT).c
+TEST_OBJ=tests/$(TEST_OUT).o
 
 OUT=bi-calc
-SRC=$(OUT).c
-OBJ=$(OUT).o
+SRC=demos/$(OUT).c
+OBJ=demos/$(OUT).o
 
 CSTD_CFLAGS=-std=c89 -DEHBI_ENSURE_POSIX=1
 #CSTD_CFLAGS=-std=c11
@@ -146,6 +146,9 @@ clean:
 
 spotless:
 	rm -rfv `cat .gitignore`
+	( cd src; rm -rfv `cat ../.gitignore`; cd .. )
+	( cd tests; rm -rfv `cat ../.gitignore`; cd .. )
+	( cd demos; rm -rfv `cat ../.gitignore`; cd .. )
 
 install: $(LIB_NAME)
 	@echo "Installing $(LIB_NAME) $(UNAME) libraries in $(LIBDIR)"

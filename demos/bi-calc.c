@@ -1,4 +1,4 @@
-#include "ehbigint.c"
+#include "../src/ehbigint.c"
 #include <string.h>
 
 int main(int argc, char *argv[])

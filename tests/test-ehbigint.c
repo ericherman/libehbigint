@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <gmp.h>
 
-#include "ehbigint.h"
+#include "../src/ehbigint.h"
 
 #define TEST_FUNC \
 	((ECHECK_FUNC == NULL) ? "" : ECHECK_FUNC)

@@ -1,16 +1,16 @@
 LIB_NAME=ehbigint
 
-EHSTR_INCLUDES=-I ../libehstr
-EHSTR_A_FILES=../libehstr/libehstr.a
-EHSTR_LDFLAGS=-L../libehstr
 EHSTR_LDADD=-lehstr
-EHSTR_LD_LIBRARY_PATHS=:../libehstr
+EHSTR_INCLUDES=
+EHSTR_A_FILES=
+EHSTR_LDFLAGS=
+EHSTR_LD_LIBRARY_PATHS=
 
-ECHECK_INCLUDES=-I ../libecheck
-ECHECK_A_FILES=../libecheck/libecheck.a
-ECHECK_LDFLAGS=-L../libecheck
 ECHECK_LDADD=-lecheck
-ECHECK_LD_LIBRARY_PATHS=:../libecheck
+ECHECK_INCLUDES=
+ECHECK_A_FILES=
+ECHECK_LDFLAGS=
+ECHECK_LD_LIBRARY_PATHS=
 
 UNAME := $(shell uname)
 
@@ -65,7 +65,7 @@ NOISY_CFLAGS=-Wall -Wextra -pedantic -Werror
 
 CFLAGS += $(CSTD_CFLAGS) $(DEBUG_CFLAGS) $(NOISY_CFLAGS) $(ALLOCA_FLAGS)
 LDFLAGS += -L. $(EHSTR_LDFLAGS) $(ECHECK_LDFLAGS) -rdynamic
-LDADD += -l$(LIB_NAME) $(EHSTR_LDADD) $(ECHECK_LDADD) -lgmp
+LDADD += $(EHSTR_LDADD) $(ECHECK_LDADD) -lgmp
 
 CC=gcc
 
@@ -115,12 +115,13 @@ $(TEST_OUT): $(LIB_NAME)
 	$(CC) -c $(INCLUDES) $(ECHECK_INCLUDES) $(CFLAGS) \
 		$(TEST_SRC) -o $(TEST_OBJ)
 	$(CC) $(TEST_OBJ) $(A_NAME) $(A_FILES) $(ECHECK_A_FILES) \
-		-o $(TEST_OUT)-static -lgmp
-	$(CC) $(TEST_OBJ) $(LDFLAGS) -o $(TEST_OUT)-dynamic $(LDADD)
+		-o $(TEST_OUT)-static $(LDADD)
+	$(CC) $(TEST_OBJ) $(LDFLAGS) \
+		-o $(TEST_OUT)-dynamic -l$(LIB_NAME) $(LDADD)
 
 $(OUT): $(LIB_NAME)
 	$(CC) -c $(INCLUDES) $(CFLAGS) $(SRC) -o $(OBJ)
-	$(CC) $(OBJ) $(A_FILES) -o $(OUT)
+	$(CC) $(OBJ) $(A_FILES) -o $(OUT) $(LDADD)
 
 demo: $(OUT)
 	./$(OUT) 132904811234120000312412 + 123412413132500

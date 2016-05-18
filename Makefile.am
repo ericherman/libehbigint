@@ -9,9 +9,9 @@ check_PROGRAMS=test-ehbigint
 test_ehbigint_SOURCES=tests/test-ehbigint.c src/ehbigint.h
 test_ehbigint_LDADD=-lehbigint -lehstr -lecheck -lgmp
 
-bin_PROGRAMS=bi-calc
-bi_calc_SROUCES=demos/bi-calc.c src/ehbigint.h
-bi_calc_LDADD=-lehbigint -lehstr
+#bin_PROGRAMS=bi-calc
+#bi_calc_SROUCES=demos/bi-calc.c src/ehbigint.h
+#bi_calc_LDADD=-lehbigint -lehstr
 
 CSTD_CFLAGS=-std=c89 -DEHBI_ENSURE_POSIX=1
 #CSTD_CFLAGS=-std=c11

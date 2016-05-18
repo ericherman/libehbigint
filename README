@@ -2,6 +2,7 @@ A thought experiment for creating arbitrarily large integers.
 
 This is just a learning exercise, not intended for use.
 
+
 Dependencies
 -------
 * https://github.com/ericherman/libehstr
@@ -9,6 +10,15 @@ Dependencies
 
 Also, the tests depend upon libecheck
 * https://github.com/ericherman/libecheck
+
+
+Packaging
+---------
+autoreconf -iv &&
+ ./configure &&
+ make &&
+ make distcheck &&
+ echo "Success."
 
 
 License

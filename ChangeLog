@@ -1,3 +1,7 @@
+2016-05-21  Eric Herman <eric@freesa.org>
+
+	add "demo" and "valgrind" targets
+
 2016-05-18  Eric Herman <eric@freesa.org>
 
 	seems to be mostly working with autotools

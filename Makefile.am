@@ -9,9 +9,11 @@ check_PROGRAMS=test-ehbigint
 test_ehbigint_SOURCES=tests/test-ehbigint.c src/ehbigint.h
 test_ehbigint_LDADD=-lehbigint -lehstr -lecheck -lgmp
 
-#bin_PROGRAMS=bi-calc
-#bi_calc_SROUCES=demos/bi-calc.c src/ehbigint.h
-#bi_calc_LDADD=-lehbigint -lehstr
+bin_PROGRAMS=bi-calc
+bi_calc_SOURCES=demos/bi-calc.c src/ehbigint.h
+bi_calc_LDADD=-lehbigint -lehstr
+
+ACLOCAL_AMFLAGS=-I m4 --install
 
 CSTD_CFLAGS=-std=c89 -DEHBI_ENSURE_POSIX=1
 #CSTD_CFLAGS=-std=c11
@@ -38,10 +40,14 @@ tidy:
 		`find src tests demos -name '*.h' -o -name '*.c'`
 
 spotless:
-	rm -rfv `cat .gitignore`
-	( cd src; rm -rfv `cat ../.gitignore`; cd .. )
-	( cd tests; rm -rfv `cat ../.gitignore`; cd .. )
-	( cd demos; rm -rfv `cat ../.gitignore`; cd .. )
+	rm -rf `cat .gitignore | sed -e 's/#.*//'`
+	pushd src && rm -rf `cat ../.gitignore | sed -e 's/#.*//'`; popd
+	pushd tests && rm -rf `cat ../.gitignore | sed -e 's/#.*//'`; popd
+	pushd demos && rm -rf `cat ../.gitignore | sed -e 's/#.*//'`; popd
 
 demo: bi-calc
-	./bi-calc 132904811234120000312412 + 123412413132500
+	libtool --mode=execute ./bi-calc \
+		132904811234120000312412 + 123412413132500
+
+valgrind: test-ehbigint
+	libtool --mode=execute valgrind ./test-ehbigint

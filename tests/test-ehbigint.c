@@ -2,97 +2,10 @@
 #include <string.h>
 #include <echeck.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <gmp.h>
 
-#include "../src/ehbigint.h"
-
-#define TEST_FUNC \
-	((ECHECK_FUNC == NULL) ? "" : ECHECK_FUNC)
-
-#define STDERR_FILE_LINE_FUNC \
-	fprintf(stderr, "%s:%d%s%s%s: ", __FILE__, __LINE__, \
-	(ECHECK_FUNC == NULL) ? "" : ":", \
-	TEST_FUNC, \
-	(ECHECK_FUNC == NULL) ? "" : "()")
-
-#define LOG_ERROR(format) \
-	STDERR_FILE_LINE_FUNC; fprintf(stderr, format)
-
-#define LOG_ERROR1(format, arg) \
-	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg)
-
-#define LOG_ERROR2(format, arg1, arg2) \
-	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg1, arg2)
-
-#define LOG_ERROR3(format, arg1, arg2, arg3) \
-	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg1, arg2, arg3)
-
-#define LOG_ERROR4(format, arg1, arg2, arg3, arg4) \
-	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg1, arg2, arg3, arg4)
-
-#define VERBOSE_ANNOUNCE(verbose) \
-	if (verbose) { fprintf(stderr, "starting %s\n", TEST_FUNC); }
-
-#define BUFLEN 80
-#define BILEN 10
-
-int check_ehbigint_dec(struct ehbigint *val, const char *expected, int line,
-		       const char *msg)
-{
-	int err;
-	char actual[BUFLEN];
-	char buf[BUFLEN];
-
-	sprintf(buf, "%s:%d", msg, line);
-	err = ehbi_to_decimal_string(val, actual, BUFLEN);
-	if (err) {
-		LOG_ERROR2("error %d ehbi_to_decimal_string (%s)\n", err, buf);
-		return 1;
-	}
-
-	return check_str_m(actual, expected, buf);
-}
-
-int check_ehbigint_hex(struct ehbigint *val, const char *expected, int line,
-		       const char *msg)
-{
-	int err;
-	char actual[BUFLEN];
-	char buf[BUFLEN];
-
-	sprintf(buf, "%s:%d", msg, line);
-	err = ehbi_to_hex_string(val, actual, BUFLEN);
-	if (err) {
-		LOG_ERROR2("error %d ehbi_to_hex_string (%s)\n", err, buf);
-		return 1;
-	}
-
-	return check_str_m(actual, expected, buf);
-}
-
-unsigned long ehbigint_to_unsigned_long(struct ehbigint *val, int *err)
-{
-	int base;
-	char dec[BUFLEN];
-	char *endptr;
-	unsigned long result;
-
-	*err = ehbi_to_decimal_string(val, dec, BUFLEN);
-	if (*err) {
-		LOG_ERROR1("error %d ehbi_to_decimal_string\n", *err);
-		return 0;
-	}
-	base = 10;
-	errno = 0;
-	result = strtoul(dec, &endptr, base);
-	*err = errno;
-	if (*err || (endptr && strlen(endptr) > 0)) {
-		LOG_ERROR4("strtoul('%s'); (invalid:'%s') (%d: %s)\n", dec,
-			   endptr, *err, strerror(*err));
-	}
-	return result;
-}
+#include "ehbigint.h"
+#include "test-ehbigint-private-utils.h"
 
 int test_to_string(int verbose)
 {

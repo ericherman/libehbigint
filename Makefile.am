@@ -6,8 +6,12 @@ include_HEADERS=src/ehbigint.h
 
 TESTS=$(check_PROGRAMS)
 check_PROGRAMS=test-ehbigint
-test_ehbigint_SOURCES=tests/test-ehbigint.c src/ehbigint.h
-test_ehbigint_LDADD=-lehbigint -lehstr -lecheck -lgmp
+COMMON_TEST_SOURCES=src/ehbigint.h \
+ tests/test-ehbigint-private-utils.h \
+ tests/test-ehbigint-private-utils.c
+
+test_ehbigint_SOURCES=tests/test-ehbigint.c $(COMMON_TEST_SOURCES)
+test_ehbigint_LDADD=-lehstr -lecheck -lgmp
 
 bin_PROGRAMS=bi-calc
 bi_calc_SOURCES=demos/bi-calc.c src/ehbigint.h

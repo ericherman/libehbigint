@@ -18,9 +18,16 @@ $*
 *.a
 *.bin
 *.d
+*.tar.gz
+*.lo
+*.la
+*.log
+*.trs
+*.log
 test-*-dynamic
 test-*-static
 test-ehbigint
+bi-calc
 
 ################
 # autotools
@@ -34,7 +41,6 @@ config.log
 config.status
 libtool
 Makefile
-*.tar.gz
 stamp-h1
 INSTALL
 Makefile.in
@@ -52,11 +58,6 @@ ltmain.sh
 test-driver
 .deps/
 .libs/
-*.lo
-*.la
 m4/
-*.log
-*.trs
-*.log
 build-aux/
 .dirstamp

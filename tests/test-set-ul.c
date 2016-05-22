@@ -47,5 +47,5 @@ int main(int argc, char **argv)
 		LOG_ERROR2("%d failures in %s\n", failures, __FILE__);
 	}
 
-	return failures;
+	return cap_failures(failures);
 }

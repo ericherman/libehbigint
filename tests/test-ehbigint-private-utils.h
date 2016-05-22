@@ -30,6 +30,9 @@
 #define VERBOSE_ANNOUNCE(verbose) \
 	if (verbose) { fprintf(stderr, "starting %s\n", TEST_FUNC); }
 
+#define cap_failures(failures) \
+	((failures > 127) ? 127 : ((failures < -128) ? -128 : failures))
+
 #define BUFLEN 80
 #define BILEN 10
 

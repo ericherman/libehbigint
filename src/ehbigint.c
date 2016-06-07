@@ -122,9 +122,10 @@ void ehbi_debug_to_string(int level, struct ehbigint *bi, const char *name)
 	fprintf(stderr, ",\n");
 
 	size = 5 + (4 * bi->bytes_used);
-	buf = malloc(size);
+	buf = ehbi_stack_alloc(size);
 	if (!buf) {
-		fprintf(stderr, "malloc(%lu) failed\n", (unsigned long)size);
+		EHBI_LOG_ERROR2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
+				(unsigned long)size);
 		exit(EXIT_FAILURE);
 	}
 	fprintf(stderr, "\thex => ");
@@ -136,6 +137,7 @@ void ehbi_debug_to_string(int level, struct ehbigint *bi, const char *name)
 
 	ehbi_to_decimal_string(bi, buf, size);
 	fprintf(stderr, "\tdec => %s,\n", buf);
+	ehbi_stack_free(buf, size);
 
 	fprintf(stderr, "}\n");
 }

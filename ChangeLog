@@ -1,3 +1,7 @@
+2016-06-07  Eric Herman <eric@freesa.org>
+
+	cleanup includes in tests, and tests LDADDs
+
 2016-05-22  Eric Herman <eric@freesa.org>
 
 	ensure tests do not return values out of range

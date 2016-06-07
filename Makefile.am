@@ -29,7 +29,7 @@ COMMON_TEST_SOURCES=src/ehbigint.h \
  tests/test-ehbigint-private-utils.h \
  tests/test-ehbigint-private-utils.c
 
-TEST_LDADDS=-lehstr -lecheck
+TEST_LDADDS=-lehstr -lecheck -lehbigint
 
 test_add_SOURCES=tests/test-add.c $(COMMON_TEST_SOURCES)
 test_add_LDADD=$(TEST_LDADDS)

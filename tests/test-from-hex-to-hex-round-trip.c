@@ -3,7 +3,6 @@
 #include <echeck.h>
 #include <stdlib.h>
 
-#include "ehbigint.h"
 #include "test-ehbigint-private-utils.h"
 
 int test_from_hex_to_hex_round_trip(int verbose)

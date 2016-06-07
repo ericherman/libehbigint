@@ -1,7 +1,7 @@
 #ifndef TEST_EHBIGINT_PRIVATE_UTILS_H
 #define TEST_EHBIGINT_PRIVATE_UTILS_H
 
-#include "ehbigint.h"
+#include "../src/ehbigint.h"
 
 #define TEST_FUNC \
 	((ECHECK_FUNC == NULL) ? "" : ECHECK_FUNC)

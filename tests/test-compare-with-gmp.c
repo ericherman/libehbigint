@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <gmp.h>
 
-#include "ehbigint.h"
 #include "test-ehbigint-private-utils.h"
 
 int test_compare_with_gmp(int verbose, int max_iterations, char *cmp_init_val)

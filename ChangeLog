@@ -1,5 +1,9 @@
 2016-10-05  Eric Herman <eric@freesa.org>
 
+	* Makefile.old: not needed any more
+
+2016-10-05  Eric Herman <eric@freesa.org>
+
 	License files tidy (LGPLv3+), to make it more github friendly
 
 	* COPYING: replace boilerplate LGPLv3+ with misc/lgpl-3.0.txt

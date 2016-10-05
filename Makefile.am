@@ -96,7 +96,7 @@ bi_calc_LDADD=-lehbigint -lehstr
 
 ACLOCAL_AMFLAGS=-I m4 --install
 
-EXTRA_DIST=misc
+EXTRA_DIST=COPYING.GPL3
 
 CSTD_CFLAGS=-std=c89 -DEHBI_ENSURE_POSIX=1
 #CSTD_CFLAGS=-std=c11

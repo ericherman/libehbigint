@@ -1,3 +1,14 @@
+2016-10-05  Eric Herman <eric@freesa.org>
+
+	License files tidy (LGPLv3+), to make it more github friendly
+
+	* COPYING: replace boilerplate LGPLv3+ with misc/lgpl-3.0.txt
+	* README: remove reference to misc/
+	* Makefile.am: replace misc/ with COPYING.GPL3
+	* misc/gpl-3.0.txt: renamed to COPYING.GPL3
+	* misc/lgpl-3.0.txt: renamed to COPYING
+	* COPYING.GPL3: renamed from misc/gpl-3.0.txt
+
 2016-06-19  Eric Herman <eric@freesa.org>
 
 	* COPYING: boilerplate LGPLv3+

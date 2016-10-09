@@ -884,6 +884,21 @@ static int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
 	return EHBI_SUCCESS;
 }
 
+FILE *global_ehbi_log_file = NULL;
+
+FILE *ehbi_log_file()
+{
+	if (global_ehbi_log_file == NULL) {
+		global_ehbi_log_file = stderr;
+	}
+	return global_ehbi_log_file;
+}
+
+void set_ehbi_log_file(FILE *log)
+{
+	global_ehbi_log_file = log;
+}
+
 void ehbi_log_backtrace(FILE *log)
 {
 #ifdef _POSIX_C_SOURCE

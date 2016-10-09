@@ -163,43 +163,42 @@ enum {
 	EHBI_LAST
 };
 
-/* yes, this would be better if dynamic, maybe later */
-#ifndef EHBI_LOG_FILE
-#define EHBI_LOG_FILE stderr
-#endif
+FILE *ehbi_log_file();
+
+void set_ehbi_log_file(FILE *log);
 
 void ehbi_log_backtrace(FILE *log);
 
 #ifndef EHBI_LOG_ERROR0
 #define EHBI_LOG_ERROR0(format) \
- fprintf(EHBI_LOG_FILE, "%s:%d: ", __FILE__, __LINE__); \
- fprintf(EHBI_LOG_FILE, format); \
- fprintf(EHBI_LOG_FILE, "\n"); \
- ehbi_log_backtrace(EHBI_LOG_FILE)
+ fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
+ fprintf(ehbi_log_file(), format); \
+ fprintf(ehbi_log_file(), "\n"); \
+ ehbi_log_backtrace(ehbi_log_file())
 #endif
 
 #ifndef EHBI_LOG_ERROR1
 #define EHBI_LOG_ERROR1(format, arg) \
- fprintf(EHBI_LOG_FILE, "%s:%d: ", __FILE__, __LINE__); \
- fprintf(EHBI_LOG_FILE, format, arg); \
- fprintf(EHBI_LOG_FILE, "\n"); \
- ehbi_log_backtrace(EHBI_LOG_FILE)
+ fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
+ fprintf(ehbi_log_file(), format, arg); \
+ fprintf(ehbi_log_file(), "\n"); \
+ ehbi_log_backtrace(ehbi_log_file())
 #endif
 
 #ifndef EHBI_LOG_ERROR2
 #define EHBI_LOG_ERROR2(format, arg1, arg2) \
- fprintf(EHBI_LOG_FILE, "%s:%d: ", __FILE__, __LINE__); \
- fprintf(EHBI_LOG_FILE, format, arg1, arg2); \
- fprintf(EHBI_LOG_FILE, "\n"); \
- ehbi_log_backtrace(EHBI_LOG_FILE)
+ fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
+ fprintf(ehbi_log_file(), format, arg1, arg2); \
+ fprintf(ehbi_log_file(), "\n"); \
+ ehbi_log_backtrace(ehbi_log_file())
 #endif
 
 #ifndef EHBI_LOG_ERROR3
 #define EHBI_LOG_ERROR3(format, arg1, arg2, arg3) \
- fprintf(EHBI_LOG_FILE, "%s:%d: ", __FILE__, __LINE__); \
- fprintf(EHBI_LOG_FILE, format, arg1, arg2, arg3); \
- fprintf(EHBI_LOG_FILE, "\n"); \
- ehbi_log_backtrace(EHBI_LOG_FILE)
+ fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
+ fprintf(ehbi_log_file(), format, arg1, arg2, arg3); \
+ fprintf(ehbi_log_file(), "\n"); \
+ ehbi_log_backtrace(ehbi_log_file())
 #endif
 
 #endif /* EHBIGINT_H */

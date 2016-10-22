@@ -133,22 +133,22 @@ demo: bi-calc
 		132904811234120000312412 + 123412413132500
 
 valgrind: $(check_PROGRAMS)
-	libtool --mode=execute valgrind ./test-add
-	libtool --mode=execute valgrind ./test-compare
-	libtool --mode=execute valgrind ./test-compare-with-gmp
-	libtool --mode=execute valgrind ./test-compare2
-	libtool --mode=execute valgrind ./test-dec
-	libtool --mode=execute valgrind ./test-dec-corner-case
-	libtool --mode=execute valgrind ./test-div
-	libtool --mode=execute valgrind ./test-equals
-	libtool --mode=execute valgrind \
+	libtool --mode=execute valgrind -q ./test-add
+	libtool --mode=execute valgrind -q ./test-compare
+	libtool --mode=execute valgrind -q ./test-compare-with-gmp
+	libtool --mode=execute valgrind -q ./test-compare2
+	libtool --mode=execute valgrind -q ./test-dec
+	libtool --mode=execute valgrind -q ./test-dec-corner-case
+	libtool --mode=execute valgrind -q ./test-div
+	libtool --mode=execute valgrind -q ./test-equals
+	libtool --mode=execute valgrind -q \
 		./test-from-decimal-to-decimal-round-trip
-	libtool --mode=execute valgrind ./test-from-hex-to-hex-round-trip
-	libtool --mode=execute valgrind ./test-inc
-	libtool --mode=execute valgrind ./test-inc-ul
-	libtool --mode=execute valgrind ./test-mul
-	libtool --mode=execute valgrind ./test-scenario-mul-mod
-	libtool --mode=execute valgrind ./test-set
-	libtool --mode=execute valgrind ./test-set-ul
-	libtool --mode=execute valgrind ./test-subtract
-	libtool --mode=execute valgrind ./test-to-string
+	libtool --mode=execute valgrind -q ./test-from-hex-to-hex-round-trip
+	libtool --mode=execute valgrind -q ./test-inc
+	libtool --mode=execute valgrind -q ./test-inc-ul
+	libtool --mode=execute valgrind -q ./test-mul
+	libtool --mode=execute valgrind -q ./test-scenario-mul-mod
+	libtool --mode=execute valgrind -q ./test-set
+	libtool --mode=execute valgrind -q ./test-set-ul
+	libtool --mode=execute valgrind -q ./test-subtract
+	libtool --mode=execute valgrind -q ./test-to-string

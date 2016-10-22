@@ -1,3 +1,8 @@
+2016-10-22  Eric Herman <eric@freesa.org>
+
+	* src/ehbigint.c: avoid indexing outside of the array
+	* Makefile.am: less verbose valgrind (add "-q")
+
 2016-10-05  Eric Herman <eric@freesa.org>
 
 	* Makefile.old: not needed any more

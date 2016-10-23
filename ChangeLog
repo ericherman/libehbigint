@@ -1,3 +1,12 @@
+2016-10-23  Eric Herman <eric@freesa.org>
+
+	add "ehbi_bytes_shift_left" function, improve division
+
+	division is now implemented using a "long divsion" approach
+
+	* src/ehbigint.h: add ehbi_bytes_shift_left
+	* src/ehbigint.c: ehbi_bytes_shift_left, improve divsion
+
 2016-10-22  Eric Herman <eric@freesa.org>
 
 	* src/ehbigint.c: avoid indexing outside of the array

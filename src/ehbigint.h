@@ -99,6 +99,12 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 		  const struct ehbigint *bi2);
 
 /*
+   shifts the value of the ehbigint up by num_bytes number of bytes
+   returns 0 on success or error_code on error
+*/
+int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes);
+
+/*
    returns 1 if the values represented by the ehbigint arguments are equal
    returns 0 otherwise
    populates the contents of err with 0 on success or error_code on error

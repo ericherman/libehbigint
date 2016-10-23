@@ -530,6 +530,7 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	     const struct ehbigint *denominator)
 {
 	int err;
+	size_t i, num_idx;
 
 	if (quotient == 0 || remainder == 0 || numerator == 0
 	    || denominator == 0) {
@@ -542,30 +543,84 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		return EHBI_BYTES_TOO_SMALL;
 	}
 
+	err = EHBI_SUCCESS;
+
 	ehbi_zero(quotient);
 
-	/* Smarter would be to do a long-division style approach, but for now,
-	   I'm going do looped subtraction because that will be easy
-	   but slow, of course. */
+	/* just early return if denominator is bigger than numerator */
+	if (ehbi_greater_than(denominator, numerator, &err)) {
+		ehbi_set(remainder, numerator);
+		return err;
+	} else if (err) {
+		return err;
+	}
+	ehbi_zero(remainder);
 
-	ehbi_set(remainder, numerator);
+	num_idx = numerator->bytes_len - numerator->bytes_used;
+	for (i = 0; i < denominator->bytes_used; ++i) {
+		if ((remainder->bytes_used > 1)
+		    || (remainder->bytes[remainder->bytes_len - 1] != 0x00)) {
+			err = ehbi_bytes_shift_left(remainder, 1);
+			if (err) {
+				goto ehbi_div_end;
+			}
+		}
+		remainder->bytes[remainder->bytes_len - 1] =
+		    numerator->bytes[num_idx++];
+	}
+	if (ehbi_greater_than(denominator, remainder, &err)) {
+		err = ehbi_bytes_shift_left(remainder, 1);
+		if (err) {
+			goto ehbi_div_end;
+		}
+		remainder->bytes[remainder->bytes_len - 1] =
+		    numerator->bytes[num_idx++];
+	}
+	if (err) {
+		goto ehbi_div_end;
+	}
 
-	err = 0;
+	ehbi_zero(quotient);
+
+	i = 0;
 	while (ehbi_greater_than(remainder, denominator, &err)) {
 		if (err) {
-			return err;
+			goto ehbi_div_end;
 		}
 		err = ehbi_inc_ul(quotient, 1);
 		if (err) {
-			return err;
+			goto ehbi_div_end;
 		}
 		err = ehbi_dec(remainder, denominator);
 		if (err) {
-			return err;
+			goto ehbi_div_end;
+		}
+		while (ehbi_less_than(remainder, denominator, &err)
+		       && (num_idx < numerator->bytes_len)) {
+			err = ehbi_bytes_shift_left(quotient, 1);
+			if (err) {
+				goto ehbi_div_end;
+			}
+
+			err = ehbi_bytes_shift_left(remainder, 1);
+			if (err) {
+				goto ehbi_div_end;
+			}
+			remainder->bytes[remainder->bytes_len - 1] =
+			    numerator->bytes[num_idx++];
+		}
+		if (err) {
+			goto ehbi_div_end;
 		}
 	}
 
-	return EHBI_SUCCESS;
+ehbi_div_end:
+	/* if error, let's not return garbage or 1/2 an answer */
+	if (err) {
+		ehbi_zero(quotient);
+		ehbi_zero(remainder);
+	}
+	return err;
 }
 
 int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
@@ -757,6 +812,42 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 			res->bytes[res->bytes_len - i] = 0xFF;
 			++i;
 		}
+	}
+
+	return EHBI_SUCCESS;
+}
+
+int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes)
+{
+	size_t i;
+
+	if (bi == 0) {
+		EHBI_LOG_ERROR0("Null argument(s)");
+		return EHBI_NULL_ARGS;
+	}
+
+	if (num_bytes == 0) {
+		return EHBI_SUCCESS;
+	}
+
+	/* by ensuring that we have at least one extra byte of freespace,
+	 * we avoid some werid sign issues */
+	if (bi->bytes_len < (bi->bytes_used + 1 + num_bytes)) {
+		EHBI_LOG_ERROR0("Result byte[] too small for shift");
+		return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
+	}
+
+	bi->bytes_used += num_bytes;
+
+	/* shift the value left by num_bytes bytes */
+	for (i = 0; i < bi->bytes_len; ++i) {
+		/* shift the value byte one byte */
+		bi->bytes[i] = bi->bytes[i + num_bytes];
+	}
+
+	/* set the zero/-1 value on the right */
+	for (i = 0; i < num_bytes; ++i) {
+		bi->bytes[bi->bytes_len - 1] = bi->bytes[0];
 	}
 
 	return EHBI_SUCCESS;

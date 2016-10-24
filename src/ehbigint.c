@@ -543,19 +543,18 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		return EHBI_BYTES_TOO_SMALL;
 	}
 
-	err = EHBI_SUCCESS;
-
-	ehbi_zero(quotient);
-
 	/* just early return if denominator is bigger than numerator */
 	if (ehbi_greater_than(denominator, numerator, &err)) {
+		ehbi_zero(quotient);
 		ehbi_set(remainder, numerator);
-		return err;
+		goto ehbi_div_end;
 	} else if (err) {
-		return err;
+		goto ehbi_div_end;
 	}
-	ehbi_zero(remainder);
 
+	/* base 256 "long division" */
+	ehbi_zero(quotient);
+	ehbi_zero(remainder);
 	num_idx = numerator->bytes_len - numerator->bytes_used;
 	for (i = 0; i < denominator->bytes_used; ++i) {
 		if ((remainder->bytes_used > 1)

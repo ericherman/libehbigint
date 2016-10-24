@@ -580,8 +580,6 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		goto ehbi_div_end;
 	}
 
-	ehbi_zero(quotient);
-
 	i = 0;
 	while (ehbi_greater_than(remainder, denominator, &err)) {
 		if (err) {

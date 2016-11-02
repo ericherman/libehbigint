@@ -6,11 +6,14 @@
 #endif /* _POSIX_C_SOURCE */
 
 #include "ehbigint.h"
+#include "ehbigint-error.h"
 
 #include <string.h>
 #include <execinfo.h>
 #include <stdarg.h>
 #include <ehstr.h>
+
+#include <stdlib.h> /* exit() used in ehbi_debug_to_string */
 
 #ifdef EHBI_NO_ALLOCA
 static void ehbi_do_stack_free(void *ptr, size_t size)

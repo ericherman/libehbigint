@@ -1,3 +1,12 @@
+2016-11-02  Eric Herman <eric@freesa.org>
+
+	split out error related definitions to separate header
+
+	* src/ehbigint.h: remove error related definitions
+	* src/ehbigint-error.h: copied from src/ehbigint.h
+	* src/ehbigint.c: include the new header
+	* Makefile.am: reference the new header
+
 2016-10-23  Eric Herman <eric@freesa.org>
 
 	add "ehbi_bytes_shift_left" function, improve division

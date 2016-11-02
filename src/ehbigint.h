@@ -1,8 +1,7 @@
 #ifndef EHBIGINT_H
 #define EHBIGINT_H
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <stddef.h> /* size_t */
 
 struct ehbigint {
 	unsigned char *bytes;
@@ -142,69 +141,5 @@ int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 */
 int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		 int *err);
-
-/* error codes */
-enum {
-	EHBI_SUCCESS = 0,
-	EHBI_NULL_CHAR_PTR,
-	EHBI_BAD_INPUT,
-	EHBI_NOT_HEX,
-	EHBI_BAD_HIGH_NIBBLE,
-	EHBI_BAD_LOW_NIBBLE,
-	EHBI_NULL_STRUCT,
-	EHBI_NULL_STRING,
-	EHBI_NULL_STRING_BUF,
-	EHBI_NULL_ARGS,
-	EHBI_ZERO_LEN_STRING,
-	EHBI_STRING_BUF_TOO_SMALL,
-	EHBI_STRING_BUF_TOO_SMALL_PARTIAL,
-	EHBI_STRING_BUF_TOO_SMALL_NO_NULL,
-	EHBI_NULL_BYTES,
-	EHBI_BYTES_TOO_SMALL,
-	EHBI_BYTES_TOO_SMALL_FOR_CARRY,
-	EHBI_BYTES_TOO_SMALL_FOR_BORROW,
-	EHBI_BAD_DATA,
-	EHBI_CORRUPT_DATA,
-	EHBI_STACK_TOO_SMALL,
-	EHBI_LAST
-};
-
-FILE *ehbi_log_file();
-
-void set_ehbi_log_file(FILE *log);
-
-void ehbi_log_backtrace(FILE *log);
-
-#ifndef EHBI_LOG_ERROR0
-#define EHBI_LOG_ERROR0(format) \
- fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
- fprintf(ehbi_log_file(), format); \
- fprintf(ehbi_log_file(), "\n"); \
- ehbi_log_backtrace(ehbi_log_file())
-#endif
-
-#ifndef EHBI_LOG_ERROR1
-#define EHBI_LOG_ERROR1(format, arg) \
- fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
- fprintf(ehbi_log_file(), format, arg); \
- fprintf(ehbi_log_file(), "\n"); \
- ehbi_log_backtrace(ehbi_log_file())
-#endif
-
-#ifndef EHBI_LOG_ERROR2
-#define EHBI_LOG_ERROR2(format, arg1, arg2) \
- fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
- fprintf(ehbi_log_file(), format, arg1, arg2); \
- fprintf(ehbi_log_file(), "\n"); \
- ehbi_log_backtrace(ehbi_log_file())
-#endif
-
-#ifndef EHBI_LOG_ERROR3
-#define EHBI_LOG_ERROR3(format, arg1, arg2, arg3) \
- fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
- fprintf(ehbi_log_file(), format, arg1, arg2, arg3); \
- fprintf(ehbi_log_file(), "\n"); \
- ehbi_log_backtrace(ehbi_log_file())
-#endif
 
 #endif /* EHBIGINT_H */

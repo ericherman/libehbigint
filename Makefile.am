@@ -1,5 +1,5 @@
 lib_LTLIBRARIES=libehbigint.la
-libehbigint_la_SOURCES=src/ehbigint.c src/ehbigint.h
+libehbigint_la_SOURCES=src/ehbigint.h src/ehbigint-error.h src/ehbigint.c
 libehbigint_la_LIBADD=-lehstr
 
 include_HEADERS=src/ehbigint.h

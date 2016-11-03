@@ -1,3 +1,7 @@
+2016-11-03  Eric Herman <eric@freesa.org>
+
+	added LGPLv3+ header boilerplate to sources
+
 2016-11-02  Eric Herman <eric@freesa.org>
 
 	split out error related definitions to separate header

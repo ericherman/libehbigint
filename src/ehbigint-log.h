@@ -1,5 +1,5 @@
 /*
-ehbigint-error.h: definitions for error reporting
+ehbigint-log.h: definitions for error reporting
 Copyright (C) 2016 Eric Herman <eric@freesa.org>
 
 This work is free software: you can redistribute it and/or modify it
@@ -12,12 +12,17 @@ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 */
+#ifndef EHBIGINT_LOG_H
+#define EHBIGINT_LOG_H
 
+#ifdef _GNU_SOURCE
+#ifndef EHBI_CAN_BACKTRACE
+#define EHBI_CAN_BACKTRACE 1
+#endif
+#endif
 
-#ifndef EHBIGINT_ERROR_H
-#define EHBIGINT_ERROR_H
-
-#include <stdio.h>
+#include <stdio.h> /* FILE */
+#include <ehbigint.h> /* struct ehbigint */
 
 /* Get the FILE pointer to where fprintf messages currently target.
    Defaults to stderr. */
@@ -26,31 +31,10 @@ FILE *ehbi_log_file();
 /* Set the FILE pointer to where fprintf messages shall target. */
 void set_ehbi_log_file(FILE *log);
 
-/* error codes */
-enum {
-	EHBI_SUCCESS = 0,
-	EHBI_NULL_CHAR_PTR,
-	EHBI_BAD_INPUT,
-	EHBI_NOT_HEX,
-	EHBI_BAD_HIGH_NIBBLE,
-	EHBI_BAD_LOW_NIBBLE,
-	EHBI_NULL_STRUCT,
-	EHBI_NULL_STRING,
-	EHBI_NULL_STRING_BUF,
-	EHBI_NULL_ARGS,
-	EHBI_ZERO_LEN_STRING,
-	EHBI_STRING_BUF_TOO_SMALL,
-	EHBI_STRING_BUF_TOO_SMALL_PARTIAL,
-	EHBI_STRING_BUF_TOO_SMALL_NO_NULL,
-	EHBI_NULL_BYTES,
-	EHBI_BYTES_TOO_SMALL,
-	EHBI_BYTES_TOO_SMALL_FOR_CARRY,
-	EHBI_BYTES_TOO_SMALL_FOR_BORROW,
-	EHBI_BAD_DATA,
-	EHBI_CORRUPT_DATA,
-	EHBI_STACK_TOO_SMALL,
-	EHBI_LAST
-};
+extern int ehbi_debug_log_level;
+int ehbi_debugf(int level, const char *fmt, ...);
+
+void ehbi_debug_to_string(int level, struct ehbigint *bi, const char *name);
 
 /* if _POSIX_C_SOURCE backtrace_symbols_fd is used */
 void ehbi_log_backtrace(FILE *log);
@@ -87,4 +71,4 @@ void ehbi_log_backtrace(FILE *log);
  ehbi_log_backtrace(ehbi_log_file())
 #endif
 
-#endif /* EHBIGINT_ERROR_H */
+#endif /* EHBIGINT_LOG_H */

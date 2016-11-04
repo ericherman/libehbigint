@@ -12,10 +12,18 @@
 #License for more details.
 
 lib_LTLIBRARIES=libehbigint.la
-libehbigint_la_SOURCES=src/ehbigint.h src/ehbigint-error.h src/ehbigint.c
-libehbigint_la_LIBADD=-lehstr
-
 include_HEADERS=src/ehbigint.h
+
+libehbigint_la_SOURCES=\
+ src/ehbigint.h \
+ src/ehbigint-log.h \
+ src/ehbigint-util.h \
+ src/ehbigint-log.c \
+ src/ehbigint-util.c \
+ src/ehbigint.c
+libehbigint_la_LIBADD=-lehstr
+AM_LDFLAGS=-rdynamic
+
 
 TESTS=$(check_PROGRAMS)
 check_PROGRAMS=\
@@ -111,15 +119,15 @@ ACLOCAL_AMFLAGS=-I m4 --install
 
 EXTRA_DIST=COPYING.GPL3
 
-CSTD_CFLAGS=-std=c89 -DEHBI_ENSURE_POSIX=1
-#CSTD_CFLAGS=-std=c11
+CSTD_CFLAGS=-std=c89
+#CSTD_CFLAGS=-std=gnu11 -DEBHI_CAN_BACKTRACE=1
 
 ALLOCA_FLAGS=
 #ALLOCA_FLAGS=-DEHBI_NO_ALLOCA=1
 
 VERBOSE_ANNOUNCE=0
 #VERBOSE_ANNOUNCE=1
-DEBUG_CFLAGS=-ggdb -O3
+DEBUG_CFLAGS=-ggdb -O3 -rdynamic
 #DEBUG_CFLAGS=-ggdb -O0
 
 NOISY_CFLAGS=-Wall -Wextra -pedantic -Werror

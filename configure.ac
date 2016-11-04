@@ -22,6 +22,7 @@ AC_CHECK_LIB([gmp], [mpz_init])
 
 # Checks for header files.
 AC_FUNC_ALLOCA
+AC_FUNC_BACKTRACE
 AC_CHECK_HEADERS([stdlib.h string.h])
 
 # Checks for typedefs, structures, and compiler characteristics.

@@ -12,8 +12,10 @@ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 */
-#include "../src/ehbigint.c"
+#include "../src/ehbigint.h"
+#include <stdio.h> /* printf fprintf */
 #include <string.h>
+#include <ehstr.h> /* decimal_to_hex */
 
 int main(int argc, char *argv[])
 {
@@ -43,8 +45,8 @@ int main(int argc, char *argv[])
 	bigint_3.bytes = bbuf3;
 	bigint_3.bytes_len = 1024;
 
-	ehbi_decimal_to_hex(argv[1], strlen(argv[1]), hexbuf1, 1024);
-	ehbi_decimal_to_hex(argv[3], strlen(argv[3]), hexbuf2, 1024);
+	decimal_to_hex(argv[1], strlen(argv[1]), hexbuf1, 1024);
+	decimal_to_hex(argv[3], strlen(argv[3]), hexbuf2, 1024);
 
 	ehbi_from_hex_string(&bigint_1, hexbuf1, 1024);
 	ehbi_from_hex_string(&bigint_2, hexbuf2, 1024);
@@ -63,11 +65,11 @@ int main(int argc, char *argv[])
 
 	ehbi_to_hex_string(&bigint_3, hexbuf3, 1024);
 
-	ehbi_hex_to_decimal(hexbuf1, 1024, buf, 1024);
+	hex_to_decimal(hexbuf1, 1024, buf, 1024);
 	printf("   %40s\n", buf);
-	ehbi_hex_to_decimal(hexbuf2, 1024, buf, 1024);
+	hex_to_decimal(hexbuf2, 1024, buf, 1024);
 	printf(" %c %40s\n", *argv[2], buf);
-	ehbi_hex_to_decimal(hexbuf3, 1024, buf, 1024);
+	hex_to_decimal(hexbuf3, 1024, buf, 1024);
 	printf(" = %40s\n", buf);
 
 	return 0;

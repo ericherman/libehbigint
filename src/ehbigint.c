@@ -13,196 +13,15 @@ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 */
 
-
-/* _POSIX_C_SOURCE needed for backtrace_symbols_fd */
-#ifndef _POSIX_C_SOURCE
-#ifdef EHBI_ENSURE_POSIX
-#define _POSIX_C_SOURCE EHBI_ENSURE_POSIX
-#endif /* EHBI_ENSURE_POSIX */
-#endif /* _POSIX_C_SOURCE */
+/* directly include the C file with static functions */
 
 #include "ehbigint.h"
-#include "ehbigint-error.h"
+#include "ehbigint-log.h"
+#include "ehbigint-util.h"
 
-#include <string.h>
-#include <execinfo.h>
-#include <stdarg.h>
-#include <ehstr.h>
+#include <string.h> /* strlen */
 
-#include <stdlib.h> /* exit() used in ehbi_debug_to_string */
-
-#ifdef EHBI_NO_ALLOCA
-static void ehbi_do_stack_free(void *ptr, size_t size)
-{
-	if (size == 0) {
-		EHBI_LOG_ERROR2("size is 0? (%p, %lu)\n", ptr,
-				(unsigned long)size);
-	}
-	free(ptr);
-}
-
-#define ehbi_stack_alloc malloc
-#define ehbi_stack_alloc_str "malloc"
-#define ehbi_stack_free ehbi_do_stack_free
-#else
-#include <alloca.h>
-static void ehbi_no_stack_free(void *ptr, size_t size)
-{
-	if (size == 0) {
-		EHBI_LOG_ERROR2("size is 0? (%p, %lu)\n", ptr,
-				(unsigned long)size);
-	}
-}
-
-#define ehbi_stack_alloc alloca
-#define ehbi_stack_alloc_str "alloca"
-#define ehbi_stack_free ehbi_no_stack_free
-#endif
-
-int ehbi_debug_log_level = 0;
-
-int debugf(int level, const char *fmt, ...)
-{
-	va_list ap;
-	int r;
-
-	if (ehbi_debug_log_level < level) {
-		return 0;
-	}
-
-	va_start(ap, fmt);
-	r = vfprintf(stderr, fmt, ap);
-	va_end(ap);
-	return r;
-}
-
-static int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
-			       size_t buf_len);
-
-static int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
-			       size_t buf_len);
-
-static int nibble_to_hex(unsigned char nibble, char *c)
-{
-	if (c == 0) {
-		EHBI_LOG_ERROR0("Null char pointer");
-		return EHBI_NULL_CHAR_PTR;
-	}
-	if (nibble < 10) {
-		*c = '0' + nibble;
-	} else if (nibble < 16) {
-		*c = 'A' + nibble - 10;
-	} else {
-		EHBI_LOG_ERROR1("Bad input '%x'", nibble);
-		return EHBI_BAD_INPUT;
-	}
-	return EHBI_SUCCESS;
-}
-
-static int to_hex(unsigned char byte, char *high, char *low)
-{
-	int err;
-
-	err = 0;
-	err += nibble_to_hex((byte & 0xF0) >> 4, high);
-	err += nibble_to_hex((byte & 0x0F), low);
-
-	return err;
-}
-
-void ehbi_debug_to_string(int level, struct ehbigint *bi, const char *name)
-{
-	char *buf, h, l;
-	size_t size, i;
-
-	if (ehbi_debug_log_level < level) {
-		return;
-	}
-
-	fprintf(stderr,
-		"%s (%p) => {\n\tbytes => (%p),\n" "\tbytes_len => %lu,\n"
-		"\tbytes_used => %lu,\n", name, (void *)bi,
-		(void *)bi->bytes, (unsigned long)bi->bytes_len,
-		(unsigned long)bi->bytes_used);
-
-	fprintf(stderr, "\tused  => ");
-	for (i = bi->bytes_len; i > 0; --i) {
-		fprintf(stderr, "%s", i > bi->bytes_used ? "XX" : "__");
-	}
-	fprintf(stderr, ",\n");
-
-	fprintf(stderr, "\tbytes => ");
-	for (i = bi->bytes_len; i > 0; --i) {
-		h = '?';
-		l = '?';
-		to_hex(bi->bytes[bi->bytes_len - i], &h, &l);
-		fprintf(stderr, "%c%c", h, l);
-	}
-	fprintf(stderr, ",\n");
-
-	size = 5 + (4 * bi->bytes_used);
-	buf = ehbi_stack_alloc(size);
-	if (!buf) {
-		EHBI_LOG_ERROR2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
-				(unsigned long)size);
-		exit(EXIT_FAILURE);
-	}
-	fprintf(stderr, "\thex => ");
-	for (i = 0; i < (bi->bytes_len - bi->bytes_used); ++i) {
-		fprintf(stderr, "  ");
-	}
-	ehbi_to_hex_string(bi, buf, size);
-	fprintf(stderr, "%s,\n", buf);
-
-	ehbi_to_decimal_string(bi, buf, size);
-	fprintf(stderr, "\tdec => %s,\n", buf);
-	ehbi_stack_free(buf, size);
-
-	fprintf(stderr, "}\n");
-}
-
-static int from_hex_nibble(unsigned char *nibble, char c)
-{
-
-	if (nibble == 0) {
-		EHBI_LOG_ERROR0("Null char pointer");
-		return EHBI_NULL_CHAR_PTR;
-	}
-	if (c >= '0' && c <= '9') {
-		*nibble = c - '0';
-	} else if (c >= 'a' && c <= 'f') {
-		*nibble = 10 + c - 'a';
-	} else if (c >= 'A' && c <= 'F') {
-		*nibble = 10 + c - 'A';
-	} else {
-		EHBI_LOG_ERROR1("Not hex (%c)", c);
-		return EHBI_NOT_HEX;
-	}
-
-	return EHBI_SUCCESS;
-}
-
-static int from_hex(unsigned char *byte, char high, char low)
-{
-	int err;
-	unsigned char nibble;
-
-	err = from_hex_nibble(&nibble, high);
-	if (err) {
-		EHBI_LOG_ERROR1("Error with high nibble (%c)", high);
-		return EHBI_BAD_HIGH_NIBBLE;
-	}
-	*byte = (nibble << 4);
-
-	err = from_hex_nibble(&nibble, low);
-	if (err) {
-		EHBI_LOG_ERROR1("Error with low nibble (%c)", high);
-		return EHBI_BAD_LOW_NIBBLE;
-	}
-	*byte += nibble;
-
-	return EHBI_SUCCESS;
-}
+static int ehbi_zero(struct ehbigint *bi);
 
 int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 {
@@ -255,7 +74,7 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 			EHBI_LOG_ERROR0("byte[] too small");
 			return EHBI_BYTES_TOO_SMALL;
 		}
-		if (from_hex(&(bi->bytes[--i]), high, low)) {
+		if (ehbi_from_hex(&(bi->bytes[--i]), high, low)) {
 			EHBI_LOG_ERROR2("Bad data (high: %c, low: %c)", high,
 					low);
 			return EHBI_BAD_DATA;
@@ -292,26 +111,6 @@ int ehbi_from_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 	err = ehbi_from_hex_string(bi, hex, size);
 	ehbi_stack_free(hex, size);
 	return err;
-}
-
-static int ehbi_zero(struct ehbigint *bi)
-{
-	size_t i;
-	if (bi == 0) {
-		EHBI_LOG_ERROR0("Null struct");
-		return EHBI_NULL_STRUCT;
-	}
-	if (bi->bytes == 0) {
-		EHBI_LOG_ERROR0("Null bytes[]");
-		return EHBI_NULL_BYTES;
-	}
-
-	for (i = 0; i < bi->bytes_len; ++i) {
-		bi->bytes[i] = 0x00;
-	}
-	bi->bytes_used = 1;
-
-	return EHBI_SUCCESS;
 }
 
 int ehbi_set_ul(struct ehbigint *bi, unsigned long val)
@@ -360,7 +159,7 @@ int ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len)
 			EHBI_LOG_ERROR0("Buffer too small, partially written");
 			return EHBI_STRING_BUF_TOO_SMALL_PARTIAL;
 		}
-		err = to_hex(bi->bytes[i], buf + j, buf + j + 1);
+		err = ehbi_to_hex(bi->bytes[i], buf + j, buf + j + 1);
 		if (err) {
 			EHBI_LOG_ERROR0("Corrupted data?");
 			return err;
@@ -942,80 +741,22 @@ int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 	return ((ehbi_compare(bi1, bi2, err) > 0) && (*err == EHBI_SUCCESS));
 }
 
-static int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
-			       size_t buf_len)
+static int ehbi_zero(struct ehbigint *bi)
 {
-	char *rv;
-
-	if (dec_str == 0 || buf == 0) {
-		EHBI_LOG_ERROR0("Null argument");
-		return EHBI_NULL_ARGS;
+	size_t i;
+	if (bi == 0) {
+		EHBI_LOG_ERROR0("Null struct");
+		return EHBI_NULL_STRUCT;
+	}
+	if (bi->bytes == 0) {
+		EHBI_LOG_ERROR0("Null bytes[]");
+		return EHBI_NULL_BYTES;
 	}
 
-	if (buf_len < 5) {
-		EHBI_LOG_ERROR0("Buffer too small");
-		return EHBI_STRING_BUF_TOO_SMALL;
+	for (i = 0; i < bi->bytes_len; ++i) {
+		bi->bytes[i] = 0x00;
 	}
-
-	rv = decimal_to_hex(dec_str, dec_len, buf, buf_len);
-
-	if (rv == NULL) {
-		EHBI_LOG_ERROR1("Character not decimal? (%s)", dec_str);
-		return EHBI_BAD_INPUT;
-	}
+	bi->bytes_used = 1;
 
 	return EHBI_SUCCESS;
-}
-
-static int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
-			       size_t buf_len)
-{
-	char *rv;
-
-	if (hex == 0 || buf == 0) {
-		EHBI_LOG_ERROR0("Null argument");
-		return EHBI_NULL_ARGS;
-	}
-
-	if (buf_len < 2 || buf_len < hex_len) {
-		EHBI_LOG_ERROR0("Buffer too small");
-		return EHBI_STRING_BUF_TOO_SMALL;
-	}
-
-	rv = hex_to_decimal(hex, hex_len, buf, buf_len);
-
-	if (rv == NULL) {
-		EHBI_LOG_ERROR1("Character not hex? (%s)", hex);
-		return EHBI_BAD_INPUT;
-	}
-
-	return EHBI_SUCCESS;
-}
-
-FILE *global_ehbi_log_file = NULL;
-
-FILE *ehbi_log_file()
-{
-	if (global_ehbi_log_file == NULL) {
-		global_ehbi_log_file = stderr;
-	}
-	return global_ehbi_log_file;
-}
-
-void set_ehbi_log_file(FILE *log)
-{
-	global_ehbi_log_file = log;
-}
-
-void ehbi_log_backtrace(FILE *log)
-{
-#ifdef _POSIX_C_SOURCE
-	void *array[4096];
-	size_t size;
-
-	size = backtrace(array, 4096);
-	backtrace_symbols_fd(array, size, fileno(log));
-#else
-	fprintf(log, "(backtrace unavailable)\n");
-#endif /* _POSIX_C_SOURCE */
 }

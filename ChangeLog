@@ -1,3 +1,19 @@
+2016-11-04  Eric Herman <eric@freesa.org>
+
+	reorganize code: split logging and util functions out
+	replace EHBI_ENSURE_POSIX with EBHI_CAN_BACKTRACE
+	prefix some internal functions with ehbi_ for clarity
+
+	* src/ehbigint-log.h: renamed from ehbigint-error.h
+	* src/ehbigint-error.h: renamed to ehbigint-log.h
+	* src/ehbigint-log.c: logging functions
+	* src/ehbigint-util.h: decimal-to-hex functions, stack-alloc
+	* src/ehbigint-util.c: extracted from ehbigint.c
+	* src/ehbigint.h: pulled error codes back in
+	* src/ehbigint.c: use the new headers, moved support functions out
+	* demos/bi-calc.c: cleaned this up a bit
+	* Makefile.am: use the new headers and such
+
 2016-11-03  Eric Herman <eric@freesa.org>
 
 	added LGPLv3+ header boilerplate to sources

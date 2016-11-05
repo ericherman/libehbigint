@@ -655,12 +655,12 @@ int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes)
 	/* shift the value left by num_bytes bytes */
 	for (i = 0; i < bi->bytes_len; ++i) {
 		/* shift the value byte one byte */
-		bi->bytes[i] = bi->bytes[i + num_bytes];
-	}
-
-	/* set the zero/-1 value on the right */
-	for (i = 0; i < num_bytes; ++i) {
-		bi->bytes[bi->bytes_len - 1] = bi->bytes[0];
+		if (i + num_bytes >= bi->bytes_len) {
+			/* set the zero/-1 value on the right */
+			bi->bytes[i] = bi->bytes[0];
+		} else {
+			bi->bytes[i] = bi->bytes[i + num_bytes];
+		}
 	}
 
 	return EHBI_SUCCESS;

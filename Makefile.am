@@ -44,6 +44,7 @@ check_PROGRAMS=\
  test-set \
  test-set-ul \
  test-subtract \
+ test-shift-left \
  test-to-string
 
 COMMON_TEST_SOURCES=src/ehbigint.h \
@@ -107,6 +108,9 @@ test_set_ul_LDADD=$(TEST_LDADDS)
 
 test_subtract_SOURCES=tests/test-subtract.c $(COMMON_TEST_SOURCES)
 test_subtract_LDADD=$(TEST_LDADDS)
+
+test_shift_left_SOURCES=tests/test-shift-left.c $(COMMON_TEST_SOURCES)
+test_shift_left_LDADD=$(TEST_LDADDS)
 
 test_to_string_SOURCES=tests/test-to-string.c $(COMMON_TEST_SOURCES)
 test_to_string_LDADD=$(TEST_LDADDS)
@@ -172,4 +176,5 @@ valgrind: $(check_PROGRAMS)
 	libtool --mode=execute valgrind -q ./test-set
 	libtool --mode=execute valgrind -q ./test-set-ul
 	libtool --mode=execute valgrind -q ./test-subtract
+	libtool --mode=execute valgrind -q ./test-shift-left
 	libtool --mode=execute valgrind -q ./test-to-string

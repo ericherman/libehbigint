@@ -41,6 +41,7 @@ test-scenario-mul-mod
 test-set
 test-set-ul
 test-subtract
+test-shift-left
 test-to-string
 test-*-dynamic
 test-*-static

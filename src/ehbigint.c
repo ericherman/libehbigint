@@ -663,6 +663,13 @@ int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes)
 		}
 	}
 
+	/* make sure we keep "bytes_used" reasonable */
+	while (bi->bytes_used > 1
+	       && bi->bytes[bi->bytes_len - bi->bytes_used] == bi->bytes[0]
+	       && bi->bytes[bi->bytes_len - (bi->bytes_used - 1)] < 0x80) {
+		--(bi->bytes_used);
+	}
+
 	return EHBI_SUCCESS;
 }
 

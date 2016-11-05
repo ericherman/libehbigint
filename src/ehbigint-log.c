@@ -15,10 +15,10 @@ License for more details.
 
 #include "ehbigint-log.h"
 
-#include "ehbigint-util.h" /* ehbi_to_hex */
+#include "ehbigint-util.h"	/* ehbi_to_hex */
 
-#include <stdarg.h> /* va_list */
-#include <stdlib.h> /* exit() used in ehbi_debug_to_string */
+#include <stdarg.h>		/* va_list */
+#include <stdlib.h>		/* exit() used in ehbi_debug_to_string */
 
 int ehbi_debug_log_level = 0;
 int ehbi_debugf(int level, const char *fmt, ...)

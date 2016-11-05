@@ -13,9 +13,9 @@ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 */
 #include "../src/ehbigint.h"
-#include <stdio.h> /* printf fprintf */
+#include <stdio.h>		/* printf fprintf */
 #include <string.h>
-#include <ehstr.h> /* decimal_to_hex */
+#include <ehstr.h>		/* decimal_to_hex */
 
 int main(int argc, char *argv[])
 {

@@ -15,7 +15,7 @@ License for more details.
 #ifndef EHBIGINT_H
 #define EHBIGINT_H
 
-#include <stddef.h> /* size_t */
+#include <stddef.h>		/* size_t */
 
 struct ehbigint {
 	unsigned char *bytes;

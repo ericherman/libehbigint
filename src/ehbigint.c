@@ -13,13 +13,11 @@ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 */
 
-/* directly include the C file with static functions */
-
 #include "ehbigint.h"
 #include "ehbigint-log.h"
 #include "ehbigint-util.h"
 
-#include <string.h> /* strlen */
+#include <string.h>		/* strlen */
 
 static int ehbi_zero(struct ehbigint *bi);
 

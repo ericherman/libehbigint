@@ -29,16 +29,16 @@ void ehbi_no_stack_free(void *ptr, size_t size);
 #endif
 
 int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
-			       size_t buf_len);
+			size_t buf_len);
 
 int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
-			       size_t buf_len);
+			size_t buf_len);
 
 int ehbi_from_hex(unsigned char *byte, char high, char low);
 
 int ehbi_to_hex(unsigned char byte, char *high, char *low);
 
 int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
-			       size_t buf_len);
+			size_t buf_len);
 
 #endif /* EHBIGINT_UTIL_H */

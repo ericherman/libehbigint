@@ -16,7 +16,7 @@ License for more details.
 #include "ehbigint-util.h"
 #include "ehbigint-log.h"
 
-#include <ehstr.h> /* decimal_to_hex */
+#include <ehstr.h>		/* decimal_to_hex */
 
 #include <execinfo.h>
 
@@ -111,7 +111,7 @@ int ehbi_from_hex(unsigned char *byte, char high, char low)
 }
 
 int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
-			       size_t buf_len)
+			size_t buf_len)
 {
 	char *rv;
 
@@ -136,7 +136,7 @@ int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
 }
 
 int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
-			       size_t buf_len)
+			size_t buf_len)
 {
 	char *rv;
 

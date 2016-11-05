@@ -21,8 +21,8 @@ License for more details.
 #endif
 #endif
 
-#include <stdio.h> /* FILE */
-#include <ehbigint.h> /* struct ehbigint */
+#include <stdio.h>		/* FILE */
+#include <ehbigint.h>		/* struct ehbigint */
 
 /* Get the FILE pointer to where fprintf messages currently target.
    Defaults to stderr. */

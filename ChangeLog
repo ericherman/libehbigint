@@ -10,6 +10,7 @@
 	* .gitignore: exclude the new test
 	* src/ehbigint-log.h: add "const" qualifier
 	* src/ehbigint-log.c: add "const" qualifier
+	* tests/test-mul.c: expand the test a bit
 
 2016-11-04  Eric Herman <eric@freesa.org>
 

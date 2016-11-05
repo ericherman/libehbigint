@@ -18,20 +18,13 @@ License for more details.
 #include <stdlib.h>
 
 #include "test-ehbigint-private-utils.h"
-
-int test_mul(int verbose)
+int test_mul(int verbose, unsigned long aul, unsigned long bul, char *expected)
 {
-	/*
-	   $ bc <<< "9415273 * 252533"
-	   2377667136509
-	 */
 	int err, failures;
 
-	unsigned long aul;
 	unsigned char a_bytes[16];
 	struct ehbigint a_bigint;
 
-	unsigned long bul;
 	unsigned char b_bytes[16];
 	struct ehbigint b_bigint;
 
@@ -54,7 +47,6 @@ int test_mul(int verbose)
 	result.bytes = result_bytes;
 	result.bytes_len = 16;
 
-	aul = 9415273;
 	sprintf(buf, "%lu", aul);
 	err = ehbi_set_ul(&a_bigint, aul);
 	if (err) {
@@ -69,7 +61,6 @@ int test_mul(int verbose)
 		return (1 + failures);
 	}
 
-	bul = 252533;
 	sprintf(buf, "%lu", bul);
 	err = ehbi_set_ul(&b_bigint, bul);
 	if (err) {
@@ -89,11 +80,11 @@ int test_mul(int verbose)
 		LOG_ERROR1("error %d from ehbi_mul\n", err);
 	}
 
-	failures +=
-	    check_ehbigint_dec(&result, "2377667136509", __LINE__, TEST_FUNC);
+	failures += check_ehbigint_dec(&result, expected, __LINE__, TEST_FUNC);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in test_mul\n", failures);
+		LOG_ERROR4("%d failures in test_mul(%lu,%lu,%s)\n", failures,
+			   aul, bul, expected);
 	}
 
 	return failures;
@@ -106,7 +97,13 @@ int main(int argc, char **argv)
 	v = (argc > 1) ? atoi(argv[1]) : 0;
 	failures = 0;
 
-	failures += test_mul(v);
+	failures += test_mul(v, 500, 333, "166500");
+
+	/*
+	   $ bc <<< "9415273 * 252533"
+	   2377667136509
+	 */
+	failures += test_mul(v, 9415273, 252533, "2377667136509");
 
 	if (failures) {
 		LOG_ERROR2("%d failures in %s\n", failures, __FILE__);

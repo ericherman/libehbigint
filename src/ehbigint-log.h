@@ -34,7 +34,8 @@ void set_ehbi_log_file(FILE *log);
 extern int ehbi_debug_log_level;
 int ehbi_debugf(int level, const char *fmt, ...);
 
-void ehbi_debug_to_string(int level, struct ehbigint *bi, const char *name);
+void ehbi_debug_to_string(int level, const struct ehbigint *bi,
+			  const char *name);
 
 /* if _POSIX_C_SOURCE backtrace_symbols_fd is used */
 void ehbi_log_backtrace(FILE *log);

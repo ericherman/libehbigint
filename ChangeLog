@@ -8,6 +8,8 @@
 	* src/ehbigint.c: fix the bug
 	* Makefile.am: include the new test
 	* .gitignore: exclude the new test
+	* src/ehbigint-log.h: add "const" qualifier
+	* src/ehbigint-log.c: add "const" qualifier
 
 2016-11-04  Eric Herman <eric@freesa.org>
 

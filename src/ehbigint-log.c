@@ -36,7 +36,8 @@ int ehbi_debugf(int level, const char *fmt, ...)
 	return r;
 }
 
-void ehbi_debug_to_string(int level, struct ehbigint *bi, const char *name)
+void ehbi_debug_to_string(int level, const struct ehbigint *bi,
+			  const char *name)
 {
 	char *buf, h, l;
 	size_t size, i;

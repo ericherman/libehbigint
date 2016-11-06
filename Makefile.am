@@ -115,9 +115,9 @@ test_shift_left_LDADD=$(TEST_LDADDS)
 test_to_string_SOURCES=tests/test-to-string.c $(COMMON_TEST_SOURCES)
 test_to_string_LDADD=$(TEST_LDADDS)
 
-bin_PROGRAMS=bi-calc
-bi_calc_SOURCES=demos/bi-calc.c src/ehbigint.h
-bi_calc_LDADD=-lehbigint -lehstr
+#bin_PROGRAMS=bi-calc
+#bi_calc_SOURCES=demos/bi-calc.c src/ehbigint.h
+#bi_calc_LDADD=-lehstr -lehbigint
 
 ACLOCAL_AMFLAGS=-I m4 --install
 

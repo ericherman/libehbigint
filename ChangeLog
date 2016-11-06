@@ -2,6 +2,8 @@
 
 	fight with autotools to get backtrace to work, defeated
 
+	remove bi-calc from build
+
 	* configure.ac: add checks for backtrace, backtrace_symbols_fd
 	* Makefile.am: head->desk, just define _POSIX_SOURCE and retreat
 	* src/ehbigint-log.h: add more concise ehbi_debug_to_hex

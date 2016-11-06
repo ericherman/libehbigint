@@ -15,8 +15,8 @@ License for more details.
 #ifndef EHBIGINT_LOG_H
 #define EHBIGINT_LOG_H
 
+#include "ehbigint.h"		/* struct ehbigint */
 #include <stdio.h>		/* FILE */
-#include <ehbigint.h>		/* struct ehbigint */
 
 /* Get the FILE pointer to where fprintf messages currently target.
    Defaults to stderr. */

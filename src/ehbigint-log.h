@@ -15,12 +15,6 @@ License for more details.
 #ifndef EHBIGINT_LOG_H
 #define EHBIGINT_LOG_H
 
-#ifdef _GNU_SOURCE
-#ifndef EHBI_CAN_BACKTRACE
-#define EHBI_CAN_BACKTRACE 1
-#endif
-#endif
-
 #include <stdio.h>		/* FILE */
 #include <ehbigint.h>		/* struct ehbigint */
 
@@ -34,8 +28,10 @@ void set_ehbi_log_file(FILE *log);
 extern int ehbi_debug_log_level;
 int ehbi_debugf(int level, const char *fmt, ...);
 
+void ehbi_debug_to_hex(int level, const struct ehbigint *bi, const char *label);
+
 void ehbi_debug_to_string(int level, const struct ehbigint *bi,
-			  const char *name);
+			  const char *label);
 
 /* if _POSIX_C_SOURCE backtrace_symbols_fd is used */
 void ehbi_log_backtrace(FILE *log);

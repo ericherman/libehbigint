@@ -20,6 +20,11 @@ License for more details.
 #include <stdarg.h>		/* va_list */
 #include <stdlib.h>		/* exit() used in ehbi_debug_to_string */
 
+#ifdef _POSIX_SOURCE
+#include <execinfo.h>		/* backtrace backtrace_symbols_fd */
+#include <stdio.h>		/* fileno */
+#endif
+
 int ehbi_debug_log_level = 0;
 int ehbi_debugf(int level, const char *fmt, ...)
 {
@@ -36,8 +41,37 @@ int ehbi_debugf(int level, const char *fmt, ...)
 	return r;
 }
 
+void ehbi_debug_to_hex(int level, const struct ehbigint *bi, const char *label)
+{
+	char *buf;
+	size_t size, i;
+
+	if (ehbi_debug_log_level < level) {
+		return;
+	}
+
+	size = 5 + (4 * bi->bytes_used);
+	buf = ehbi_stack_alloc(size);
+	if (!buf) {
+		EHBI_LOG_ERROR2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
+				(unsigned long)size);
+		exit(EXIT_FAILURE);
+	}
+
+	fprintf(stderr, "%s\t(%p):", label, (void *)bi);
+	for (i = 0; i < (bi->bytes_len - bi->bytes_used); ++i) {
+		fprintf(stderr, "  ");
+	}
+	ehbi_to_hex_string(bi, buf, size);
+	fprintf(stderr, "%s", buf);
+	ehbi_to_decimal_string(bi, buf, size);
+	fprintf(stderr, "\t(%s)\n", buf);
+
+	ehbi_stack_free(buf, size);
+}
+
 void ehbi_debug_to_string(int level, const struct ehbigint *bi,
-			  const char *name)
+			  const char *label)
 {
 	char *buf, h, l;
 	size_t size, i;
@@ -48,7 +82,7 @@ void ehbi_debug_to_string(int level, const struct ehbigint *bi,
 
 	fprintf(stderr,
 		"%s (%p) => {\n\tbytes => (%p),\n" "\tbytes_len => %lu,\n"
-		"\tbytes_used => %lu,\n", name, (void *)bi,
+		"\tbytes_used => %lu,\n", label, (void *)bi,
 		(void *)bi->bytes, (unsigned long)bi->bytes_len,
 		(unsigned long)bi->bytes_used);
 
@@ -105,7 +139,7 @@ void set_ehbi_log_file(FILE *log)
 
 void ehbi_log_backtrace(FILE *log)
 {
-#if EHBI_CAN_BACKTRACE
+#if _POSIX_SOURCE
 	void *array[4096];
 	size_t size;
 

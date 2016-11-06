@@ -21,8 +21,6 @@ AC_CHECK_LIB([ehstr], [decimal_to_hex])
 AC_CHECK_LIB([gmp], [mpz_init])
 
 # Checks for header files.
-AC_FUNC_ALLOCA
-AC_FUNC_BACKTRACE
 AC_CHECK_HEADERS([stdlib.h string.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -30,7 +28,9 @@ AC_TYPE_SIZE_T
 
 # Checks for library functions.
 AC_FUNC_MALLOC
+AC_FUNC_ALLOCA
 AC_CHECK_FUNCS([strerror strtoul])
+AC_CHECK_FUNCS([backtrace backtrace_symbols_fd])
 
 AM_INIT_AUTOMAKE([subdir-objects -Werror -Wall])
 AM_PROG_AR

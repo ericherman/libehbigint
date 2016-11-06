@@ -6,6 +6,7 @@
 	* Makefile.am: head->desk, just define _POSIX_SOURCE and retreat
 	* src/ehbigint-log.h: add more concise ehbi_debug_to_hex
 	* src/ehbigint-log.c: ifdef _POSIX_SOURCE; ehbi_debug_to_hex
+	* tests/test-mul.c: expand test a bit
 
 
 2016-11-05  Eric Herman <eric@freesa.org>

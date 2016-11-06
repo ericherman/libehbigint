@@ -97,6 +97,8 @@ int main(int argc, char **argv)
 	v = (argc > 1) ? atoi(argv[1]) : 0;
 	failures = 0;
 
+	failures += test_mul(v, 2, 256, "512");
+
 	failures += test_mul(v, 500, 333, "166500");
 
 	/*

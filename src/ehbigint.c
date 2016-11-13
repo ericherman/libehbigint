@@ -46,11 +46,11 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 	unsigned char a, b, c;
 	const struct ehbigint *tmp;
 
-	if (res == 0 || bi1 == 0 || bi2 == 0) {
+	if (res == NULL || bi1 == NULL || bi2 == NULL) {
 		Ehbi_log_error0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
-	if (res->bytes == 0 || bi1->bytes == 0 || bi2->bytes == 0) {
+	if (res->bytes == NULL || bi1->bytes == NULL || bi2->bytes == NULL) {
 		Ehbi_log_error0("Null bytes[]");
 		return EHBI_NULL_BYTES;
 	}
@@ -106,11 +106,11 @@ int ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
 	unsigned int a, b, r;
 	struct ehbigint tmp;
 
-	if (res == 0 || bi1 == 0 || bi2 == 0) {
+	if (res == NULL || bi1 == NULL || bi2 == NULL) {
 		Ehbi_log_error0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
-	if (res->bytes == 0 || bi1->bytes == 0 || bi2->bytes == 0) {
+	if (res->bytes == NULL || bi1->bytes == NULL || bi2->bytes == NULL) {
 		Ehbi_log_error0("Null bytes[]");
 		return EHBI_NULL_BYTES;
 	}
@@ -166,13 +166,13 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	int err;
 	size_t i, num_idx;
 
-	if (quotient == 0 || remainder == 0 || numerator == 0
-	    || denominator == 0) {
+	if (quotient == NULL || remainder == NULL || numerator == NULL
+	    || denominator == NULL) {
 		Ehbi_log_error0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
-	if (quotient->bytes == 0 || remainder->bytes == 0
-	    || numerator->bytes == 0 || denominator->bytes == 0) {
+	if (quotient->bytes == NULL || remainder->bytes == NULL
+	    || numerator->bytes == NULL || denominator->bytes == NULL) {
 		Ehbi_log_error0("Null bytes[]");
 		return EHBI_NULL_BYTES;
 	}
@@ -265,11 +265,11 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 	size_t i;
 	unsigned char a, b, c;
 
-	if (bi == 0 || val == 0) {
+	if (bi == NULL || val == NULL) {
 		Ehbi_log_error0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
-	if (bi->bytes == 0 || val->bytes == 0) {
+	if (bi->bytes == NULL || val->bytes == NULL) {
 		Ehbi_log_error0("Null bytes[]");
 		return EHBI_NULL_BYTES;
 	}
@@ -357,11 +357,11 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 	size_t i, j;
 	unsigned char a, b, c;
 
-	if (bi == 0 || val == 0) {
+	if (bi == NULL || val == NULL) {
 		Ehbi_log_error0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
-	if (bi->bytes == 0 || val->bytes == 0) {
+	if (bi->bytes == NULL || val->bytes == NULL) {
 		Ehbi_log_error0("Null bytes[]");
 		return EHBI_NULL_BYTES;
 	}
@@ -412,11 +412,11 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 	size_t i, max_len;
 	unsigned char a, b, c;
 
-	if (res == 0 || bi1 == 0 || bi2 == 0) {
+	if (res == NULL || bi1 == NULL || bi2 == NULL) {
 		Ehbi_log_error0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
-	if (res->bytes == 0 || bi1->bytes == 0 || bi2->bytes == 0) {
+	if (res->bytes == NULL || bi1->bytes == NULL || bi2->bytes == NULL) {
 		Ehbi_log_error0("Null bytes[]");
 		return EHBI_NULL_BYTES;
 	}
@@ -470,11 +470,11 @@ int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes)
 {
 	size_t i;
 
-	if (bi == 0) {
+	if (bi == NULL) {
 		Ehbi_log_error0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
-	if (bi->bytes == 0) {
+	if (bi->bytes == NULL) {
 		Ehbi_log_error0("Null bytes[]");
 		return EHBI_NULL_BYTES;
 	}
@@ -541,7 +541,7 @@ int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 	unsigned char a, b;
 	int b1_pos, b2_pos;
 
-	if (bi1 == 0 || bi2 == 0 || err == 0) {
+	if (bi1 == NULL || bi2 == NULL || err == NULL) {
 		Ehbi_log_error0("Null argument(s)");
 		if (err) {
 			*err = EHBI_NULL_ARGS;
@@ -610,11 +610,11 @@ int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 static int ehbi_zero(struct ehbigint *bi)
 {
 	size_t i;
-	if (bi == 0) {
+	if (bi == NULL) {
 		Ehbi_log_error0("Null struct");
 		return EHBI_NULL_STRUCT;
 	}
-	if (bi->bytes == 0) {
+	if (bi->bytes == NULL) {
 		Ehbi_log_error0("Null bytes[]");
 		return EHBI_NULL_BYTES;
 	}

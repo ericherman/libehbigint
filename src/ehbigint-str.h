@@ -15,9 +15,17 @@ License for more details.
 #ifndef EHBIGINT_STR_H
 #define EHBIGINT_STR_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "ehbigint.h"
 
 int ehbi_byte_to_hex_chars(unsigned char byte, char *high, char *low);
 int ehbi_hex_chars_to_byte(char high, char low, unsigned char *byte);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* EHBIGINT_STR_H */

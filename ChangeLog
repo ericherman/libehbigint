@@ -4,6 +4,7 @@
 	reorganize the string parsing, improve naming
 	make Ehbi_log_error macro names less "shouty"
 	remove dependencies on libehstr, echeck
+	add ifdef __cplusplus extern "C" to headers
 
 	* src/ehbigint.c: rewrite ehbi_mul, reference ehbigint-str.h
 	* src/ehbigint-str.h: "semi-public" functions, not in ehbigint.h

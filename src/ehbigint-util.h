@@ -15,6 +15,10 @@ License for more details.
 #ifndef EHBIGINT_UTIL_H
 #define EHBIGINT_UTIL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef EHBI_NO_ALLOCA
 void ehbi_do_stack_free(void *ptr, size_t size);
 #define ehbi_stack_alloc malloc
@@ -26,6 +30,10 @@ void ehbi_no_stack_free(void *ptr, size_t size);
 #define ehbi_stack_alloc alloca
 #define ehbi_stack_alloc_str "alloca"
 #define ehbi_stack_free ehbi_no_stack_free
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* EHBIGINT_UTIL_H */

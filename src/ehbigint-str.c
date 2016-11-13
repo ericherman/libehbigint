@@ -114,7 +114,7 @@ int ehbi_from_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 	int err;
 
 	size = strlen("0x00") + len + 1;
-	hex = ehbi_stack_alloc(size);
+	hex = (char *)ehbi_stack_alloc(size);
 	if (!hex) {
 		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
 				(unsigned long)size);
@@ -188,7 +188,7 @@ int ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len)
 	int err;
 
 	size = strlen("0x00") + (2 * bi->bytes_used) + 1;
-	hex = ehbi_stack_alloc(size);
+	hex = (char *)ehbi_stack_alloc(size);
 	if (!hex) {
 		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
 				(unsigned long)size);

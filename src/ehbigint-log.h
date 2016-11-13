@@ -15,6 +15,10 @@ License for more details.
 #ifndef EHBIGINT_LOG_H
 #define EHBIGINT_LOG_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "ehbigint.h"		/* struct ehbigint */
 #include <stdio.h>		/* FILE */
 
@@ -66,6 +70,10 @@ void ehbi_log_backtrace(FILE *log);
  fprintf(ehbi_log_file(), format, arg1, arg2, arg3); \
  fprintf(ehbi_log_file(), "\n"); \
  ehbi_log_backtrace(ehbi_log_file())
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* EHBIGINT_LOG_H */

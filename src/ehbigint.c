@@ -115,7 +115,7 @@ int ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
 	}
 
 	size = res->bytes_len;
-	tmp.bytes = ehbi_stack_alloc(size);
+	tmp.bytes = (unsigned char *)ehbi_stack_alloc(size);
 	if (!tmp.bytes) {
 		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
 				(unsigned long)size);

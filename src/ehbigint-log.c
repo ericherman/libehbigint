@@ -52,7 +52,7 @@ void ehbi_debug_to_hex(int level, const struct ehbigint *bi, const char *label)
 	}
 
 	size = 5 + (4 * bi->bytes_used);
-	buf = ehbi_stack_alloc(size);
+	buf = (char *)ehbi_stack_alloc(size);
 	if (!buf) {
 		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
 				(unsigned long)size);
@@ -103,7 +103,7 @@ void ehbi_debug_to_string(int level, const struct ehbigint *bi,
 	fprintf(stderr, ",\n");
 
 	size = 5 + (4 * bi->bytes_used);
-	buf = ehbi_stack_alloc(size);
+	buf = (char *)ehbi_stack_alloc(size);
 	if (!buf) {
 		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
 				(unsigned long)size);

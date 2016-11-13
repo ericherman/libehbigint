@@ -15,6 +15,10 @@ License for more details.
 #ifndef EHBIGINT_H
 #define EHBIGINT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>		/* size_t */
 
 struct ehbigint {
@@ -181,5 +185,9 @@ enum {
 	EHBI_STACK_TOO_SMALL,
 	EHBI_LAST
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* EHBIGINT_H */

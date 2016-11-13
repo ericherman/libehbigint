@@ -1,6 +1,7 @@
 2016-11-13  Eric Herman <eric@freesa.org>
 
 	implement "long mulitiplication" rather than loop-increment
+	fix corner-case in ehbi_div
 	reorganize the string parsing, improve naming
 	make Ehbi_log_error macro names less "shouty"
 	remove dependencies on libehstr, echeck

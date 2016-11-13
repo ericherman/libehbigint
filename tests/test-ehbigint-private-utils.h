@@ -16,6 +16,10 @@ License for more details.
 #define TEST_EHBIGINT_PRIVATE_UTILS_H
 
 #include "../src/ehbigint.h"
+#include "echeck.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define TEST_FUNC \
 	((ECHECK_FUNC == NULL) ? "" : ECHECK_FUNC)

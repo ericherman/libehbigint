@@ -15,8 +15,8 @@ AC_PROG_CC
 AC_PROG_LN_S
 
 # Checks for libraries.
-AC_CHECK_LIB([echeck], [check_str_m])
-AC_CHECK_LIB([ehbigint], [ehbi_add])
+# AC_CHECK_LIB([echeck], [check_str_m])
+# AC_CHECK_LIB([ehbigint], [ehbi_add])
 AC_CHECK_LIB([gmp], [mpz_init])
 
 # Checks for header files.

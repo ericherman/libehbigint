@@ -12,12 +12,8 @@ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 */
-#include <stdio.h>
-#include <string.h>
-#include <echeck.h>
-#include <stdlib.h>
-
 #include "test-ehbigint-private-utils.h"
+
 int test_mul(int verbose, unsigned long aul, unsigned long bul, char *expected)
 {
 	int err, failures;

@@ -32,9 +32,11 @@ static int ehbi_nibble_to_hex(unsigned char nibble, char *c);
 
 static int ehbi_from_hex_nibble(unsigned char *nibble, char c);
 
-static char *ehbi_hex_to_decimal_raw(const char *hex, size_t hex_len, char *buf, size_t buf_len);
+static char *ehbi_hex_to_decimal_raw(const char *hex, size_t hex_len, char *buf,
+				     size_t buf_len);
 
-static char *ehbi_decimal_to_hex_raw(const char *dec_str, size_t dec_len, char *buf, size_t buf_len);
+static char *ehbi_decimal_to_hex_raw(const char *dec_str, size_t dec_len,
+				     char *buf, size_t buf_len);
 
 /* public functions */
 int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
@@ -323,7 +325,8 @@ static int ehbi_from_hex_nibble(unsigned char *nibble, char c)
 	return EHBI_SUCCESS;
 }
 
-static char *ehbi_decimal_to_hex_raw(const char *dec_str, size_t dec_len, char *buf, size_t buf_len)
+static char *ehbi_decimal_to_hex_raw(const char *dec_str, size_t dec_len,
+				     char *buf, size_t buf_len)
 {
 	size_t i, j, k, hex_len;
 	unsigned char *hex_buf;
@@ -370,7 +373,7 @@ static char *ehbi_decimal_to_hex_raw(const char *dec_str, size_t dec_len, char *
 
 	/* convert to ASCII */
 	for (j = 0; j < hex_len; ++j) {
-		ehbi_nibble_to_hex(buf[2 + j], (char *)hex_buf+j);
+		ehbi_nibble_to_hex(buf[2 + j], (char *)hex_buf + j);
 	}
 
 	/* left shift away leading zeros */
@@ -396,7 +399,8 @@ static char *ehbi_decimal_to_hex_raw(const char *dec_str, size_t dec_len, char *
 	return buf;
 }
 
-static char *ehbi_hex_to_decimal_raw(const char *hex, size_t hex_len, char *buf, size_t buf_len)
+static char *ehbi_hex_to_decimal_raw(const char *hex, size_t hex_len, char *buf,
+				     size_t buf_len)
 {
 	size_t i, j, k, dec_len;
 	unsigned char *dec_buf;

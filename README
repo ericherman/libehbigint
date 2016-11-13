@@ -5,8 +5,8 @@ This is just a learning exercise, not intended for use.
 
 Dependencies
 -------
-Also, the tests depend upon libecheck
-* https://github.com/ericherman/libecheck
+One test ("tests/test-compare-with-gmp.c") depends upon libgmp
+ (GNU Multiple Precision Arithmetic Library) https://gmplib.org/
 
 
 Packaging

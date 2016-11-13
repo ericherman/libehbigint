@@ -3,7 +3,7 @@
 	implement "long mulitiplication" rather than loop-increment
 	reorganize the string parsing, improve naming
 	make Ehbi_log_error macro names less "shouty"
-	remove dependencies on libehstr
+	remove dependencies on libehstr, echeck
 
 	* src/ehbigint.c: rewrite ehbi_mul, reference ehbigint-str.h
 	* src/ehbigint-str.h: "semi-public" functions, not in ehbigint.h
@@ -13,6 +13,9 @@
 	* src/ehbigint-util.c: move out the string stuff
 	* src/ehbigint-log.c: reference ehbigint-str.h
 	* src/ehbigint.c: reference ehbigint-str.h
+	* tests/echeck.h: copy-in files from echeck
+	* tests/echeck.c: copy-in files from echeck
+	* tests/*.c: remove reference to system echeck
 	* Makefile.am: include new ehbigint-str.*
 
 2016-11-06  Eric Herman <eric@freesa.org>

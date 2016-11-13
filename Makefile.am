@@ -27,7 +27,6 @@ libehbigint_la_SOURCES=\
 libehbigint_la_LIBADD=
 AM_LDFLAGS=-rdynamic
 
-
 TESTS=$(check_PROGRAMS)
 check_PROGRAMS=\
  test-add \
@@ -51,10 +50,12 @@ check_PROGRAMS=\
  test-to-string
 
 COMMON_TEST_SOURCES=src/ehbigint.h \
+ tests/echeck.h \
+ tests/echeck.c \
  tests/test-ehbigint-private-utils.h \
  tests/test-ehbigint-private-utils.c
 
-TEST_LDADDS=-lecheck -lehbigint
+TEST_LDADDS=-lehbigint
 
 test_add_SOURCES=tests/test-add.c $(COMMON_TEST_SOURCES)
 test_add_LDADD=$(TEST_LDADDS)
@@ -124,7 +125,7 @@ test_to_string_LDADD=$(TEST_LDADDS)
 
 ACLOCAL_AMFLAGS=-I m4 --install
 
-EXTRA_DIST=COPYING.GPL3
+EXTRA_DIST=COPYING.GPL3 misc
 
 CSTD_CFLAGS=-std=c89
 #CSTD_CFLAGS=-std=gnu11
@@ -159,11 +160,13 @@ AM_CFLAGS=$(CSTD_CFLAGS) \
 LINDENT=indent -npro -kr -i8 -ts8 -sob -l80 -ss -ncs -cp1 -il0
 
 tidy:
+	patch -Np1 -i misc/pre-tidy.patch
 	$(LINDENT) \
 		-T size_t \
 		-T FILE \
 		-T ehbigint \
 		`find src tests demos -name '*.h' -o -name '*.c'`
+	patch -Rp1 -i misc/pre-tidy.patch
 
 spotless:
 	rm -rf `cat .gitignore | sed -e 's/#.*//'`

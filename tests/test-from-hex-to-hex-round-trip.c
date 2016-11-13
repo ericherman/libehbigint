@@ -12,11 +12,6 @@ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 */
-#include <stdio.h>
-#include <string.h>
-#include <echeck.h>
-#include <stdlib.h>
-
 #include "test-ehbigint-private-utils.h"
 
 int test_from_hex_to_hex_round_trip(int verbose)

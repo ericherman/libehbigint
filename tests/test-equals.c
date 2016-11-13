@@ -42,37 +42,37 @@ int test_equals(int verbose)
 	err += ehbi_set_hex_string(&bi2, str_2, strlen(str_2));
 	err += ehbi_set_hex_string(&bi3, str_3, strlen(str_3));
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_set_hex_string\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d from ehbi_set_hex_string\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 
 	result = ehbi_equals(&bi1, &bi1, &err);
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_equals\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d from ehbi_equals\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 	failures += check_int(result, 1);
 
 	result = ehbi_equals(&bi1, &bi2, &err);
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_equals\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d from ehbi_equals\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 	failures += check_int(result, 1);
 
 	result = ehbi_equals(&bi1, &bi3, &err);
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_equals\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d from ehbi_equals\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 	failures += check_int(result, 0);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in test_equals\n", failures);
+		Test_log_error1("%d failures in test_equals\n", failures);
 	}
 
 	return failures;
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
 	failures += test_equals(v);
 
 	if (failures) {
-		LOG_ERROR2("%d failures in %s\n", failures, __FILE__);
+		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}
 
 	return cap_failures(failures);

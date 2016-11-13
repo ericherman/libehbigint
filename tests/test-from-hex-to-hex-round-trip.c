@@ -34,8 +34,9 @@ int test_from_hex_to_hex_round_trip(int verbose)
 	    ehbi_set_hex_string(&a_bigint, expected_str, strlen(expected_str));
 
 	if (err) {
-		LOG_ERROR1("error %d returned from ehbi_set_hex_string\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d returned from ehbi_set_hex_string\n",
+				err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 
@@ -43,7 +44,8 @@ int test_from_hex_to_hex_round_trip(int verbose)
 	    check_ehbigint_hex(&a_bigint, expected_str, __LINE__, TEST_FUNC);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in test_hex_round_trip\n", failures);
+		Test_log_error1("%d failures in test_hex_round_trip\n",
+				failures);
 	}
 
 	return failures;
@@ -59,7 +61,7 @@ int main(int argc, char **argv)
 	failures += test_from_hex_to_hex_round_trip(v);
 
 	if (failures) {
-		LOG_ERROR2("%d failures in %s\n", failures, __FILE__);
+		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}
 
 	return cap_failures(failures);

@@ -36,7 +36,7 @@ int test_set_ul(int verbose)
 	failures += check_ehbigint_dec(&bi, "1234567890", __LINE__, TEST_FUNC);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in test_set_ul\n", failures);
+		Test_log_error1("%d failures in test_set_ul\n", failures);
 	}
 
 	return failures;
@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 	failures += test_set_ul(v);
 
 	if (failures) {
-		LOG_ERROR2("%d failures in %s\n", failures, __FILE__);
+		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}
 
 	return cap_failures(failures);

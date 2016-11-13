@@ -33,7 +33,7 @@ int test_to_string(int verbose)
 	failures += check_ehbigint_dec(&a_bigint, "65605", __LINE__, TEST_FUNC);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in test_to_string\n", failures);
+		Test_log_error1("%d failures in test_to_string\n", failures);
 	}
 
 	return failures;
@@ -49,7 +49,7 @@ int main(int argc, char **argv)
 	failures += test_to_string(v);
 
 	if (failures) {
-		LOG_ERROR2("%d failures in %s\n", failures, __FILE__);
+		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}
 
 	return cap_failures(failures);

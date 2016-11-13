@@ -38,22 +38,22 @@ int test_dec(int verbose)
 	err = ehbi_set_hex_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_set_hex_string(&bi2, str_2, strlen(str_2));
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_set_hex_string\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d from ehbi_set_hex_string\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 
 	err = ehbi_dec(&bi1, &bi2);
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_inc\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d from ehbi_inc\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 
 	failures += check_ehbigint_hex(&bi1, str_3, __LINE__, TEST_FUNC);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in test_dec\n", failures);
+		Test_log_error1("%d failures in test_dec\n", failures);
 	}
 
 	return failures;
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 	failures += test_dec(v);
 
 	if (failures) {
-		LOG_ERROR2("%d failures in %s\n", failures, __FILE__);
+		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}
 
 	return cap_failures(failures);

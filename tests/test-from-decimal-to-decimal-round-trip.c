@@ -36,23 +36,24 @@ int test_from_decimal_to_decimal_round_trip(int verbose)
 				    strlen(expected_str));
 
 	if (err) {
-		LOG_ERROR1("error %d ehbi_set_decimal_string\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d ehbi_set_decimal_string\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 
 	err = ehbi_to_decimal_string(&a_bigint, as_string, BUFLEN);
 	if (err) {
-		LOG_ERROR1("error %d ehbi_to_decimal_string\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d ehbi_to_decimal_string\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 
 	failures += check_str(as_string, expected_str);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in "
-			   "check_decimal_to_decimal_round_trip\n", failures);
+		Test_log_error1("%d failures in "
+				"check_decimal_to_decimal_round_trip\n",
+				failures);
 	}
 
 	return failures;
@@ -68,7 +69,7 @@ int main(int argc, char **argv)
 	failures += test_from_decimal_to_decimal_round_trip(v);
 
 	if (failures) {
-		LOG_ERROR2("%d failures in %s\n", failures, __FILE__);
+		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}
 
 	return cap_failures(failures);

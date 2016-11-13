@@ -79,80 +79,86 @@ int test_compare_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 		mpz_set_str(gin, in_str, 10);
 		err = ehbi_set_decimal_string(&ein, in_str, strlen(in_str));
 		if (err) {
-			LOG_ERROR1("ehbi_set_decimal_string error: %d\n", err);
+			Test_log_error1("ehbi_set_decimal_string error: %d\n",
+					err);
 		}
 
 		mpz_get_str(gbuf, 10, gin);
 		err = ehbi_to_decimal_string(&ein, ebuf, BUFLEN);
 		if (err) {
-			LOG_ERROR1("ehbi_to_decimal_string error: %d\n", err);
+			Test_log_error1("ehbi_to_decimal_string error: %d\n",
+					err);
 		}
 		failures += check_str_m(ebuf, gbuf, "from_decimal_string");
 
 		mpz_mul(gres, gin, gmul);
 		err = ehbi_mul(&eres, &ein, &emul);
 		if (err) {
-			LOG_ERROR1("ehbi_mul error: %d\n", err);
+			Test_log_error1("ehbi_mul error: %d\n", err);
 		}
 
 		mpz_get_str(gbuf, 10, gres);
 		err = ehbi_to_decimal_string(&eres, ebuf, BUFLEN);
 		if (err) {
-			LOG_ERROR1("ehbi_to_decimal_string error: %d\n", err);
+			Test_log_error1("ehbi_to_decimal_string error: %d\n",
+					err);
 		}
 		failures += check_str_m(ebuf, gbuf, "ehbi_mul");
 
 		mpz_tdiv_qr(gquot, grem, gres, gdiv);
 		err = ehbi_div(&equot, &erem, &eres, &ediv);
 		if (err) {
-			LOG_ERROR1("ehbi_div error: %d\n", err);
+			Test_log_error1("ehbi_div error: %d\n", err);
 		}
 
 		mpz_get_str(gbuf, 10, gquot);
 		err = ehbi_to_decimal_string(&equot, ebuf, BUFLEN);
 		if (err) {
-			LOG_ERROR1("ehbi_to_decimal_string error: %d\n", err);
+			Test_log_error1("ehbi_to_decimal_string error: %d\n",
+					err);
 		}
 		failures += check_str_m(ebuf, gbuf, "ehbi_div (quot)");
 		mpz_get_str(gbuf, 10, grem);
 		err = ehbi_to_decimal_string(&erem, ebuf, BUFLEN);
 		if (err) {
-			LOG_ERROR1("ehbi_to_decimal_string error: %d\n", err);
+			Test_log_error1("ehbi_to_decimal_string error: %d\n",
+					err);
 		}
 		failures += check_str_m(ebuf, gbuf, "ehbi_div (rem)");
 
 		if (failures) {
-			LOG_ERROR2("iteration %d: in_str: %s\n", i, in_str);
+			Test_log_error2("iteration %d: in_str: %s\n", i,
+					in_str);
 
 			mpz_get_str(gbuf, 10, gin);
 			ehbi_to_decimal_string(&ein, ebuf, BUFLEN);
-			LOG_ERROR1("\tein: %s\n", ebuf);
-			LOG_ERROR1("\tgin: %s\n", gbuf);
+			Test_log_error1("\tein: %s\n", ebuf);
+			Test_log_error1("\tgin: %s\n", gbuf);
 
 			mpz_get_str(gbuf, 10, gmul);
 			ehbi_to_decimal_string(&emul, ebuf, BUFLEN);
-			LOG_ERROR1("\temul: %s\n", ebuf);
-			LOG_ERROR1("\tgmul: %s\n", gbuf);
+			Test_log_error1("\temul: %s\n", ebuf);
+			Test_log_error1("\tgmul: %s\n", gbuf);
 
 			mpz_get_str(gbuf, 10, gres);
 			ehbi_to_decimal_string(&eres, ebuf, BUFLEN);
-			LOG_ERROR1("\teres: %s\n", ebuf);
-			LOG_ERROR1("\tgres: %s\n", gbuf);
+			Test_log_error1("\teres: %s\n", ebuf);
+			Test_log_error1("\tgres: %s\n", gbuf);
 
 			mpz_get_str(gbuf, 10, gdiv);
 			ehbi_to_decimal_string(&ediv, ebuf, BUFLEN);
-			LOG_ERROR1("\tediv: %s\n", ebuf);
-			LOG_ERROR1("\tgdiv: %s\n", gbuf);
+			Test_log_error1("\tediv: %s\n", ebuf);
+			Test_log_error1("\tgdiv: %s\n", gbuf);
 
 			mpz_get_str(gbuf, 10, gquot);
 			ehbi_to_decimal_string(&equot, ebuf, BUFLEN);
-			LOG_ERROR1("\tequot: %s\n", ebuf);
-			LOG_ERROR1("\tgquot: %s\n", gbuf);
+			Test_log_error1("\tequot: %s\n", ebuf);
+			Test_log_error1("\tgquot: %s\n", gbuf);
 
 			mpz_get_str(gbuf, 10, grem);
 			ehbi_to_decimal_string(&erem, ebuf, BUFLEN);
-			LOG_ERROR1("\terem: %s\n", ebuf);
-			LOG_ERROR1("\tgrem: %s\n", gbuf);
+			Test_log_error1("\terem: %s\n", ebuf);
+			Test_log_error1("\tgrem: %s\n", gbuf);
 
 			goto mpz_clean_up;
 		}
@@ -168,7 +174,7 @@ mpz_clean_up:
 	mpz_clear(grem);
 
 	if (failures) {
-		LOG_ERROR("failure in test_compare_with_gmp\n");
+		Test_log_error("failure in test_compare_with_gmp\n");
 	}
 
 	return failures;
@@ -187,7 +193,7 @@ int main(int argc, char **argv)
 	failures += test_compare_with_gmp(v, slow_iterations, cmp_init_val);
 
 	if (failures) {
-		LOG_ERROR2("%d failures in %s\n", failures, __FILE__);
+		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}
 
 	return cap_failures(failures);

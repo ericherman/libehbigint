@@ -46,41 +46,41 @@ int test_mul(int verbose, unsigned long aul, unsigned long bul, char *expected)
 	sprintf(buf, "%lu", aul);
 	err = ehbi_set_ul(&a_bigint, aul);
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_set_ul\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d from ehbi_set_ul\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 	failures += check_ehbigint_dec(&a_bigint, buf, __LINE__, TEST_FUNC);
 	if (failures) {
-		LOG_ERROR1("assign failed %s\n", buf);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("assign failed %s\n", buf);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 
 	sprintf(buf, "%lu", bul);
 	err = ehbi_set_ul(&b_bigint, bul);
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_set_ul\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d from ehbi_set_ul\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 	failures += check_ehbigint_dec(&b_bigint, buf, __LINE__, TEST_FUNC);
 	if (failures) {
-		LOG_ERROR1("assign failed %s\n", buf);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("assign failed %s\n", buf);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 
 	err = ehbi_mul(&result, &a_bigint, &b_bigint);
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_mul\n", err);
+		Test_log_error1("error %d from ehbi_mul\n", err);
 	}
 
 	failures += check_ehbigint_dec(&result, expected, __LINE__, TEST_FUNC);
 
 	if (failures) {
-		LOG_ERROR4("%d failures in test_mul(%lu,%lu,%s)\n", failures,
-			   aul, bul, expected);
+		Test_log_error4("%d failures in test_mul(%lu,%lu,%s)\n",
+				failures, aul, bul, expected);
 	}
 
 	return failures;
@@ -104,7 +104,7 @@ int main(int argc, char **argv)
 	failures += test_mul(v, 9415273, 252533, "2377667136509");
 
 	if (failures) {
-		LOG_ERROR2("%d failures in %s\n", failures, __FILE__);
+		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}
 
 	return cap_failures(failures);

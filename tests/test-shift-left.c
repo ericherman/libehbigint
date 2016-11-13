@@ -28,23 +28,23 @@ int test_shift_left(int verbose, char *val, size_t bytes, char *expected)
 
 	err = ehbi_set_hex_string(&bi, val, strlen(val));
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_set_hex_string\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d from ehbi_set_hex_string\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 
 	err = ehbi_bytes_shift_left(&bi, bytes);
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_bytes_shift_left\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d from ehbi_bytes_shift_left\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 
 	failures += check_ehbigint_hex(&bi, expected, __LINE__, TEST_FUNC);
 
 	if (failures) {
-		LOG_ERROR4("%d failures in test_shift_left(%s, %lu, %s)\n",
-			   failures, val, (unsigned long)bytes, expected);
+		Test_log_error4("%d failures in test_shift_left(%s, %lu, %s)\n",
+				failures, val, (unsigned long)bytes, expected);
 	}
 
 	return failures;
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 	failures += test_shift_left(v, "0x00FF", 3, "0x00FF000000");
 
 	if (failures) {
-		LOG_ERROR2("%d failures in %s\n", failures, __FILE__);
+		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}
 
 	return cap_failures(failures);

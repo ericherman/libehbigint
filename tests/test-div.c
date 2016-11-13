@@ -51,15 +51,15 @@ int test_div(int verbose, char *snumerator, char *sdenominator, char *squotient,
 	err =
 	    ehbi_set_decimal_string(&numerator, snumerator, strlen(snumerator));
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_set_hex_string\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d from ehbi_set_hex_string\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 	failures +=
 	    check_ehbigint_dec(&numerator, snumerator, __LINE__, TEST_FUNC);
 	if (failures) {
-		LOG_ERROR1("round trip failed %s\n", snumerator);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("round trip failed %s\n", snumerator);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 
@@ -67,22 +67,22 @@ int test_div(int verbose, char *snumerator, char *sdenominator, char *squotient,
 	    ehbi_set_decimal_string(&denominator, sdenominator,
 				    strlen(sdenominator));
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_set_hex_string\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d from ehbi_set_hex_string\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 	failures +=
 	    check_ehbigint_dec(&denominator, sdenominator, __LINE__, TEST_FUNC);
 	if (failures) {
-		LOG_ERROR1("round trip failed %s\n", sdenominator);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("round trip failed %s\n", sdenominator);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 
 	err = ehbi_div(&quotient, &remainder, &numerator, &denominator);
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_div\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d from ehbi_div\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
 	failures += test_div(v, "20001", "100", "200", "1");
 
 	if (failures) {
-		LOG_ERROR2("%d failures in %s\n", failures, __FILE__);
+		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}
 
 	return cap_failures(failures);

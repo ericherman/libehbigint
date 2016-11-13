@@ -30,19 +30,19 @@ License for more details.
 	TEST_FUNC, \
 	(ECHECK_FUNC == NULL) ? "" : "()")
 
-#define LOG_ERROR(format) \
+#define Test_log_error(format) \
 	STDERR_FILE_LINE_FUNC; fprintf(stderr, format)
 
-#define LOG_ERROR1(format, arg) \
+#define Test_log_error1(format, arg) \
 	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg)
 
-#define LOG_ERROR2(format, arg1, arg2) \
+#define Test_log_error2(format, arg1, arg2) \
 	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg1, arg2)
 
-#define LOG_ERROR3(format, arg1, arg2, arg3) \
+#define Test_log_error3(format, arg1, arg2, arg3) \
 	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg1, arg2, arg3)
 
-#define LOG_ERROR4(format, arg1, arg2, arg3, arg4) \
+#define Test_log_error4(format, arg1, arg2, arg3, arg4) \
 	STDERR_FILE_LINE_FUNC; fprintf(stderr, format, arg1, arg2, arg3, arg4)
 
 #define VERBOSE_ANNOUNCE(verbose) \

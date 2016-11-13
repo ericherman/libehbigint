@@ -52,22 +52,22 @@ int test_scenario_mul_mod(int verbose)
 	x = 20151125;
 	err = ehbi_set_ul(&bx, x);
 	if (err) {
-		LOG_ERROR2("ehbi_set_ul (%lu) error: %d\n", x, err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error2("ehbi_set_ul (%lu) error: %d\n", x, err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 	y = 252533;
 	err = ehbi_set_ul(&by, y);
 	if (err) {
-		LOG_ERROR2("ehbi_set_ul (%lu) error: %d\n", y, err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error2("ehbi_set_ul (%lu) error: %d\n", y, err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 	z = 33554393;
 	err = ehbi_set_ul(&bz, z);
 	if (err) {
-		LOG_ERROR2("ehbi_set_ul (%lu) error: %d\n", z, err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error2("ehbi_set_ul (%lu) error: %d\n", z, err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 
@@ -75,8 +75,8 @@ int test_scenario_mul_mod(int verbose)
 	expect_mul = "5088824049625";
 	err = ehbi_mul(&bresult, &bx, &by);
 	if (err) {
-		LOG_ERROR3("ehbi_mul (%lu * %lu), error: %d\n", x, y, err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error3("ehbi_mul (%lu * %lu), error: %d\n", x, y, err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 	failures +=
@@ -88,11 +88,11 @@ int test_scenario_mul_mod(int verbose)
 	 */
 	err = ehbi_div(&bquot, &brem, &bresult, &bz);
 	if (err) {
-		LOG_ERROR3("ehbi_div: (%s/%lu) error: %d\n", expect_mul, z,
-			   err);
+		Test_log_error3("ehbi_div: (%s/%lu) error: %d\n", expect_mul, z,
+				err);
 	}
 	if (brem.bytes_used > (1 + sizeof(unsigned long))) {
-		LOG_ERROR2
+		Test_log_error2
 		    ("brem.bytes_used > sizeof(unsigned long)(%lu > %lu)\n",
 		     (unsigned long)brem.bytes_used,
 		     (unsigned long)(1 + sizeof(unsigned long)));
@@ -101,22 +101,25 @@ int test_scenario_mul_mod(int verbose)
 
 	result = ehbigint_to_unsigned_long(&bquot, &err);
 	if (err) {
-		LOG_ERROR1("ehbigint_to_unsigned_long(quot) error: %d\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("ehbigint_to_unsigned_long(quot) error: %d\n",
+				err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 	failures += check_unsigned_long(result, 151658);
 
 	result = ehbigint_to_unsigned_long(&brem, &err);
 	if (err) {
-		LOG_ERROR1("ehbigint_to_unsigned_long(rem) error: %d\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("ehbigint_to_unsigned_long(rem) error: %d\n",
+				err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 	failures += check_unsigned_long(result, 31916031);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in test_scenario_mul_mod\n", failures);
+		Test_log_error1("%d failures in test_scenario_mul_mod\n",
+				failures);
 	}
 
 	return failures;
@@ -132,7 +135,7 @@ int main(int argc, char **argv)
 	failures += test_scenario_mul_mod(v);
 
 	if (failures) {
-		LOG_ERROR2("%d failures in %s\n", failures, __FILE__);
+		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}
 
 	return cap_failures(failures);

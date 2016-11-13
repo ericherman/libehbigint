@@ -4,6 +4,7 @@
 	fix corner-case in ehbi_div
 	reorganize the string parsing, improve naming
 	make Ehbi_log_error macro names less "shouty"
+	make Test_log_error macro names less "shouty"
 	remove dependencies on libehstr, echeck
 	add ifdef __cplusplus extern "C" to headers
 

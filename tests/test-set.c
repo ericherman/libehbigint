@@ -38,22 +38,22 @@ int test_set(int verbose)
 
 	err = ehbi_set_ul(&a_bigint, three);
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_set_ul\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d from ehbi_set_ul\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 	failures += check_ehbigint_hex(&a_bigint, "0x03", __LINE__, TEST_FUNC);
 
 	err = ehbi_set(&b_bigint, &a_bigint);
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_set_ul\n", err);
-		LOG_ERROR("Aborting test\n");
+		Test_log_error1("error %d from ehbi_set_ul\n", err);
+		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 	failures += check_ehbigint_hex(&b_bigint, "0x03", __LINE__, TEST_FUNC);
 
 	if (failures) {
-		LOG_ERROR1("%d failures in test_set\n", failures);
+		Test_log_error1("%d failures in test_set\n", failures);
 	}
 
 	return failures;
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 	failures += test_set(v);
 
 	if (failures) {
-		LOG_ERROR2("%d failures in %s\n", failures, __FILE__);
+		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}
 
 	return cap_failures(failures);

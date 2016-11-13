@@ -1,6 +1,7 @@
 2016-11-13  Eric Herman <eric@freesa.org>
 
 	reorganize the string parsing, improve naming
+	make Ehbi_log_error macro names less "shouty"
 
 	* src/ehbigint-str.h: "semi-public" functions, not in ehbigint.h
 	* src/ehbigint-str.c: move all the string stuff here

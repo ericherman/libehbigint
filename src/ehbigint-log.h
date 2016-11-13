@@ -36,32 +36,32 @@ void ehbi_debug_to_string(int level, const struct ehbigint *bi,
 /* if _POSIX_C_SOURCE backtrace_symbols_fd is used */
 void ehbi_log_backtrace(FILE *log);
 
-#ifndef EHBI_LOG_ERROR0
-#define EHBI_LOG_ERROR0(format) \
+#ifndef Ehbi_log_error0
+#define Ehbi_log_error0(format) \
  fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
  fprintf(ehbi_log_file(), format); \
  fprintf(ehbi_log_file(), "\n"); \
  ehbi_log_backtrace(ehbi_log_file())
 #endif
 
-#ifndef EHBI_LOG_ERROR1
-#define EHBI_LOG_ERROR1(format, arg) \
+#ifndef Ehbi_log_error1
+#define Ehbi_log_error1(format, arg) \
  fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
  fprintf(ehbi_log_file(), format, arg); \
  fprintf(ehbi_log_file(), "\n"); \
  ehbi_log_backtrace(ehbi_log_file())
 #endif
 
-#ifndef EHBI_LOG_ERROR2
-#define EHBI_LOG_ERROR2(format, arg1, arg2) \
+#ifndef Ehbi_log_error2
+#define Ehbi_log_error2(format, arg1, arg2) \
  fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
  fprintf(ehbi_log_file(), format, arg1, arg2); \
  fprintf(ehbi_log_file(), "\n"); \
  ehbi_log_backtrace(ehbi_log_file())
 #endif
 
-#ifndef EHBI_LOG_ERROR3
-#define EHBI_LOG_ERROR3(format, arg1, arg2, arg3) \
+#ifndef Ehbi_log_error3
+#define Ehbi_log_error3(format, arg1, arg2, arg3) \
  fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
  fprintf(ehbi_log_file(), format, arg1, arg2, arg3); \
  fprintf(ehbi_log_file(), "\n"); \

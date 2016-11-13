@@ -22,7 +22,7 @@ License for more details.
 void ehbi_do_stack_free(void *ptr, size_t size)
 {
 	if (size == 0) {
-		EHBI_LOG_ERROR2("size is 0? (%p, %lu)\n", ptr,
+		Ehbi_log_error2("size is 0? (%p, %lu)\n", ptr,
 				(unsigned long)size);
 	}
 	free(ptr);
@@ -31,7 +31,7 @@ void ehbi_do_stack_free(void *ptr, size_t size)
 void ehbi_no_stack_free(void *ptr, size_t size)
 {
 	if (size == 0) {
-		EHBI_LOG_ERROR2("size is 0? (%p, %lu)\n", ptr,
+		Ehbi_log_error2("size is 0? (%p, %lu)\n", ptr,
 				(unsigned long)size);
 	}
 }

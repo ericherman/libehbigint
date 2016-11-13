@@ -47,7 +47,7 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 	const struct ehbigint *tmp;
 
 	if (res == 0 || bi1 == 0 || bi2 == 0) {
-		EHBI_LOG_ERROR0("Null argument(s)");
+		Ehbi_log_error0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
 
@@ -65,7 +65,7 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 		c = c + a + b;
 
 		if (i > res->bytes_len) {
-			EHBI_LOG_ERROR0("Result byte[] too small");
+			Ehbi_log_error0("Result byte[] too small");
 			return EHBI_BYTES_TOO_SMALL;
 		}
 		res->bytes[res->bytes_len - i] = c;
@@ -75,14 +75,14 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 	}
 	if (c) {
 		if (i > res->bytes_len) {
-			EHBI_LOG_ERROR0("Result byte[] too small for carry");
+			Ehbi_log_error0("Result byte[] too small for carry");
 			return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
 		}
 		res->bytes[res->bytes_len - i] = c;
 		res->bytes_used++;
 		if (c == 0xFF) {
 			if (res->bytes_used == res->bytes_len) {
-				EHBI_LOG_ERROR0
+				Ehbi_log_error0
 				    ("Result byte[] too small for carry");
 				return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
 			}
@@ -104,7 +104,7 @@ int ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
 	unsigned char one_bytes[2];
 
 	if (res == 0 || bi1 == 0 || bi2 == 0) {
-		EHBI_LOG_ERROR0("Null argument(s)");
+		Ehbi_log_error0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
 
@@ -149,7 +149,7 @@ int ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
 
 	bidx.bytes = ehbi_stack_alloc(size);
 	if (!bidx.bytes) {
-		EHBI_LOG_ERROR2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
+		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
 				(unsigned long)size);
 		return EHBI_STACK_TOO_SMALL;
 	}
@@ -185,12 +185,12 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 
 	if (quotient == 0 || remainder == 0 || numerator == 0
 	    || denominator == 0) {
-		EHBI_LOG_ERROR0("Null argument(s)");
+		Ehbi_log_error0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
 
 	if (remainder->bytes_len < numerator->bytes_len) {
-		EHBI_LOG_ERROR0("byte[] too small");
+		Ehbi_log_error0("byte[] too small");
 		return EHBI_BYTES_TOO_SMALL;
 	}
 
@@ -277,11 +277,11 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 	unsigned char a, b, c;
 
 	if (bi == 0 || val == 0) {
-		EHBI_LOG_ERROR0("Null argument(s)");
+		Ehbi_log_error0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
 	if (val->bytes_used > bi->bytes_len) {
-		EHBI_LOG_ERROR0("byte[] too small");
+		Ehbi_log_error0("byte[] too small");
 		return EHBI_BYTES_TOO_SMALL;
 	}
 
@@ -301,7 +301,7 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 	}
 	while (c) {
 		if (i > bi->bytes_len) {
-			EHBI_LOG_ERROR0("byte[] too small for carry");
+			Ehbi_log_error0("byte[] too small for carry");
 			return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
 		}
 		a = c;
@@ -318,7 +318,7 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 	}
 	if (bi->bytes[bi->bytes_len - bi->bytes_used] == 0xFF) {
 		if (bi->bytes_used == bi->bytes_len) {
-			EHBI_LOG_ERROR0("byte[] too small for carry");
+			Ehbi_log_error0("byte[] too small for carry");
 			return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
 		}
 		++bi->bytes_used;
@@ -365,7 +365,7 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 	unsigned char a, b, c;
 
 	if (bi == 0 || val == 0) {
-		EHBI_LOG_ERROR0("Null argument(s)");
+		Ehbi_log_error0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
 
@@ -380,7 +380,7 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 		j = i;
 		while (c > a) {
 			if ((bi->bytes_len - j) == 0) {
-				EHBI_LOG_ERROR0("byte[] too small for borrow");
+				Ehbi_log_error0("byte[] too small for borrow");
 				return EHBI_BYTES_TOO_SMALL_FOR_BORROW;
 			}
 			bi->bytes[bi->bytes_len - (j + 1)] -= 1;
@@ -416,7 +416,7 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 	unsigned char a, b, c;
 
 	if (res == 0 || bi1 == 0 || bi2 == 0) {
-		EHBI_LOG_ERROR0("Null argument(s)");
+		Ehbi_log_error0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
 
@@ -442,7 +442,7 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 		c = c + (a - b);
 
 		if (i > res->bytes_len) {
-			EHBI_LOG_ERROR0("Result byte[] too small");
+			Ehbi_log_error0("Result byte[] too small");
 			return EHBI_BYTES_TOO_SMALL;
 		}
 		res->bytes[res->bytes_len - i] = c;
@@ -453,7 +453,7 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 
 	if (c) {
 		if (i > res->bytes_len) {
-			EHBI_LOG_ERROR0("Result byte[] too small for carry");
+			Ehbi_log_error0("Result byte[] too small for carry");
 			return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
 		}
 		while (i <= res->bytes_len) {
@@ -470,7 +470,7 @@ int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes)
 	size_t i;
 
 	if (bi == 0) {
-		EHBI_LOG_ERROR0("Null argument(s)");
+		Ehbi_log_error0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
 
@@ -481,7 +481,7 @@ int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes)
 	/* by ensuring that we have at least one extra byte of freespace,
 	 * we avoid some werid sign issues */
 	if (bi->bytes_len < (bi->bytes_used + 1 + num_bytes)) {
-		EHBI_LOG_ERROR0("Result byte[] too small for shift");
+		Ehbi_log_error0("Result byte[] too small for shift");
 		return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
 	}
 
@@ -529,7 +529,7 @@ int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 	int b1_pos, b2_pos;
 
 	if (bi1 == 0 || bi2 == 0 || err == 0) {
-		EHBI_LOG_ERROR0("Null argument(s)");
+		Ehbi_log_error0("Null argument(s)");
 		if (err) {
 			*err = EHBI_NULL_ARGS;
 		}
@@ -585,11 +585,11 @@ static int ehbi_zero(struct ehbigint *bi)
 {
 	size_t i;
 	if (bi == 0) {
-		EHBI_LOG_ERROR0("Null struct");
+		Ehbi_log_error0("Null struct");
 		return EHBI_NULL_STRUCT;
 	}
 	if (bi->bytes == 0) {
-		EHBI_LOG_ERROR0("Null bytes[]");
+		Ehbi_log_error0("Null bytes[]");
 		return EHBI_NULL_BYTES;
 	}
 

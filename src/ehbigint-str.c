@@ -40,19 +40,19 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 	unsigned char high, low;
 
 	if (bi == 0) {
-		EHBI_LOG_ERROR0("Null struct");
+		Ehbi_log_error0("Null struct");
 		return EHBI_NULL_STRUCT;
 	}
 	if (bi->bytes == 0) {
-		EHBI_LOG_ERROR0("Null bytes[]");
+		Ehbi_log_error0("Null bytes[]");
 		return EHBI_NULL_BYTES;
 	}
 	if (str == 0) {
-		EHBI_LOG_ERROR0("Null string");
+		Ehbi_log_error0("Null string");
 		return EHBI_NULL_STRING;
 	}
 	if (str_len == 0 || str[0] == 0) {
-		EHBI_LOG_ERROR0("Zero length string");
+		Ehbi_log_error0("Zero length string");
 		return EHBI_ZERO_LEN_STRING;
 	}
 
@@ -82,11 +82,11 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 			high = '0';
 		}
 		if (bi->bytes_used >= bi->bytes_len) {
-			EHBI_LOG_ERROR0("byte[] too small");
+			Ehbi_log_error0("byte[] too small");
 			return EHBI_BYTES_TOO_SMALL;
 		}
 		if (ehbi_hex_chars_to_byte(high, low, &(bi->bytes[--i]))) {
-			EHBI_LOG_ERROR2("Bad data (high: %c, low: %c)", high,
+			Ehbi_log_error2("Bad data (high: %c, low: %c)", high,
 					low);
 			return EHBI_BAD_DATA;
 		}
@@ -111,7 +111,7 @@ int ehbi_from_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 	size = strlen("0x00") + len + 1;
 	hex = ehbi_stack_alloc(size);
 	if (!hex) {
-		EHBI_LOG_ERROR2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
+		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
 				(unsigned long)size);
 		return EHBI_STACK_TOO_SMALL;
 	}
@@ -130,15 +130,15 @@ int ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len)
 	size_t i, j;
 
 	if (bi == 0) {
-		EHBI_LOG_ERROR0("Null struct");
+		Ehbi_log_error0("Null struct");
 		return EHBI_NULL_STRUCT;
 	}
 	if (buf == 0) {
-		EHBI_LOG_ERROR0("Null buffer");
+		Ehbi_log_error0("Null buffer");
 		return EHBI_NULL_STRING_BUF;
 	}
 	if (buf_len < (bi->bytes_used + 3)) {
-		EHBI_LOG_ERROR0("Buffer too small");
+		Ehbi_log_error0("Buffer too small");
 		return EHBI_STRING_BUF_TOO_SMALL;
 	}
 	j = 0;
@@ -147,19 +147,19 @@ int ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len)
 
 	for (i = bi->bytes_len - bi->bytes_used; i < bi->bytes_len; ++i) {
 		if (j + 2 > buf_len) {
-			EHBI_LOG_ERROR0("Buffer too small, partially written");
+			Ehbi_log_error0("Buffer too small, partially written");
 			return EHBI_STRING_BUF_TOO_SMALL_PARTIAL;
 		}
 		err =
 		    ehbi_byte_to_hex_chars(bi->bytes[i], buf + j, buf + j + 1);
 		if (err) {
-			EHBI_LOG_ERROR0("Corrupted data?");
+			Ehbi_log_error0("Corrupted data?");
 			return err;
 		}
 		j += 2;
 	}
 	if (j > buf_len) {
-		EHBI_LOG_ERROR0("Unable to write trailing NULL to buffer");
+		Ehbi_log_error0("Unable to write trailing NULL to buffer");
 		return EHBI_STRING_BUF_TOO_SMALL_NO_NULL;
 	}
 	buf[j] = '\0';
@@ -185,7 +185,7 @@ int ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len)
 	size = strlen("0x00") + (2 * bi->bytes_used) + 1;
 	hex = ehbi_stack_alloc(size);
 	if (!hex) {
-		EHBI_LOG_ERROR2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
+		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
 				(unsigned long)size);
 		return EHBI_STACK_TOO_SMALL;
 	}
@@ -216,14 +216,14 @@ int ehbi_hex_chars_to_byte(char high, char low, unsigned char *byte)
 
 	err = ehbi_from_hex_nibble(&nibble, high);
 	if (err) {
-		EHBI_LOG_ERROR1("Error with high nibble (%c)", high);
+		Ehbi_log_error1("Error with high nibble (%c)", high);
 		return EHBI_BAD_HIGH_NIBBLE;
 	}
 	*byte = (nibble << 4);
 
 	err = ehbi_from_hex_nibble(&nibble, low);
 	if (err) {
-		EHBI_LOG_ERROR1("Error with low nibble (%c)", high);
+		Ehbi_log_error1("Error with low nibble (%c)", high);
 		return EHBI_BAD_LOW_NIBBLE;
 	}
 	*byte += nibble;
@@ -238,19 +238,19 @@ static int ehbi_decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
 	char *rv;
 
 	if (dec_str == 0 || buf == 0) {
-		EHBI_LOG_ERROR0("Null argument");
+		Ehbi_log_error0("Null argument");
 		return EHBI_NULL_ARGS;
 	}
 
 	if (buf_len < 5) {
-		EHBI_LOG_ERROR0("Buffer too small");
+		Ehbi_log_error0("Buffer too small");
 		return EHBI_STRING_BUF_TOO_SMALL;
 	}
 
 	rv = decimal_to_hex(dec_str, dec_len, buf, buf_len);
 
 	if (rv == NULL) {
-		EHBI_LOG_ERROR1("Character not decimal? (%s)", dec_str);
+		Ehbi_log_error1("Character not decimal? (%s)", dec_str);
 		return EHBI_BAD_INPUT;
 	}
 
@@ -263,19 +263,19 @@ static int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
 	char *rv;
 
 	if (hex == 0 || buf == 0) {
-		EHBI_LOG_ERROR0("Null argument");
+		Ehbi_log_error0("Null argument");
 		return EHBI_NULL_ARGS;
 	}
 
 	if (buf_len < 2 || buf_len < hex_len) {
-		EHBI_LOG_ERROR0("Buffer too small");
+		Ehbi_log_error0("Buffer too small");
 		return EHBI_STRING_BUF_TOO_SMALL;
 	}
 
 	rv = hex_to_decimal(hex, hex_len, buf, buf_len);
 
 	if (rv == NULL) {
-		EHBI_LOG_ERROR1("Character not hex? (%s)", hex);
+		Ehbi_log_error1("Character not hex? (%s)", hex);
 		return EHBI_BAD_INPUT;
 	}
 
@@ -285,7 +285,7 @@ static int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
 static int ehbi_nibble_to_hex(unsigned char nibble, char *c)
 {
 	if (c == 0) {
-		EHBI_LOG_ERROR0("Null char pointer");
+		Ehbi_log_error0("Null char pointer");
 		return EHBI_NULL_CHAR_PTR;
 	}
 	if (nibble < 10) {
@@ -293,7 +293,7 @@ static int ehbi_nibble_to_hex(unsigned char nibble, char *c)
 	} else if (nibble < 16) {
 		*c = 'A' + nibble - 10;
 	} else {
-		EHBI_LOG_ERROR1("Bad input '%x'", nibble);
+		Ehbi_log_error1("Bad input '%x'", nibble);
 		return EHBI_BAD_INPUT;
 	}
 	return EHBI_SUCCESS;
@@ -303,7 +303,7 @@ static int ehbi_from_hex_nibble(unsigned char *nibble, char c)
 {
 
 	if (nibble == 0) {
-		EHBI_LOG_ERROR0("Null char pointer");
+		Ehbi_log_error0("Null char pointer");
 		return EHBI_NULL_CHAR_PTR;
 	}
 	if (c >= '0' && c <= '9') {
@@ -313,7 +313,7 @@ static int ehbi_from_hex_nibble(unsigned char *nibble, char c)
 	} else if (c >= 'A' && c <= 'F') {
 		*nibble = 10 + c - 'A';
 	} else {
-		EHBI_LOG_ERROR1("Not hex (%c)", c);
+		Ehbi_log_error1("Not hex (%c)", c);
 		return EHBI_NOT_HEX;
 	}
 

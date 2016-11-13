@@ -16,8 +16,6 @@ License for more details.
 #include "ehbigint-util.h"
 #include "ehbigint-log.h"
 
-#include <execinfo.h>
-
 #ifdef EHBI_NO_ALLOCA
 void ehbi_do_stack_free(void *ptr, size_t size)
 {

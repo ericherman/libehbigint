@@ -24,7 +24,7 @@ libehbigint_la_SOURCES=\
  src/ehbigint-util.c \
  src/ehbigint.c
 
-libehbigint_la_LIBADD=-lehstr
+libehbigint_la_LIBADD=
 AM_LDFLAGS=-rdynamic
 
 
@@ -54,7 +54,7 @@ COMMON_TEST_SOURCES=src/ehbigint.h \
  tests/test-ehbigint-private-utils.h \
  tests/test-ehbigint-private-utils.c
 
-TEST_LDADDS=-lehstr -lecheck -lehbigint
+TEST_LDADDS=-lecheck -lehbigint
 
 test_add_SOURCES=tests/test-add.c $(COMMON_TEST_SOURCES)
 test_add_LDADD=$(TEST_LDADDS)
@@ -120,7 +120,7 @@ test_to_string_LDADD=$(TEST_LDADDS)
 
 #bin_PROGRAMS=bi-calc
 #bi_calc_SOURCES=demos/bi-calc.c src/ehbigint.h
-#bi_calc_LDADD=-lehstr -lehbigint
+#bi_calc_LDADD=-lehbigint
 
 ACLOCAL_AMFLAGS=-I m4 --install
 

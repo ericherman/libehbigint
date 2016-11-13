@@ -15,14 +15,10 @@ License for more details.
 #include "../src/ehbigint.h"
 #include <stdio.h>		/* printf fprintf */
 #include <string.h>
-#include <ehstr.h>		/* decimal_to_hex */
 
 int main(int argc, char *argv[])
 {
 	char buf[1024];
-	char hexbuf1[1024];
-	char hexbuf2[1024];
-	char hexbuf3[1024];
 	unsigned char bbuf1[1024];
 	unsigned char bbuf2[1024];
 	unsigned char bbuf3[1024];
@@ -45,11 +41,8 @@ int main(int argc, char *argv[])
 	bigint_3.bytes = bbuf3;
 	bigint_3.bytes_len = 1024;
 
-	decimal_to_hex(argv[1], strlen(argv[1]), hexbuf1, 1024);
-	decimal_to_hex(argv[3], strlen(argv[3]), hexbuf2, 1024);
-
-	ehbi_from_hex_string(&bigint_1, hexbuf1, 1024);
-	ehbi_from_hex_string(&bigint_2, hexbuf2, 1024);
+	ehbi_from_decimal_string(&bigint_1, argv[1], strlen(argv[1]));
+	ehbi_from_decimal_string(&bigint_2, argv[3], strlen(argv[3]));
 
 	switch (*argv[2]) {
 	case '+':
@@ -63,13 +56,11 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	ehbi_to_hex_string(&bigint_3, hexbuf3, 1024);
-
-	hex_to_decimal(hexbuf1, 1024, buf, 1024);
+	ehbi_to_decimal_string(&bigint_1, buf, 1024);
 	printf("   %40s\n", buf);
-	hex_to_decimal(hexbuf2, 1024, buf, 1024);
+	ehbi_to_decimal_string(&bigint_2, buf, 1024);
 	printf(" %c %40s\n", *argv[2], buf);
-	hex_to_decimal(hexbuf3, 1024, buf, 1024);
+	ehbi_to_decimal_string(&bigint_3, buf, 1024);
 	printf(" = %40s\n", buf);
 
 	return 0;

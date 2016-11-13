@@ -5,9 +5,6 @@ This is just a learning exercise, not intended for use.
 
 Dependencies
 -------
-* https://github.com/ericherman/libehstr
-  (hex-to-decimal and decimal-to-hex string conversion)
-
 Also, the tests depend upon libecheck
 * https://github.com/ericherman/libecheck
 

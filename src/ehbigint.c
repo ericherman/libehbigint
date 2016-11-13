@@ -96,83 +96,58 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 int ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
 	     const struct ehbigint *bi2)
 {
-	size_t size;
+	size_t size, i, j;
 	int err;
-	struct ehbigint bidx, zero, one;
-	const struct ehbigint *t1;
-	unsigned char zero_bytes[2];
-	unsigned char one_bytes[2];
+	const struct ehbigint *t;
+	unsigned int a, b, r;
+	struct ehbigint tmp;
 
 	if (res == 0 || bi1 == 0 || bi2 == 0) {
 		Ehbi_log_error0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
 
+	err = 0;
 	if (ehbi_less_than(bi1, bi2, &err)) {
-		t1 = bi1;
+		t = bi1;
 		bi1 = bi2;
-		bi2 = t1;
-	}
-	if (err) {
-		return err;
+		bi2 = t;
 	}
 
-	zero.bytes = zero_bytes;
-	zero.bytes_len = 2;
-	err = ehbi_zero(&zero);
-	if (err) {
-		return err;
-	}
-
-	one.bytes = one_bytes;
-	one.bytes_len = 2;
-	err = ehbi_zero(&one);
-	if (err) {
-		return err;
-	}
-	err = ehbi_inc_ul(&one, 1);
-	if (err) {
-		return err;
-	}
-
-	err = ehbi_set(res, &zero);
-	if (err) {
-		return err;
-	}
-
-	if (bi1->bytes_used > bi2->bytes_used) {
-		size = bi1->bytes_used;
-	} else {
-		size = bi2->bytes_used;
-	}
-	size += 4;
-
-	bidx.bytes = ehbi_stack_alloc(size);
-	if (!bidx.bytes) {
+	size = res->bytes_len;
+	tmp.bytes = ehbi_stack_alloc(size);
+	if (!tmp.bytes) {
 		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
 				(unsigned long)size);
-		return EHBI_STACK_TOO_SMALL;
+		err = EHBI_STACK_TOO_SMALL;
 	}
-	bidx.bytes_len = size;
-
-	err = ehbi_set(&bidx, bi2);
+	tmp.bytes_len = size;
+	err = err || ehbi_zero(&tmp);
+	err = err || ehbi_zero(res);
 	if (err) {
-		return err;
+		goto ehbi_mul_end;
 	}
-	while (ehbi_greater_than(&bidx, &zero, &err)) {
-		if (err) {
-			return err;
-		}
-		err = ehbi_inc(res, bi1);
-		if (err) {
-			return err;
-		}
-		err = ehbi_dec(&bidx, &one);
-		if (err) {
-			return err;
+
+	for (i = 0; i < bi2->bytes_used; ++i) {
+		for (j = 0; j < bi1->bytes_used; ++j) {
+			a = bi2->bytes[(bi2->bytes_len - 1) - i];
+			b = bi1->bytes[(bi1->bytes_len - 1) - j];
+			r = (a * b);
+			err = err || ehbi_set_ul(&tmp, r);
+			err = err || ehbi_bytes_shift_left(&tmp, i);
+			err = err || ehbi_bytes_shift_left(&tmp, j);
+			err = err || ehbi_inc(res, &tmp);
+			if (err) {
+				goto ehbi_mul_end;
+			}
 		}
 	}
-	ehbi_stack_free(bidx.bytes, size);
+
+ehbi_mul_end:
+	if (err) {
+		ehbi_zero(res);
+	}
+	ehbi_stack_free(tmp.bytes, size);
 	return err;
 }
 

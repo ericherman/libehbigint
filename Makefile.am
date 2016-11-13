@@ -17,10 +17,13 @@ include_HEADERS=src/ehbigint.h
 libehbigint_la_SOURCES=\
  src/ehbigint.h \
  src/ehbigint-log.h \
- src/ehbigint-util.h \
  src/ehbigint-log.c \
+ src/ehbigint-str.h \
+ src/ehbigint-str.c \
+ src/ehbigint-util.h \
  src/ehbigint-util.c \
  src/ehbigint.c
+
 libehbigint_la_LIBADD=-lehstr
 AM_LDFLAGS=-rdynamic
 

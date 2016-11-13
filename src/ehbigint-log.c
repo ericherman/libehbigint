@@ -15,7 +15,8 @@ License for more details.
 
 #include "ehbigint-log.h"
 
-#include "ehbigint-util.h"	/* ehbi_to_hex */
+#include "ehbigint-str.h"	/* ehbi_to_hex_string ehbi_byte_to_hex_chars */
+#include "ehbigint-util.h"	/* ehbi_stack_alloc */
 
 #include <stdarg.h>		/* va_list */
 #include <stdlib.h>		/* exit() used in ehbi_debug_to_string */
@@ -96,7 +97,7 @@ void ehbi_debug_to_string(int level, const struct ehbigint *bi,
 	for (i = bi->bytes_len; i > 0; --i) {
 		h = '?';
 		l = '?';
-		ehbi_to_hex(bi->bytes[bi->bytes_len - i], &h, &l);
+		ehbi_byte_to_hex_chars(bi->bytes[bi->bytes_len - i], &h, &l);
 		fprintf(stderr, "%c%c", h, l);
 	}
 	fprintf(stderr, ",\n");

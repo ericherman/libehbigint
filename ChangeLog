@@ -1,3 +1,15 @@
+2016-11-13  Eric Herman <eric@freesa.org>
+
+	reorganize the string parsing, improve naming
+
+	* src/ehbigint-str.h: "semi-public" functions, not in ehbigint.h
+	* src/ehbigint-str.c: move all the string stuff here
+	* src/ehbigint-util.h: move out the string stuff
+	* src/ehbigint-util.c: move out the string stuff
+	* src/ehbigint-log.c: reference ehbigint-str.h
+	* src/ehbigint.c: reference ehbigint-str.h
+	* Makefile.am: include new ehbigint-str.*
+
 2016-11-06  Eric Herman <eric@freesa.org>
 
 	fight with autotools to get backtrace to work, defeated

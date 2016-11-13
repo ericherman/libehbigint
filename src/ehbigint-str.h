@@ -1,5 +1,5 @@
 /*
-ehbigint-util.c: support-functions for ehbigint.c
+ehbigint-str.h: additional prototypes for ehbigint-str.c
 Copyright (C) 2016 Eric Herman <eric@freesa.org>
 
 This work is free software: you can redistribute it and/or modify it
@@ -12,20 +12,12 @@ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 */
-#ifndef EHBIGINT_UTIL_H
-#define EHBIGINT_UTIL_H
+#ifndef EHBIGINT_STR_H
+#define EHBIGINT_STR_H
 
-#ifdef EHBI_NO_ALLOCA
-void ehbi_do_stack_free(void *ptr, size_t size);
-#define ehbi_stack_alloc malloc
-#define ehbi_stack_alloc_str "malloc"
-#define ehbi_stack_free ehbi_do_stack_free
-#else
-#include <alloca.h>
-void ehbi_no_stack_free(void *ptr, size_t size);
-#define ehbi_stack_alloc alloca
-#define ehbi_stack_alloc_str "alloca"
-#define ehbi_stack_free ehbi_no_stack_free
-#endif
+#include "ehbigint.h"
 
-#endif /* EHBIGINT_UTIL_H */
+int ehbi_byte_to_hex_chars(unsigned char byte, char *high, char *low);
+int ehbi_hex_chars_to_byte(char high, char low, unsigned char *byte);
+
+#endif /* EHBIGINT_STR_H */

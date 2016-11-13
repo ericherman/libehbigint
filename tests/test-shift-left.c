@@ -26,9 +26,9 @@ int test_shift_left(int verbose, char *val, size_t bytes, char *expected)
 	bi.bytes = bytes_buf1;
 	bi.bytes_len = 20;
 
-	err = ehbi_from_hex_string(&bi, val, strlen(val));
+	err = ehbi_set_hex_string(&bi, val, strlen(val));
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_set_hex_string\n", err);
 		LOG_ERROR("Aborting test\n");
 		return (1 + failures);
 	}

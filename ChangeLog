@@ -17,6 +17,7 @@
 	* tests/echeck.h: copy-in files from echeck
 	* tests/echeck.c: copy-in files from echeck
 	* tests/*.c: remove reference to system echeck
+	* README: add some usage docs
 	* Makefile.am: include new ehbigint-str.*
 
 2016-11-06  Eric Herman <eric@freesa.org>

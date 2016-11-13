@@ -86,7 +86,7 @@
  
  #include <stddef.h>		/* size_t */
  
-@@ -186,8 +188,10 @@ enum {
+@@ -187,8 +189,10 @@ enum {
  	EHBI_LAST
  };
  
@@ -111,3 +111,14 @@
  
  #include <stdlib.h>		/* for size_t */
  #include <stdio.h>		/* for FILE */
+@@ -238,7 +240,10 @@ char echeck_status_m(FILE *err, const char *func, const char *file,
+ #define check_status(val)\
+ 	echeck_status_m(stderr, ECHECK_FUNC, __FILE__, __LINE__, val, NULL)
+ 
++/*
+ #ifdef __cplusplus
+ }
+ #endif
++*/
++
+ #endif /* ECHECK_H */

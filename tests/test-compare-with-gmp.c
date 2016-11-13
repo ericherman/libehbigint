@@ -77,9 +77,9 @@ int test_compare_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 		}
 
 		mpz_set_str(gin, in_str, 10);
-		err = ehbi_from_decimal_string(&ein, in_str, strlen(in_str));
+		err = ehbi_set_decimal_string(&ein, in_str, strlen(in_str));
 		if (err) {
-			LOG_ERROR1("ehbi_from_decimal_string error: %d\n", err);
+			LOG_ERROR1("ehbi_set_decimal_string error: %d\n", err);
 		}
 
 		mpz_get_str(gbuf, 10, gin);

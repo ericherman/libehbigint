@@ -39,7 +39,7 @@ static char *ehbi_decimal_to_hex_raw(const char *dec_str, size_t dec_len,
 				     char *buf, size_t buf_len);
 
 /* public functions */
-int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
+int ehbi_set_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 {
 	size_t i, j;
 	unsigned char high, low;
@@ -107,7 +107,7 @@ int ehbi_from_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 	return EHBI_SUCCESS;
 }
 
-int ehbi_from_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
+int ehbi_set_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 {
 	char *hex;
 	size_t size;
@@ -124,7 +124,7 @@ int ehbi_from_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 	if (err) {
 		return err;
 	}
-	err = ehbi_from_hex_string(bi, hex, size);
+	err = ehbi_set_hex_string(bi, hex, size);
 	ehbi_stack_free(hex, size);
 	return err;
 }

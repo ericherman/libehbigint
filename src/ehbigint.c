@@ -483,9 +483,13 @@ int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes)
 	return EHBI_SUCCESS;
 }
 
-int ehbi_is_negative(const struct ehbigint *bi)
+int ehbi_is_negative(const struct ehbigint *bi, int *err)
 {
 	if (bi == NULL || bi->bytes_used == 0) {
+		Ehbi_log_error0("Null argument(s)");
+		if (err) {
+			*err = EHBI_NULL_ARGS;
+		}
 		return 0;
 	}
 
@@ -513,8 +517,8 @@ int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 
 	*err = EHBI_SUCCESS;
 
-	b1_pos = !ehbi_is_negative(bi1);
-	b2_pos = !ehbi_is_negative(bi2);
+	b1_pos = !ehbi_is_negative(bi1, err);
+	b2_pos = !ehbi_is_negative(bi2, err);
 
 	if (b1_pos != b2_pos) {
 		return b1_pos ? 1 : -1;
@@ -541,18 +545,24 @@ int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 int ehbi_equals(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		int *err)
 {
+	int terr;
+	err = (err != NULL) ? err : &terr;
 	return ((ehbi_compare(bi1, bi2, err) == 0) && (*err == EHBI_SUCCESS));
 }
 
 int ehbi_less_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		   int *err)
 {
+	int terr;
+	err = (err != NULL) ? err : &terr;
 	return ((ehbi_compare(bi1, bi2, err) < 0) && (*err == EHBI_SUCCESS));
 }
 
 int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		      int *err)
 {
+	int terr;
+	err = (err != NULL) ? err : &terr;
 	return ((ehbi_compare(bi1, bi2, err) > 0) && (*err == EHBI_SUCCESS));
 }
 

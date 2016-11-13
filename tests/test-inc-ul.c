@@ -29,9 +29,9 @@ int test_inc_ul(int verbose)
 	bi1.bytes = bytes_buf1;
 	bi1.bytes_len = 20;
 
-	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
+	err = ehbi_set_hex_string(&bi1, str_1, strlen(str_1));
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_set_hex_string\n", err);
 		LOG_ERROR("Aborting test\n");
 		return (1 + failures);
 	}

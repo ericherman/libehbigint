@@ -39,10 +39,10 @@ int test_add(int verbose)
 	bi3.bytes = bytes_buf3;
 	bi3.bytes_len = 20;
 
-	err = ehbi_from_hex_string(&bi1, str_1, strlen(str_1));
-	err += ehbi_from_hex_string(&bi2, str_2, strlen(str_2));
+	err = ehbi_set_hex_string(&bi1, str_1, strlen(str_1));
+	err += ehbi_set_hex_string(&bi2, str_2, strlen(str_2));
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_set_hex_string\n", err);
 		LOG_ERROR("Aborting test\n");
 		return (1 + failures);
 	}

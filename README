@@ -1,6 +1,120 @@
 A thought experiment for creating arbitrarily large integers.
 
-This is just a learning exercise, not intended for use.
+This is just a learning exercise, although perhaps it may be useful.
+
+Usage
+-----
+The ehbigint structure is defined in "ehbigint.h". This structure
+contains the pointer to the underlying bytes, as well as some meta-data:
+
+	struct ehbigint {
+		unsigned char *bytes;
+		size_t bytes_len;
+		size_t bytes_used;
+	};
+
+Prior to use, it the caller's responsibility to construct the structure,
+and initialize it, for example:
+
+	struct ehbigint *bi;
+	bi = (struct ehbigint *) malloc(sizeof(struct ehbigint));
+	bi->bytes = (unsigned char *) malloc(20);
+	bi->bytes_len = 20;
+	bi->bytes_used = 0;
+
+Most ehbigint functions return an error code. The "ehbigint.h" header
+defines the meaning of the error codes. Like posix return codes, a value
+of 0 is success. Typically a non-zero error code will be the result of
+programmer error, although EHBI_BYTES_TOO_SMALL_FOR_CARRY for example
+denotes that an overflow would have occured.
+
+
+Initial value
+-------------
+The structure can be set to a value in a number of ways.
+It can be set by a decimal string:
+	const char *dstr = "1949183158370983519073011571092751";
+	err = ehbi_set_decimal_string(bi, dstr, strlen(dstr));
+
+or a hexidecimal string:
+	const char *hex = "0x23052AC258940FF12342FFFFFFFFA1231";
+	err = ehbi_set_hex_string(bi, hex, strlen(hex));
+
+or an unsigned long:
+	unsigned long val = 123412UL;
+	err = ehbi_set_ul(bi, val);
+
+or another instance of struct ehbigint:
+	err = ehbi_set_ul(bi, bi_other);
+
+
+Addition
+--------
+Populate a result from adding two passed in:
+	err = ehbi_add(result, bi1, bi2);
+
+Adding to an existing value, modifying in place:
+	err = ehbi_inc(bi, bi_amount);
+
+Add to an existing value using an unsigned long:
+	err = ehbi_inc_ul(bi, 23);
+
+
+Subtraction
+-----------
+Populate a result with the value of the second param minus the third:
+	err = ehbi_subtract(result, bi1, bi2);
+
+Decrement the value in place:
+	err = ehbi_dec(bi, bi_amount);
+
+
+Multiplication
+--------------
+Populate the first ehbigint with the sum of the second multiplied by the
+third:
+	err = ehbi_mul(result, bi1, bi2);
+
+Shift the value of the ehbigint up by num_bytes number of bytes:
+	err = ehbi_bytes_shift_left(bi, num_bytes);
+
+
+Division
+--------
+Populate the quotient and remainder with the results of the numerator
+divided by the denominator:
+	err = ehbi_div(*quotient, *remainder, *numerator, *denominator);
+
+
+Comparison
+----------
+The comparison functions return a result, and pass the return code to
+the functions as an "out" paramter:
+
+	result = ehbi_equals(bi1, bi2, &err);
+	result = ehbi_less_than(bi1, bi2, &err);
+	result = ehbi_greater_than(bi1, bi2, &err);
+	result = ehbi_compare(bi1, bi2, &err);
+	result = ehbi_is_negative(bi);
+
+With the result, standard if statements can be made:
+	if (ehbi_equals(bi1, bi2, &err)) {
+		printf("bi1 == bi2\n");
+	}
+
+The result is always false if an error condition occurs, for exmaple if
+a NULL pointer is passed to the function.
+
+
+Output
+------
+Populate the passed in buffer with a hex string representation of the
+ehbigint:
+	err = ehbi_to_hex_string(bi, buf, buf_len);
+
+Populates the passed in buffer with a decimal string representation of
+the ehbigint:
+	err = ehbi_to_decimal_string(bi, buf, buf_len);
 
 
 Dependencies

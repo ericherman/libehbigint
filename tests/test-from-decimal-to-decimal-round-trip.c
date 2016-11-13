@@ -32,11 +32,11 @@ int test_from_decimal_to_decimal_round_trip(int verbose)
 	failures = 0;
 
 	err =
-	    ehbi_from_decimal_string(&a_bigint, expected_str,
-				     strlen(expected_str));
+	    ehbi_set_decimal_string(&a_bigint, expected_str,
+				    strlen(expected_str));
 
 	if (err) {
-		LOG_ERROR1("error %d ehbi_from_decimal_string\n", err);
+		LOG_ERROR1("error %d ehbi_set_decimal_string\n", err);
 		LOG_ERROR("Aborting test\n");
 		return (1 + failures);
 	}

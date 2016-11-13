@@ -57,10 +57,9 @@ int test_div(int verbose)
 	remainder.bytes_used = 0;
 
 	sprintf(as_string, "%lu", ulnumerator);
-	err =
-	    ehbi_from_decimal_string(&numerator, as_string, strlen(as_string));
+	err = ehbi_set_decimal_string(&numerator, as_string, strlen(as_string));
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_set_hex_string\n", err);
 		LOG_ERROR("Aborting test\n");
 		return (1 + failures);
 	}
@@ -74,10 +73,9 @@ int test_div(int verbose)
 
 	sprintf(as_string, "%lu", uldenominator);
 	err =
-	    ehbi_from_decimal_string(&denominator, as_string,
-				     strlen(as_string));
+	    ehbi_set_decimal_string(&denominator, as_string, strlen(as_string));
 	if (err) {
-		LOG_ERROR1("error %d from ehbi_from_hex_string\n", err);
+		LOG_ERROR1("error %d from ehbi_set_hex_string\n", err);
 		LOG_ERROR("Aborting test\n");
 		return (1 + failures);
 	}
@@ -109,17 +107,17 @@ int test_div(int verbose)
 	   result.quot: 151658, result.remainder: 31916031
 	 */
 	str = "5088824049625";
-	err = ehbi_from_decimal_string(&numerator, str, strlen(str));
+	err = ehbi_set_decimal_string(&numerator, str, strlen(str));
 	if (err) {
 		LOG_ERROR3
-		    ("error %d ehbi_from_decimal_string(&numerator, %s, %lu)\n",
+		    ("error %d ehbi_set_decimal_string(&numerator, %s, %lu)\n",
 		     err, str, (unsigned long)strlen(str));
 		LOG_ERROR("Aborting test\n");
 		return (1 + failures);
 	}
 	str = "33554393";
 	denominator.bytes_used = 0;
-	ehbi_from_decimal_string(&denominator, str, strlen(str));
+	ehbi_set_decimal_string(&denominator, str, strlen(str));
 	err = ehbi_div(&quotient, &remainder, &numerator, &denominator);
 	if (err) {
 		LOG_ERROR1("error %d from ehbi_div\n", err);

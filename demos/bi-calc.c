@@ -41,8 +41,8 @@ int main(int argc, char *argv[])
 	bigint_3.bytes = bbuf3;
 	bigint_3.bytes_len = 1024;
 
-	ehbi_from_decimal_string(&bigint_1, argv[1], strlen(argv[1]));
-	ehbi_from_decimal_string(&bigint_2, argv[3], strlen(argv[3]));
+	ehbi_set_decimal_string(&bigint_1, argv[1], strlen(argv[1]));
+	ehbi_set_decimal_string(&bigint_2, argv[3], strlen(argv[3]));
 
 	switch (*argv[2]) {
 	case '+':

@@ -185,15 +185,17 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	/* just early return if denominator is bigger than numerator */
 	if (ehbi_greater_than(denominator, numerator, &err)) {
 		ehbi_zero(quotient);
-		ehbi_set(remainder, numerator);
+		err = ehbi_set(remainder, numerator);
 		goto ehbi_div_end;
-	} else if (err) {
+	}
+	if (err) {
 		goto ehbi_div_end;
 	}
 
 	/* base 256 "long division" */
 	ehbi_zero(quotient);
 	ehbi_zero(remainder);
+
 	num_idx = numerator->bytes_len - numerator->bytes_used;
 	for (i = 0; i < denominator->bytes_used; ++i) {
 		if ((remainder->bytes_used > 1)

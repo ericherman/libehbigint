@@ -196,6 +196,15 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	ehbi_zero(quotient);
 	ehbi_zero(remainder);
 
+	if (ehbi_equals(denominator, quotient, &err)) {
+		Ehbi_log_error0("denominator == 0");
+		err = EHBI_DIVIDE_BY_ZERO;
+		goto ehbi_div_end;
+	}
+	if (err) {
+		goto ehbi_div_end;
+	}
+
 	num_idx = numerator->bytes_len - numerator->bytes_used;
 	for (i = 0; i < denominator->bytes_used; ++i) {
 		if ((remainder->bytes_used > 1)

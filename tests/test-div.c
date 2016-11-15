@@ -95,6 +95,51 @@ int test_div(int verbose, char *snumerator, char *sdenominator, char *squotient,
 	return failures;
 }
 
+int test_div_by_zero(int verbose)
+{
+	int err, failures;
+
+	unsigned char bytes_numerator[10];
+	unsigned char bytes_denominator[10];
+	unsigned char bytes_quotient[10];
+	unsigned char bytes_remainder[10];
+
+	struct ehbigint numerator;
+	struct ehbigint denominator;
+	struct ehbigint quotient;
+	struct ehbigint remainder;
+
+	VERBOSE_ANNOUNCE(verbose);
+	failures = 0;
+
+	numerator.bytes = bytes_numerator;
+	numerator.bytes_len = 10;
+	numerator.bytes_used = 0;
+
+	denominator.bytes = bytes_denominator;
+	denominator.bytes_len = 10;
+	denominator.bytes_used = 0;
+
+	quotient.bytes = bytes_quotient;
+	quotient.bytes_len = 10;
+	quotient.bytes_used = 0;
+
+	remainder.bytes = bytes_remainder;
+	remainder.bytes_len = 10;
+	remainder.bytes_used = 0;
+
+	ehbi_set_ul(&numerator, 10);
+	ehbi_set_ul(&denominator, 0);
+
+	err = ehbi_div(&quotient, &remainder, &numerator, &denominator);
+	if (!err) {
+		++failures;
+		Test_log_error("no error from ehbi_div by zero?\n");
+	}
+
+	return failures;
+}
+
 int main(int argc, char **argv)
 {
 	int v, failures;
@@ -116,6 +161,8 @@ int main(int argc, char **argv)
 	failures += test_div(v, "20001", "100", "200", "1");
 
 	failures += test_div(v, "20013", "200", "100", "13");
+
+	failures += test_div_by_zero(v);
 
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);

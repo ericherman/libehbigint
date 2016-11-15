@@ -1,6 +1,7 @@
 2016-11-15  Eric Herman <eric@freesa.org>
 
 	finally find and fix corner-case in from_decimal going negative
+	introduce DIVIDE_BY_ZERO error code
 
 	* src/ehbigint-str.c: leave leading 00 if first hex byte > 0x7F
 	* tests/test-div.c: add test with case which revealed bug

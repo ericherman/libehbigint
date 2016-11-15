@@ -86,7 +86,7 @@
  
  #include <stddef.h>		/* size_t */
  
-@@ -187,8 +189,10 @@ enum {
+@@ -188,8 +190,10 @@ enum {
  	EHBI_LAST
  };
  

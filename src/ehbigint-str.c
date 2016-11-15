@@ -329,7 +329,7 @@ static char *ehbi_decimal_to_hex_raw(const char *dec_str, size_t dec_len,
 				     char *buf, size_t buf_len)
 {
 	size_t i, j, k, hex_len;
-	unsigned char *hex_buf;
+	unsigned char *hex_buf, byte;
 
 	if (dec_str == 0 || buf == 0 || buf_len < 5) {
 		return NULL;
@@ -386,6 +386,14 @@ static char *ehbi_decimal_to_hex_raw(const char *dec_str, size_t dec_len,
 	/* since j was incremented, whole bytes of '0' will be odd */
 	if (j % 2 == 0) {
 		j -= 1;
+	}
+
+	/* leave a "00" if the leading byte would be greater than 7F */
+	if ((j >= 2) && (j + 1 < hex_len)) {
+		ehbi_hex_chars_to_byte(hex_buf[j], hex_buf[j + 1], &byte);
+		if (byte > 0x7F) {
+			j -= 2;
+		}
 	}
 
 	/* next, shift all the contents "j" places to the left */

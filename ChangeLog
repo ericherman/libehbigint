@@ -1,3 +1,11 @@
+2016-11-15  Eric Herman <eric@freesa.org>
+
+	finally find and fix corner-case in from_decimal going negative
+
+	* src/ehbigint-str.c: leave leading 00 if first hex byte > 0x7F
+	* tests/test-div.c: add test with case which revealed bug
+	* tests/test-from-decimal-to-decimal-round-trip.c: check >= 0
+
 2016-11-13  Eric Herman <eric@freesa.org>
 
 	implement "long mulitiplication" rather than loop-increment

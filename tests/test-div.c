@@ -115,6 +115,8 @@ int main(int argc, char **argv)
 
 	failures += test_div(v, "20001", "100", "200", "1");
 
+	failures += test_div(v, "20013", "200", "100", "13");
+
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}

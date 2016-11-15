@@ -14,14 +14,12 @@ License for more details.
 */
 #include "test-ehbigint-private-utils.h"
 
-int test_from_decimal_to_decimal_round_trip(int verbose)
+int test_from_decimal_to_decimal_round_trip(int verbose,
+					    const char *expected_str)
 {
 	int err, failures;
 	unsigned char bytes_buf[20];
 	char as_string[BUFLEN];
-
-	/*   const char *u64_max =    "18446744073709551615" */
-	const char *expected_str = "12345678901234567890000";
 
 	struct ehbigint a_bigint;
 
@@ -39,6 +37,12 @@ int test_from_decimal_to_decimal_round_trip(int verbose)
 		Test_log_error1("error %d ehbi_set_decimal_string\n", err);
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
+	}
+
+	if (ehbi_is_negative(&a_bigint, &err) || err) {
+		Test_log_error2("ehbi_is_negative for %s, (error:%d)\n",
+				expected_str, err);
+		failures += 1;
 	}
 
 	err = ehbi_to_decimal_string(&a_bigint, as_string, BUFLEN);
@@ -62,11 +66,17 @@ int test_from_decimal_to_decimal_round_trip(int verbose)
 int main(int argc, char **argv)
 {
 	int v, failures;
+	char *str_val;
 
 	v = (argc > 1) ? atoi(argv[1]) : 0;
 	failures = 0;
 
-	failures += test_from_decimal_to_decimal_round_trip(v);
+	/* u64_max = "18446744073709551615" */
+	str_val = "12345678901234567890000";
+	failures += test_from_decimal_to_decimal_round_trip(v, str_val);
+
+	str_val = "200";
+	failures += test_from_decimal_to_decimal_round_trip(v, str_val);
 
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);

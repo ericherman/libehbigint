@@ -205,16 +205,14 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 				goto ehbi_div_end;
 			}
 		}
-		remainder->bytes[remainder->bytes_len - 1] =
-		    numerator->bytes[num_idx++];
+		ehbi_inc_ul(remainder, numerator->bytes[num_idx++]);
 	}
 	if (ehbi_greater_than(denominator, remainder, &err)) {
 		err = ehbi_bytes_shift_left(remainder, 1);
 		if (err) {
 			goto ehbi_div_end;
 		}
-		remainder->bytes[remainder->bytes_len - 1] =
-		    numerator->bytes[num_idx++];
+		ehbi_inc_ul(remainder, numerator->bytes[num_idx++]);
 	}
 	if (err) {
 		goto ehbi_div_end;
@@ -550,7 +548,7 @@ int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		}
 		return 0;
 	}
-	if (bi1->bytes == NULL) {
+	if (bi1->bytes == NULL || bi2->bytes == NULL) {
 		Ehbi_log_error0("Null bytes[]");
 		if (err) {
 			*err = EHBI_NULL_BYTES;

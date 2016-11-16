@@ -13,6 +13,7 @@ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 */
 #include "test-ehbigint-private-utils.h"
+#include "../src/ehbigint-log.h"	/* set_ehbi_log_file */
 
 int test_div(int verbose, char *snumerator, char *sdenominator, char *squotient,
 	     char *sremainder)
@@ -95,9 +96,23 @@ int test_div(int verbose, char *snumerator, char *sdenominator, char *squotient,
 	return failures;
 }
 
+int log_contains(FILE *log, const char *expected)
+{
+	char buffer[4096];
+	rewind(log);
+	while (fgets(buffer, 4096, log)) {
+		if (strstr(buffer, expected)) {
+			return 0;
+		}
+	}
+	fprintf(stderr, "'%s' not found in log\n", expected);
+	return 1;
+}
+
 int test_div_by_zero(int verbose)
 {
 	int err, failures;
+	FILE *log;
 
 	unsigned char bytes_numerator[10];
 	unsigned char bytes_denominator[10];
@@ -111,6 +126,8 @@ int test_div_by_zero(int verbose)
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
+	log = tmpfile();
+	set_ehbi_log_file(log);
 
 	numerator.bytes = bytes_numerator;
 	numerator.bytes_len = 10;
@@ -136,6 +153,8 @@ int test_div_by_zero(int verbose)
 		++failures;
 		Test_log_error("no error from ehbi_div by zero?\n");
 	}
+	failures += log_contains(log, "denominator == 0");
+	fclose(log);
 
 	return failures;
 }

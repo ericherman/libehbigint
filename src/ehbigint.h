@@ -106,6 +106,11 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	     const struct ehbigint *numerator,
 	     const struct ehbigint *denominator);
 
+/* sign inversion
+   returns 0 on success or error_code on error
+*/
+int ehbi_negate(struct ehbigint *bi);
+
 /*
    returns 1 if the values represented by the ehbigint arguments are equal
    returns 0 otherwise

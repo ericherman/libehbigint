@@ -110,8 +110,21 @@ int ehbi_set_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 int ehbi_set_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 {
 	char *hex;
+	const char *str;
 	size_t size;
-	int err;
+	int err, negative;
+
+	if (bi == 0) {
+		Ehbi_log_error0("Null argument(s)");
+		return EHBI_NULL_ARGS;
+	}
+	if (len == 0) {
+		str = "0x00";
+		len = 4;
+	} else if (dec == NULL) {
+		Ehbi_log_error0("Null string");
+		return EHBI_NULL_STRING;
+	}
 
 	size = strlen("0x00") + len + 1;
 	hex = (char *)ehbi_stack_alloc(size);
@@ -120,12 +133,23 @@ int ehbi_set_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 				(unsigned long)size);
 		return EHBI_STACK_TOO_SMALL;
 	}
-	err = ehbi_decimal_to_hex(dec, len, hex, size);
+	if (dec[0] == '-') {
+		str = dec + 1;
+		len -= 1;
+		negative = 1;
+	} else {
+		str = dec;
+		negative = 0;
+	}
+	err = ehbi_decimal_to_hex(str, len, hex, size);
 	if (err) {
 		return err;
 	}
 	err = ehbi_set_hex_string(bi, hex, size);
 	ehbi_stack_free(hex, size);
+	if (negative) {
+		err = err ? err : ehbi_negate(bi);
+	}
 	return err;
 }
 
@@ -186,6 +210,12 @@ int ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len)
 	char *hex;
 	size_t size;
 	int err;
+	struct ehbigint tmp = { NULL, 0, 0 };
+
+	if (bi == NULL || buf == NULL || len == 0) {
+		Ehbi_log_error0("Null Arguments(s)");
+		return EHBI_NULL_ARGS;
+	}
 
 	size = strlen("0x00") + (2 * bi->bytes_used) + 1;
 	hex = (char *)ehbi_stack_alloc(size);
@@ -194,11 +224,40 @@ int ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len)
 				(unsigned long)size);
 		return EHBI_STACK_TOO_SMALL;
 	}
-	err = ehbi_to_hex_string(bi, hex, size);
+
+	if (ehbi_is_negative(bi, &err)) {
+		tmp.bytes = (unsigned char *)ehbi_stack_alloc(bi->bytes_used);
+		if (!tmp.bytes) {
+			Ehbi_log_error2("Could not %s(%lu) bytes",
+					ehbi_stack_alloc_str,
+					(unsigned long)bi->bytes_used);
+			err = EHBI_STACK_TOO_SMALL;
+			goto ehbi_to_decimal_string_end;
+		}
+		tmp.bytes_len = bi->bytes_used;
+		ehbi_set(&tmp, bi);
+		err = ehbi_negate(&tmp);
+		if (err) {
+			goto ehbi_to_decimal_string_end;
+		}
+		err = ehbi_to_hex_string(&tmp, hex, size);
+
+		buf[0] = '-';
+		buf[1] = '\0';
+		buf = buf + 1;
+		len -= 1;
+	} else {
+		err = ehbi_to_hex_string(bi, hex, size);
+	}
 	if (err) {
 		return err;
 	}
 	err = ehbi_hex_to_decimal(hex, size, buf, len);
+
+ehbi_to_decimal_string_end:
+	if (tmp.bytes) {
+		ehbi_stack_free(tmp.bytes, tmp.bytes_len);
+	}
 	ehbi_stack_free(hex, size);
 	return err;
 }

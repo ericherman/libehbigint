@@ -1,3 +1,14 @@
+2016-11-17  Eric Herman <eric@freesa.org>
+
+	ehbi_set_decimal_string allow negative numbers
+	ehbi_to_decimal_string respect negative numbers
+
+	* src/ehbigint.h: add "ehbi_negate" function
+	* src/ehbigint.c: add "ehbi_negate" function
+	* src/ehbigint-str.c: deal with negative numbers better
+	* tests/test-from-decimal-to-decimal-round-trip.c: "-1"
+
+
 2016-11-15  Eric Herman <eric@freesa.org>
 
 	finally find and fix corner-case in from_decimal going negative

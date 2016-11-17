@@ -411,6 +411,9 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 	    && (i <= bi->bytes_len) && (bi->bytes[i - 1] == 0x00)) {
 		++bi->bytes_used;
 	}
+	if (bi->bytes_used == 0) {
+		bi->bytes_used = 1;
+	}
 
 	return EHBI_SUCCESS;
 }
@@ -520,6 +523,40 @@ int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes)
 	}
 
 	return EHBI_SUCCESS;
+}
+
+int ehbi_negate(struct ehbigint *bi)
+{
+	size_t i;
+	struct ehbigint one;
+	unsigned char bytes[2];
+	int err;
+
+	if (bi == NULL) {
+		Ehbi_log_error0("Null argument");
+		return EHBI_NULL_ARGS;
+	}
+	if (bi->bytes == NULL) {
+		Ehbi_log_error0("Null bytes[]");
+		return EHBI_NULL_BYTES;
+	}
+
+	one.bytes = bytes;
+	one.bytes_len = 2;
+	one.bytes_used = 1;
+	one.bytes[0] = 0;
+	one.bytes[1] = 1;
+
+	err = ehbi_dec(bi, &one);
+	if (err) {
+		return err;
+	}
+
+	for (i = 0; i < bi->bytes_len; ++i) {
+		bi->bytes[i] = ~bi->bytes[i];
+	}
+
+	return 0;
 }
 
 int ehbi_is_negative(const struct ehbigint *bi, int *err)

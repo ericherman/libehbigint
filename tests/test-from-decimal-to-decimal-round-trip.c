@@ -54,20 +54,20 @@ int test_from_decimal_to_decimal_round_trip(int verbose, const char *dec)
 int main(int argc, char **argv)
 {
 	int v, failures;
-	char *str_val;
+	const char *dec_str;
 
 	v = (argc > 1) ? atoi(argv[1]) : 0;
 	failures = 0;
 
 	/* u64_max = "18446744073709551615" */
-	str_val = "12345678901234567890000";
-	failures += test_from_decimal_to_decimal_round_trip(v, str_val);
+	dec_str = "12345678901234567890000";
+	failures += test_from_decimal_to_decimal_round_trip(v, dec_str);
 
-	str_val = "200";
-	failures += test_from_decimal_to_decimal_round_trip(v, str_val);
+	dec_str = "200";
+	failures += test_from_decimal_to_decimal_round_trip(v, dec_str);
 
-	str_val = "-1";
-	failures += test_from_decimal_to_decimal_round_trip(v, str_val);
+	dec_str = "-1";
+	failures += test_from_decimal_to_decimal_round_trip(v, dec_str);
 
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);

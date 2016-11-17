@@ -14,8 +14,7 @@ License for more details.
 */
 #include "test-ehbigint-private-utils.h"
 
-int test_from_decimal_to_decimal_round_trip(int verbose,
-					    const char *expected_str)
+int test_from_decimal_to_decimal_round_trip(int verbose, const char *dec)
 {
 	int err, failures, is_negative;
 	unsigned char bytes_buf[20];
@@ -25,10 +24,8 @@ int test_from_decimal_to_decimal_round_trip(int verbose,
 	a_bigint.bytes_len = 20;
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
-	is_negative = expected_str[0] == '-';
-	err =
-	    ehbi_set_decimal_string(&a_bigint, expected_str,
-				    strlen(expected_str));
+	is_negative = dec[0] == '-';
+	err = ehbi_set_decimal_string(&a_bigint, dec, strlen(dec));
 	if (err) {
 		Test_log_error1("error %d ehbi_set_decimal_string\n", err);
 		Test_log_error("Aborting test\n");
@@ -36,7 +33,7 @@ int test_from_decimal_to_decimal_round_trip(int verbose,
 	}
 	if (ehbi_is_negative(&a_bigint, &err) != is_negative || err) {
 		Test_log_error3("ehbi_is_negative != %d for %s, (error:%d)\n",
-				is_negative, expected_str, err);
+				is_negative, dec, err);
 		failures += 1;
 	}
 	err = ehbi_to_decimal_string(&a_bigint, as_string, BUFLEN);
@@ -45,7 +42,7 @@ int test_from_decimal_to_decimal_round_trip(int verbose,
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
-	failures += check_str(as_string, expected_str);
+	failures += check_str(as_string, dec);
 	if (failures) {
 		Test_log_error1("%d failures in "
 				"check_decimal_to_decimal_round_trip\n",

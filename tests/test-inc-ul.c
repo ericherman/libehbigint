@@ -21,7 +21,7 @@ int test_inc_ul(int verbose)
 	struct ehbigint bi1;
 
 	const char *str_1 = "0x700000000000000001";
-	const char *str_3 = "0x700000000100000000";
+	const char *str_3 = "0x700000000000010000";
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
@@ -36,9 +36,9 @@ int test_inc_ul(int verbose)
 		return (1 + failures);
 	}
 
-	err = ehbi_inc_ul(&bi1, (unsigned long)0xFFFFFFFF);
+	err = ehbi_inc_l(&bi1, 0xFFFF);
 	if (err) {
-		Test_log_error1("error %d from ehbi_inc_ul\n", err);
+		Test_log_error1("error %d from ehbi_inc_l\n", err);
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}

@@ -60,8 +60,8 @@ int test_inc(int verbose)
 	   $ echo "9415273 + 3154116455" | bc
 	   3163531728
 	 */
-	err = ehbi_set_ul(&bi1, 9415273UL);
-	err += ehbi_set_ul(&bi2, 3154116455UL);
+	err = ehbi_set_l(&bi1, 9415273UL);
+	err += ehbi_set_l(&bi2, 3154116455UL);
 	err += ehbi_inc(&bi1, &bi2);
 	if (err) {
 		Test_log_error1("error %d from ehbi_inc\n", err);
@@ -70,8 +70,8 @@ int test_inc(int verbose)
 	}
 	failures += check_ehbigint_dec(&bi1, "3163531728", __LINE__, TEST_FUNC);
 
-	err = ehbi_set_ul(&bi1, 254);
-	err += ehbi_set_ul(&bi2, 1);
+	err = ehbi_set_l(&bi1, 254);
+	err += ehbi_set_l(&bi2, 1);
 	err += ehbi_inc(&bi1, &bi2);
 	if (err) {
 		Test_log_error1("error %d from ehbi_inc\n", err);

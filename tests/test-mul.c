@@ -44,9 +44,9 @@ int test_mul(int verbose, unsigned long aul, unsigned long bul, char *expected)
 	result.bytes_len = 16;
 
 	sprintf(buf, "%lu", aul);
-	err = ehbi_set_ul(&a_bigint, aul);
+	err = ehbi_set_l(&a_bigint, aul);
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_ul\n", err);
+		Test_log_error1("error %d from ehbi_set_l\n", err);
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
@@ -58,9 +58,9 @@ int test_mul(int verbose, unsigned long aul, unsigned long bul, char *expected)
 	}
 
 	sprintf(buf, "%lu", bul);
-	err = ehbi_set_ul(&b_bigint, bul);
+	err = ehbi_set_l(&b_bigint, bul);
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_ul\n", err);
+		Test_log_error1("error %d from ehbi_set_l\n", err);
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}

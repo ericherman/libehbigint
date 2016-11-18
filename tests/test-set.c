@@ -36,9 +36,9 @@ int test_set(int verbose)
 	b_bigint.bytes_len = 10;
 	b_bigint.bytes_used = 0;
 
-	err = ehbi_set_ul(&a_bigint, three);
+	err = ehbi_set_l(&a_bigint, three);
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_ul\n", err);
+		Test_log_error1("error %d from ehbi_set_l\n", err);
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
@@ -46,7 +46,7 @@ int test_set(int verbose)
 
 	err = ehbi_set(&b_bigint, &a_bigint);
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_ul\n", err);
+		Test_log_error1("error %d from ehbi_set_l\n", err);
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}

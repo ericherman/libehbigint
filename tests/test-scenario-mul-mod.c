@@ -50,23 +50,23 @@ int test_scenario_mul_mod(int verbose)
 	brem.bytes_used = 0;
 
 	x = 20151125;
-	err = ehbi_set_ul(&bx, x);
+	err = ehbi_set_l(&bx, x);
 	if (err) {
-		Test_log_error2("ehbi_set_ul (%lu) error: %d\n", x, err);
+		Test_log_error2("ehbi_set_l (%lu) error: %d\n", x, err);
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 	y = 252533;
-	err = ehbi_set_ul(&by, y);
+	err = ehbi_set_l(&by, y);
 	if (err) {
-		Test_log_error2("ehbi_set_ul (%lu) error: %d\n", y, err);
+		Test_log_error2("ehbi_set_l (%lu) error: %d\n", y, err);
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
 	z = 33554393;
-	err = ehbi_set_ul(&bz, z);
+	err = ehbi_set_l(&bz, z);
 	if (err) {
-		Test_log_error2("ehbi_set_ul (%lu) error: %d\n", z, err);
+		Test_log_error2("ehbi_set_l (%lu) error: %d\n", z, err);
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}

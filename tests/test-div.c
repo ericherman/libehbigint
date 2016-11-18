@@ -145,8 +145,8 @@ int test_div_by_zero(int verbose)
 	remainder.bytes_len = 10;
 	remainder.bytes_used = 0;
 
-	ehbi_set_ul(&numerator, 10);
-	ehbi_set_ul(&denominator, 0);
+	ehbi_set_l(&numerator, 10);
+	ehbi_set_l(&denominator, 0);
 
 	err = ehbi_div(&quotient, &remainder, &numerator, &denominator);
 	if (!err) {

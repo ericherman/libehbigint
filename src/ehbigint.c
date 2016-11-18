@@ -19,14 +19,14 @@ License for more details.
 
 static int ehbi_zero(struct ehbigint *bi);
 
-int ehbi_set_ul(struct ehbigint *bi, unsigned long val)
+int ehbi_set_l(struct ehbigint *bi, long val)
 {
 	int err;
 	err = ehbi_zero(bi);
 	if (err) {
 		return err;
 	}
-	return ehbi_inc_ul(bi, val);
+	return ehbi_inc_l(bi, val);
 }
 
 int ehbi_set(struct ehbigint *bi, const struct ehbigint *val)
@@ -141,7 +141,7 @@ int ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
 			a = bi2->bytes[(bi2->bytes_len - 1) - i];
 			b = bi1->bytes[(bi1->bytes_len - 1) - j];
 			r = (a * b);
-			err = err || ehbi_set_ul(&tmp, r);
+			err = err || ehbi_set_l(&tmp, r);
 			err = err || ehbi_bytes_shift_left(&tmp, i);
 			err = err || ehbi_bytes_shift_left(&tmp, j);
 			err = err || ehbi_inc(res, &tmp);
@@ -214,14 +214,14 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 				goto ehbi_div_end;
 			}
 		}
-		ehbi_inc_ul(remainder, numerator->bytes[num_idx++]);
+		ehbi_inc_l(remainder, numerator->bytes[num_idx++]);
 	}
 	if (ehbi_greater_than(denominator, remainder, &err)) {
 		err = ehbi_bytes_shift_left(remainder, 1);
 		if (err) {
 			goto ehbi_div_end;
 		}
-		ehbi_inc_ul(remainder, numerator->bytes[num_idx++]);
+		ehbi_inc_l(remainder, numerator->bytes[num_idx++]);
 	}
 	if (err) {
 		goto ehbi_div_end;
@@ -233,7 +233,7 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		if (err) {
 			goto ehbi_div_end;
 		}
-		err = ehbi_inc_ul(quotient, 1);
+		err = ehbi_inc_l(quotient, 1);
 		if (err) {
 			goto ehbi_div_end;
 		}
@@ -330,31 +330,30 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 	return EHBI_SUCCESS;
 }
 
-int ehbi_inc_ul(struct ehbigint *bi, unsigned long val)
+int ehbi_inc_l(struct ehbigint *bi, long val)
 {
 	size_t i, j;
 	unsigned char c;
-	unsigned char bytes[1 + sizeof(unsigned long)];
+	unsigned char bytes[sizeof(long)];
 	struct ehbigint temp;
 
 	temp.bytes = bytes;
-	temp.bytes_len = 1 + sizeof(unsigned long);
-	temp.bytes_used = sizeof(unsigned long);
+	temp.bytes_len = sizeof(long);
+	temp.bytes_used = sizeof(long);
 
-	temp.bytes[0] = 0x00;
 	for (i = 0; i < temp.bytes_used; ++i) {
 		c = (val >> (8 * i));
 		j = (temp.bytes_len - 1) - i;
 		temp.bytes[j] = c;
 	}
 	for (i = 0; i < temp.bytes_len; ++i) {
-		if (temp.bytes[i] != 0x00) {
+		if ((val >= 0 && temp.bytes[i] != 0x00)
+		    || (val < 0 && temp.bytes[i] != 0xFF)) {
 			break;
 		}
 	}
 	temp.bytes_used = temp.bytes_len - i;
-	if ((temp.bytes_used == 0)
-	    || (temp.bytes[temp.bytes_len - temp.bytes_used] > 0x7F)) {
+	if (temp.bytes_used == 0) {
 		++temp.bytes_used;
 	}
 

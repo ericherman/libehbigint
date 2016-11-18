@@ -54,12 +54,12 @@ int test_compare_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 	equot.bytes_used = 0;
 	erem.bytes_used = 0;
 
-	ehbi_set_ul(&ein, 0);
-	ehbi_set_ul(&emul, 252533);
-	ehbi_set_ul(&eres, 0);
-	ehbi_set_ul(&ediv, 33554393);
-	ehbi_set_ul(&equot, 0);
-	ehbi_set_ul(&erem, 0);
+	ehbi_set_l(&ein, 0);
+	ehbi_set_l(&emul, 252533);
+	ehbi_set_l(&eres, 0);
+	ehbi_set_l(&ediv, 33554393);
+	ehbi_set_l(&equot, 0);
+	ehbi_set_l(&erem, 0);
 
 	mpz_init(gin);
 	mpz_init(gmul);

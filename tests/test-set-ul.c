@@ -27,11 +27,11 @@ int test_set_ul(int verbose)
 	bi.bytes = bytes;
 	bi.bytes_len = 4;
 
-	ehbi_set_ul(&bi, 0);
+	ehbi_set_l(&bi, 0);
 	failures += check_ehbigint_hex(&bi, "0x00", __LINE__, TEST_FUNC);
 	failures += check_ehbigint_dec(&bi, "0", __LINE__, TEST_FUNC);
 
-	ehbi_set_ul(&bi, 1234567890);
+	ehbi_set_l(&bi, 1234567890);
 	failures += check_ehbigint_hex(&bi, "0x499602D2", __LINE__, TEST_FUNC);
 	failures += check_ehbigint_dec(&bi, "1234567890", __LINE__, TEST_FUNC);
 

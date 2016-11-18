@@ -49,7 +49,7 @@ int ehbi_set(struct ehbigint *bi, const struct ehbigint *val);
    populates an ehbigint with the value
    returns 0 on success or error_code on error
 */
-int ehbi_set_ul(struct ehbigint *bi, unsigned long val);
+int ehbi_set_l(struct ehbigint *bi, long val);
 
 /*
    populates the first ehbigint with the sum of the second and third
@@ -68,7 +68,7 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val);
    increments the ehbigint by the value in the second parameter
    returns 0 on success or error_code on error
 */
-int ehbi_inc_ul(struct ehbigint *bi, unsigned long val);
+int ehbi_inc_l(struct ehbigint *bi, long val);
 
 /*
    decrements the first ehbigint by the value in the second parameter

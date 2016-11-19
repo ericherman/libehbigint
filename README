@@ -40,12 +40,12 @@ or a hexidecimal string:
 	const char *hex = "0x23052AC258940FF12342FFFFFFFFA1231";
 	err = ehbi_set_hex_string(bi, hex, strlen(hex));
 
-or an unsigned long:
-	unsigned long val = 123412UL;
-	err = ehbi_set_ul(bi, val);
+or an long:
+	long val = 123412L;
+	err = ehbi_set_l(bi, val);
 
 or another instance of struct ehbigint:
-	err = ehbi_set_ul(bi, bi_other);
+	err = ehbi_set_l(bi, bi_other);
 
 
 Addition
@@ -56,8 +56,8 @@ Populate a result from adding two passed in:
 Adding to an existing value, modifying in place:
 	err = ehbi_inc(bi, bi_amount);
 
-Add to an existing value using an unsigned long:
-	err = ehbi_inc_ul(bi, 23);
+Add to an existing value using an long:
+	err = ehbi_inc_l(bi, 23);
 
 
 Subtraction

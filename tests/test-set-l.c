@@ -14,10 +14,11 @@ License for more details.
 */
 #include "test-ehbigint-private-utils.h"
 
-int test_set_ul(int verbose)
+int test_set_l(int verbose, long v1)
 {
 	int failures;
 
+	char expect[25];
 	unsigned char bytes[4];
 	struct ehbigint bi;
 
@@ -31,12 +32,14 @@ int test_set_ul(int verbose)
 	failures += check_ehbigint_hex(&bi, "0x00", __LINE__, TEST_FUNC);
 	failures += check_ehbigint_dec(&bi, "0", __LINE__, TEST_FUNC);
 
-	ehbi_set_l(&bi, 1234567890);
-	failures += check_ehbigint_hex(&bi, "0x499602D2", __LINE__, TEST_FUNC);
-	failures += check_ehbigint_dec(&bi, "1234567890", __LINE__, TEST_FUNC);
+	ehbi_set_l(&bi, v1);
+	sprintf(expect, "0x%lX", v1);
+	failures += check_ehbigint_hex(&bi, expect, __LINE__, TEST_FUNC);
+	sprintf(expect, "%ld", v1);
+	failures += check_ehbigint_dec(&bi, expect, __LINE__, TEST_FUNC);
 
 	if (failures) {
-		Test_log_error1("%d failures in test_set_ul\n", failures);
+		Test_log_error1("%d failures in test_set_l\n", failures);
 	}
 
 	return failures;
@@ -49,7 +52,7 @@ int main(int argc, char **argv)
 	v = (argc > 1) ? atoi(argv[1]) : 0;
 	failures = 0;
 
-	failures += test_set_ul(v);
+	failures += test_set_l(v, 1234567890);
 
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);

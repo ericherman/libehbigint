@@ -40,11 +40,11 @@ check_PROGRAMS=\
  test-from-decimal-to-decimal-round-trip \
  test-from-hex-to-hex-round-trip \
  test-inc \
- test-inc-ul \
+ test-inc-l \
  test-mul \
  test-scenario-mul-mod \
  test-set \
- test-set-ul \
+ test-set-l \
  test-subtract \
  test-shift-left \
  test-to-string
@@ -94,8 +94,8 @@ test_from_hex_to_hex_round_trip_LDADD=$(TEST_LDADDS)
 test_inc_SOURCES=tests/test-inc.c $(COMMON_TEST_SOURCES)
 test_inc_LDADD=$(TEST_LDADDS)
 
-test_inc_ul_SOURCES=tests/test-inc-ul.c $(COMMON_TEST_SOURCES)
-test_inc_ul_LDADD=$(TEST_LDADDS)
+test_inc_l_SOURCES=tests/test-inc-l.c $(COMMON_TEST_SOURCES)
+test_inc_l_LDADD=$(TEST_LDADDS)
 
 test_mul_SOURCES=tests/test-mul.c $(COMMON_TEST_SOURCES)
 test_mul_LDADD=$(TEST_LDADDS)
@@ -107,8 +107,8 @@ test_scenario_mul_mod_LDADD=$(TEST_LDADDS)
 test_set_SOURCES=tests/test-set.c $(COMMON_TEST_SOURCES)
 test_set_LDADD=$(TEST_LDADDS)
 
-test_set_ul_SOURCES=tests/test-set-ul.c $(COMMON_TEST_SOURCES)
-test_set_ul_LDADD=$(TEST_LDADDS)
+test_set_l_SOURCES=tests/test-set-l.c $(COMMON_TEST_SOURCES)
+test_set_l_LDADD=$(TEST_LDADDS)
 
 test_subtract_SOURCES=tests/test-subtract.c $(COMMON_TEST_SOURCES)
 test_subtract_LDADD=$(TEST_LDADDS)
@@ -191,11 +191,11 @@ valgrind: $(check_PROGRAMS)
 		./test-from-decimal-to-decimal-round-trip
 	libtool --mode=execute valgrind -q ./test-from-hex-to-hex-round-trip
 	libtool --mode=execute valgrind -q ./test-inc
-	libtool --mode=execute valgrind -q ./test-inc-ul
+	libtool --mode=execute valgrind -q ./test-inc-l
 	libtool --mode=execute valgrind -q ./test-mul
 	libtool --mode=execute valgrind -q ./test-scenario-mul-mod
 	libtool --mode=execute valgrind -q ./test-set
-	libtool --mode=execute valgrind -q ./test-set-ul
+	libtool --mode=execute valgrind -q ./test-set-l
 	libtool --mode=execute valgrind -q ./test-subtract
 	libtool --mode=execute valgrind -q ./test-shift-left
 	libtool --mode=execute valgrind -q ./test-to-string

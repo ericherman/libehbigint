@@ -35,11 +35,11 @@ test-equals
 test-from-decimal-to-decimal-round-trip
 test-from-hex-to-hex-round-trip
 test-inc
-test-inc-ul
+test-inc-l
 test-mul
 test-scenario-mul-mod
 test-set
-test-set-ul
+test-set-l
 test-subtract
 test-shift-left
 test-to-string

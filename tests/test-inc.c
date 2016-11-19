@@ -14,7 +14,8 @@ License for more details.
 */
 #include "test-ehbigint-private-utils.h"
 
-int test_inc_hex(int verbose, const char *hexs1, const char *hexs2, const char *expct)
+int test_inc_hex(int verbose, const char *hexs1, const char *hexs2,
+		 const char *expct)
 {
 	int err, failures;
 	unsigned char bytes_buf1[20];
@@ -93,21 +94,21 @@ int main(int argc, char **argv)
 	v = (argc > 1) ? atoi(argv[1]) : 0;
 	failures = 0;
 
+	failures += test_inc(v, "254", "1", "255");
+	failures += test_inc(v, "254", "-1", "253");
+
+	/*
+	   $ echo "9415273 + 3154116455" | bc
+	   3163531728
+	 */
+	failures += test_inc(v, "9415273", "3154116455", "3163531728");
+
 	/* u64max = "0xFFFFFFFFFFFFFFFF" */
 	hexs1 = "0x00F00000F00000000001";
 	hexs2 = "0x00100000100000000001";
 	expct = "0x01000001000000000002";
 	failures += test_inc_hex(v, hexs1, hexs2, expct);
 
-	failures += test_inc(v, "254", "1", "255");
-	/*
-	   $ echo "9415273 + 3154116455" | bc
-	   3163531728
-	 */
-	failures += test_inc(v, "9415273", "3154116455", "3163531728");
-/*
-	failures += test_inc(v, "254", "-1", "253");
-*/
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}

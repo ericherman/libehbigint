@@ -36,7 +36,7 @@ int test_from_decimal_to_decimal_round_trip(int verbose, const char *dec)
 				is_negative, dec, err);
 		failures += 1;
 	}
-	err = ehbi_to_decimal_string(&a_bigint, as_string, BUFLEN);
+	ehbi_to_decimal_string(&a_bigint, as_string, BUFLEN, &err);
 	if (err) {
 		Test_log_error1("error %d ehbi_to_decimal_string\n", err);
 		Test_log_error("Aborting test\n");

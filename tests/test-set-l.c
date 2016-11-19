@@ -16,9 +16,9 @@ License for more details.
 
 int test_set_l(int verbose, long v1)
 {
-	int failures;
+	int failures, err;
 
-	char expect[25];
+	char expect[25], buf[80];
 	unsigned char bytes[4];
 	struct ehbigint bi;
 
@@ -28,13 +28,15 @@ int test_set_l(int verbose, long v1)
 	bi.bytes = bytes;
 	bi.bytes_len = 4;
 
-	ehbi_set_l(&bi, 0);
+	err = ehbi_set_l(&bi, 0);
+	failures += check_int_m(err, 0, "ehbi_set_l(0)");
 	failures += check_ehbigint_hex(&bi, "0x00", __LINE__, TEST_FUNC);
 	failures += check_ehbigint_dec(&bi, "0", __LINE__, TEST_FUNC);
 
-	ehbi_set_l(&bi, v1);
-	sprintf(expect, "0x%lX", v1);
-	failures += check_ehbigint_hex(&bi, expect, __LINE__, TEST_FUNC);
+	sprintf(buf, "ehbi_set_l(%ld)", v1);
+	err = ehbi_set_l(&bi, v1);
+	failures += check_int_m(err, 0, buf);
+
 	sprintf(expect, "%ld", v1);
 	failures += check_ehbigint_dec(&bi, expect, __LINE__, TEST_FUNC);
 
@@ -56,6 +58,7 @@ int main(int argc, char **argv)
 /*
 	failures += test_set_l(v, -1);
 */
+
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}

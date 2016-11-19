@@ -154,17 +154,20 @@ int ehbi_is_negative(const struct ehbigint *bi, int *err);
 /*
    populates the passed in buffer with a hex string representation
    of the ehbigint
-   returns 0 on success or error_code on error
+   returns pointer to buf success or NULL on error and sets the value of
+   err with error_code.
 */
-int ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len);
+char *ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len,
+			 int *err);
 
 /*
    populates the passed in buffer with a decimal string representation
    of the ehbigint
-   returns 0 on success or error_code on error
+   returns pointer to buf success or NULL on error and sets the value of
+   err with error_code.
 */
-int ehbi_to_decimal_string(const struct ehbigint *bi, char *buf,
-			   size_t buf_len);
+char *ehbi_to_decimal_string(const struct ehbigint *bi, char *buf,
+			     size_t buf_len, int *err);
 
 /* error codes */
 enum {

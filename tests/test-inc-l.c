@@ -61,6 +61,7 @@ int main(int argc, char **argv)
 	failures += test_inc_l(v, "700000000000", -2, "699999999998");
 	failures += test_inc_l(v, "1", -3, "-2");
 */
+
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}

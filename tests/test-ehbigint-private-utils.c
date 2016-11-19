@@ -23,7 +23,7 @@ int check_ehbigint_dec(struct ehbigint *val, const char *expected, int line,
 	char buf[BUFLEN];
 
 	sprintf(buf, "%s:%d", msg, line);
-	err = ehbi_to_decimal_string(val, actual, BUFLEN);
+	ehbi_to_decimal_string(val, actual, BUFLEN, &err);
 	if (err) {
 		Test_log_error2("error %d ehbi_to_decimal_string (%s)\n", err,
 				buf);
@@ -41,7 +41,7 @@ int check_ehbigint_hex(struct ehbigint *val, const char *expected, int line,
 	char buf[BUFLEN];
 
 	sprintf(buf, "%s:%d", msg, line);
-	err = ehbi_to_hex_string(val, actual, BUFLEN);
+	ehbi_to_hex_string(val, actual, BUFLEN, &err);
 	if (err) {
 		Test_log_error2("error %d ehbi_to_hex_string (%s)\n", err, buf);
 		return 1;
@@ -57,7 +57,7 @@ unsigned long ehbigint_to_unsigned_long(struct ehbigint *val, int *err)
 	char *endptr;
 	unsigned long result;
 
-	*err = ehbi_to_decimal_string(val, dec, BUFLEN);
+	ehbi_to_decimal_string(val, dec, BUFLEN, err);
 	if (*err) {
 		Test_log_error1("error %d ehbi_to_decimal_string\n", *err);
 		return 0;

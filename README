@@ -110,11 +110,13 @@ Output
 ------
 Populate the passed in buffer with a hex string representation of the
 ehbigint:
-	err = ehbi_to_hex_string(bi, buf, buf_len);
+	int err;
+	printf("%s\n", ehbi_to_hex_string(bi, buf, buf_len, &err));
 
 Populates the passed in buffer with a decimal string representation of
 the ehbigint:
-	err = ehbi_to_decimal_string(bi, buf, buf_len);
+	int err;
+	printf("%s\n", ehbi_to_decimal_string(bi, buf, buf_len, &err));
 
 
 Dependencies

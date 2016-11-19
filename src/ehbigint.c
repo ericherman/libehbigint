@@ -32,11 +32,33 @@ int ehbi_set_l(struct ehbigint *bi, long val)
 int ehbi_set(struct ehbigint *bi, const struct ehbigint *val)
 {
 	int err;
+	size_t i;
+	unsigned char byte;
+
 	err = ehbi_zero(bi);
 	if (err) {
 		return err;
 	}
-	return ehbi_inc(bi, val);
+
+	bi->bytes_used = 0;
+	for (i = 0; i < val->bytes_used; ++i) {
+		if (bi->bytes_used >= bi->bytes_len) {
+			ehbi_zero(bi);
+			Ehbi_log_error0("Result byte[] too small");
+			return EHBI_BYTES_TOO_SMALL;
+		}
+		byte = val->bytes[val->bytes_len - 1 - i];
+		bi->bytes[bi->bytes_len - 1 - i] = byte;
+		++bi->bytes_used;
+	}
+	byte = ehbi_is_negative(val, &err) ? 0xFF : 0x00;
+	if (err) {
+		return err;
+	}
+	for (i = 0; i < (bi->bytes_len - bi->bytes_used); ++i) {
+		bi->bytes[i] = byte;
+	}
+	return EHBI_SUCCESS;
 }
 
 int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
@@ -273,6 +295,8 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 {
 	size_t i;
 	unsigned char a, b, c;
+	int err;
+	struct ehbigint temp;
 
 	if (bi == NULL || val == NULL) {
 		Ehbi_log_error0("Null argument(s)");
@@ -285,6 +309,29 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 	if (val->bytes_used > bi->bytes_len) {
 		Ehbi_log_error0("byte[] too small");
 		return EHBI_BYTES_TOO_SMALL;
+	}
+
+	err = 0;
+	if (ehbi_is_negative(val, &err)) {
+		temp.bytes_used = 0;
+		temp.bytes_len = 0;
+		temp.bytes = (unsigned char *)ehbi_stack_alloc(val->bytes_used);
+		if (!temp.bytes) {
+			Ehbi_log_error2("Could not %s(%lu) bytes",
+					ehbi_stack_alloc_str,
+					(unsigned long)val->bytes_used);
+			err = EHBI_STACK_TOO_SMALL;
+			return err;
+		}
+		temp.bytes_len = val->bytes_used;
+		err = ehbi_set(&temp, val);
+		err = err || ehbi_negate(&temp);
+		err = err || ehbi_dec(bi, &temp);
+		ehbi_stack_free(temp.bytes, temp.bytes_len);
+		return err;
+	}
+	if (err) {
+		return err;
 	}
 
 	c = 0;
@@ -356,14 +403,15 @@ int ehbi_inc_l(struct ehbigint *bi, long val)
 	if (temp.bytes_used == 0) {
 		++temp.bytes_used;
 	}
-
 	return ehbi_inc(bi, &temp);
 }
 
 int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 {
-	size_t i, j;
+	size_t i, j, size;
 	unsigned char a, b, c;
+	struct ehbigint tmp;
+	int err;
 
 	if (bi == NULL || val == NULL) {
 		Ehbi_log_error0("Null argument(s)");
@@ -372,6 +420,27 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 	if (bi->bytes == NULL || val->bytes == NULL) {
 		Ehbi_log_error0("Null bytes[]");
 		return EHBI_NULL_BYTES;
+	}
+
+	err = 0;
+	if (ehbi_greater_than(val, bi, &err)) {
+		size = 1 + val->bytes_used;
+		tmp.bytes = (unsigned char *)ehbi_stack_alloc(size);
+		if (!tmp.bytes) {
+			Ehbi_log_error2("Could not %s(%lu) bytes",
+					ehbi_stack_alloc_str,
+					(unsigned long)size);
+			return EHBI_STACK_TOO_SMALL;
+		}
+		tmp.bytes_len = size;
+		tmp.bytes_used = 0;
+		err = ehbi_subtract(&tmp, val, bi);
+		err = err || ehbi_set(bi, &tmp);
+		ehbi_stack_free(tmp.bytes, tmp.bytes_len);
+		err = err || ehbi_negate(bi);
+	}
+	if (err) {
+		return err;
 	}
 
 	c = 0;
@@ -529,7 +598,7 @@ int ehbi_negate(struct ehbigint *bi)
 	size_t i;
 	struct ehbigint one;
 	unsigned char bytes[2];
-	int err;
+	int err, is_negative;
 
 	if (bi == NULL) {
 		Ehbi_log_error0("Null argument");
@@ -546,7 +615,15 @@ int ehbi_negate(struct ehbigint *bi)
 	one.bytes[0] = 0;
 	one.bytes[1] = 1;
 
-	err = ehbi_dec(bi, &one);
+	err = 0;
+	is_negative = ehbi_is_negative(bi, &err);
+	if (err) {
+		return err;
+	}
+
+	if (!is_negative) {
+		err = ehbi_dec(bi, &one);
+	}
 	if (err) {
 		return err;
 	}
@@ -555,7 +632,11 @@ int ehbi_negate(struct ehbigint *bi)
 		bi->bytes[i] = ~bi->bytes[i];
 	}
 
-	return 0;
+	if (is_negative) {
+		err = ehbi_inc(bi, &one);
+	}
+
+	return err;
 }
 
 int ehbi_is_negative(const struct ehbigint *bi, int *err)

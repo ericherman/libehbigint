@@ -45,7 +45,11 @@ int ehbi_debugf(int level, const char *fmt, ...)
 void ehbi_debug_to_hex(int level, const struct ehbigint *bi, const char *label)
 {
 	char *buf;
-	size_t size, i;
+	size_t size;
+	int err;
+	/*
+	   size_t i;
+	 */
 
 	if (ehbi_debug_log_level < level) {
 		return;
@@ -60,13 +64,14 @@ void ehbi_debug_to_hex(int level, const struct ehbigint *bi, const char *label)
 	}
 
 	fprintf(stderr, "%s\t(%p):", label, (void *)bi);
-	for (i = 0; i < (bi->bytes_len - bi->bytes_used); ++i) {
-		fprintf(stderr, "  ");
-	}
-	ehbi_to_hex_string(bi, buf, size);
-	fprintf(stderr, "%s", buf);
-	ehbi_to_decimal_string(bi, buf, size);
-	fprintf(stderr, "\t(%s)\n", buf);
+	/*
+	   for (i = 0; i < (bi->bytes_len - bi->bytes_used); ++i) {
+	   fprintf(stderr, "  ");
+	   }
+	 */
+	fprintf(stderr, "%s", ehbi_to_hex_string(bi, buf, size, &err));
+	fprintf(stderr, "\t(%s)\n",
+		ehbi_to_decimal_string(bi, buf, size, &err));
 
 	ehbi_stack_free(buf, size);
 }
@@ -76,6 +81,7 @@ void ehbi_debug_to_string(int level, const struct ehbigint *bi,
 {
 	char *buf, h, l;
 	size_t size, i;
+	int err;
 
 	if (ehbi_debug_log_level < level) {
 		return;
@@ -113,11 +119,11 @@ void ehbi_debug_to_string(int level, const struct ehbigint *bi,
 	for (i = 0; i < (bi->bytes_len - bi->bytes_used); ++i) {
 		fprintf(stderr, "  ");
 	}
-	ehbi_to_hex_string(bi, buf, size);
-	fprintf(stderr, "%s,\n", buf);
+	fprintf(stderr, "%s,\n", ehbi_to_hex_string(bi, buf, size, &err));
 
-	ehbi_to_decimal_string(bi, buf, size);
-	fprintf(stderr, "\tdec => %s,\n", buf);
+	ehbi_to_decimal_string(bi, buf, size, &err);
+	fprintf(stderr, "\tdec => %s,\n",
+		ehbi_to_decimal_string(bi, buf, size, &err));
 	ehbi_stack_free(buf, size);
 
 	fprintf(stderr, "}\n");

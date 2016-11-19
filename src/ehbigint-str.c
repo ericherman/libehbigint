@@ -153,23 +153,33 @@ int ehbi_set_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 	return err;
 }
 
-int ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len)
+char *ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len,
+			 int *err)
 {
-	int err;
 	size_t i, j;
+
+	if (err == NULL) {
+		Ehbi_log_error0("Null err");
+		goto ehbi_to_hex_string_end;
+	}
 
 	if (bi == 0) {
 		Ehbi_log_error0("Null struct");
-		return EHBI_NULL_STRUCT;
+		*err = EHBI_NULL_STRUCT;
+		goto ehbi_to_hex_string_end;
 	}
 	if (buf == 0) {
 		Ehbi_log_error0("Null buffer");
-		return EHBI_NULL_STRING_BUF;
+		*err = EHBI_NULL_STRING_BUF;
+		goto ehbi_to_hex_string_end;
 	}
 	if (buf_len < (bi->bytes_used + 3)) {
 		Ehbi_log_error0("Buffer too small");
-		return EHBI_STRING_BUF_TOO_SMALL;
+		*err = EHBI_STRING_BUF_TOO_SMALL;
+		goto ehbi_to_hex_string_end;
 	}
+
+	*err = 0;
 	j = 0;
 	buf[j++] = '0';
 	buf[j++] = 'x';
@@ -177,19 +187,21 @@ int ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len)
 	for (i = bi->bytes_len - bi->bytes_used; i < bi->bytes_len; ++i) {
 		if (j + 2 > buf_len) {
 			Ehbi_log_error0("Buffer too small, partially written");
-			return EHBI_STRING_BUF_TOO_SMALL_PARTIAL;
+			*err = EHBI_STRING_BUF_TOO_SMALL_PARTIAL;
+			goto ehbi_to_hex_string_end;
 		}
-		err =
+		*err =
 		    ehbi_byte_to_hex_chars(bi->bytes[i], buf + j, buf + j + 1);
-		if (err) {
+		if (*err) {
 			Ehbi_log_error0("Corrupted data?");
-			return err;
+			goto ehbi_to_hex_string_end;
 		}
 		j += 2;
 	}
 	if (j > buf_len) {
 		Ehbi_log_error0("Unable to write trailing NULL to buffer");
-		return EHBI_STRING_BUF_TOO_SMALL_NO_NULL;
+		*err = EHBI_STRING_BUF_TOO_SMALL_NO_NULL;
+		goto ehbi_to_hex_string_end;
 	}
 	buf[j] = '\0';
 
@@ -202,64 +214,84 @@ int ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len)
 		}
 	}
 
-	return EHBI_SUCCESS;
+ehbi_to_hex_string_end:
+	if (buf && (err == NULL || *err)) {
+		buf[0] = '\0';
+	}
+	return (err == NULL || *err) ? NULL : buf;
 }
 
-int ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len)
+char *ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len,
+			     int *err)
 {
 	char *hex;
 	size_t size;
-	int err;
-	struct ehbigint tmp = { NULL, 0, 0 };
+	struct ehbigint tmp;
 
-	if (bi == NULL || buf == NULL || len == 0) {
+	hex = NULL;
+	size = 0;
+	tmp.bytes = NULL;
+	tmp.bytes_len = 0;
+	tmp.bytes_used = 0;
+
+	if (err == NULL || bi == NULL || buf == NULL || len == 0) {
 		Ehbi_log_error0("Null Arguments(s)");
-		return EHBI_NULL_ARGS;
+		if (err) {
+			*err = EHBI_NULL_ARGS;
+		}
+		goto ehbi_to_decimal_string_end;
 	}
+	*err = 0;
 
 	size = strlen("0x00") + (2 * bi->bytes_used) + 1;
 	hex = (char *)ehbi_stack_alloc(size);
 	if (!hex) {
 		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
 				(unsigned long)size);
-		return EHBI_STACK_TOO_SMALL;
+		*err = EHBI_STACK_TOO_SMALL;
+		goto ehbi_to_decimal_string_end;
 	}
 
-	if (ehbi_is_negative(bi, &err)) {
+	if (ehbi_is_negative(bi, err)) {
 		tmp.bytes = (unsigned char *)ehbi_stack_alloc(bi->bytes_used);
 		if (!tmp.bytes) {
 			Ehbi_log_error2("Could not %s(%lu) bytes",
 					ehbi_stack_alloc_str,
 					(unsigned long)bi->bytes_used);
-			err = EHBI_STACK_TOO_SMALL;
+			*err = EHBI_STACK_TOO_SMALL;
 			goto ehbi_to_decimal_string_end;
 		}
 		tmp.bytes_len = bi->bytes_used;
 		ehbi_set(&tmp, bi);
-		err = ehbi_negate(&tmp);
-		if (err) {
+		*err = ehbi_negate(&tmp);
+		if (*err) {
 			goto ehbi_to_decimal_string_end;
 		}
-		err = ehbi_to_hex_string(&tmp, hex, size);
+		ehbi_to_hex_string(&tmp, hex, size, err);
 
 		buf[0] = '-';
 		buf[1] = '\0';
 		buf = buf + 1;
 		len -= 1;
 	} else {
-		err = ehbi_to_hex_string(bi, hex, size);
+		ehbi_to_hex_string(bi, hex, size, err);
 	}
-	if (err) {
-		return err;
+	if (*err) {
+		goto ehbi_to_decimal_string_end;
 	}
-	err = ehbi_hex_to_decimal(hex, size, buf, len);
+	*err = ehbi_hex_to_decimal(hex, size, buf, len);
 
 ehbi_to_decimal_string_end:
 	if (tmp.bytes) {
 		ehbi_stack_free(tmp.bytes, tmp.bytes_len);
 	}
-	ehbi_stack_free(hex, size);
-	return err;
+	if (hex) {
+		ehbi_stack_free(hex, size);
+	}
+	if (buf && (err == NULL || *err)) {
+		buf[0] = '\0';
+	}
+	return (err == NULL || *err) ? NULL : buf;
 }
 
 int ehbi_byte_to_hex_chars(unsigned char byte, char *high, char *low)

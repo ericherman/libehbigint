@@ -53,7 +53,9 @@ int main(int argc, char **argv)
 	failures = 0;
 
 	failures += test_set_l(v, 1234567890);
-
+/*
+	failures += test_set_l(v, -1);
+*/
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}

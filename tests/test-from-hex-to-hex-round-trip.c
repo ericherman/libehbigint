@@ -26,6 +26,7 @@ int test_from_hex_to_hex_round_trip(int verbose)
 
 	a_bigint.bytes = bytes_buf;
 	a_bigint.bytes_len = 20;
+	a_bigint.sign = 0;
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;

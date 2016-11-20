@@ -47,6 +47,13 @@ int test_compare_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 	equot.bytes_len = BILEN;
 	erem.bytes_len = BILEN;
 
+	ein.sign = 0;
+	emul.sign = 0;
+	eres.sign = 0;
+	ediv.sign = 0;
+	equot.sign = 0;
+	erem.sign = 0;
+
 	ein.bytes_used = 0;
 	emul.bytes_used = 0;
 	eres.bytes_used = 0;

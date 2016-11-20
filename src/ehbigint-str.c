@@ -99,9 +99,8 @@ int ehbi_set_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 	}
 
 	/* let's just zero out the rest of the bytes, for easier debug */
-	high = ((i < bi->bytes_len) && (bi->bytes[i] > 0x7F)) ? 0xFF : 0x00;
 	while (i-- > 0) {
-		bi->bytes[i] = high;
+		bi->bytes[i] = 0x00;
 	}
 
 	return EHBI_SUCCESS;

@@ -25,6 +25,7 @@ struct ehbigint {
 	unsigned char *bytes;
 	size_t bytes_len;
 	size_t bytes_used;
+	unsigned char sign;
 };
 
 /*

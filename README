@@ -11,6 +11,7 @@ contains the pointer to the underlying bytes, as well as some meta-data:
 		unsigned char *bytes;
 		size_t bytes_len;
 		size_t bytes_used;
+		unsigned char sign;
 	};
 
 Prior to use, it the caller's responsibility to construct the structure,
@@ -21,6 +22,7 @@ and initialize it, for example:
 	bi->bytes = (unsigned char *) malloc(20);
 	bi->bytes_len = 20;
 	bi->bytes_used = 0;
+	bi->sign = 0;
 
 Most ehbigint functions return an error code. The "ehbigint.h" header
 defines the meaning of the error codes. Like posix return codes, a value

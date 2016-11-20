@@ -27,6 +27,7 @@ int test_set_l(int verbose, long v1)
 
 	bi.bytes = bytes;
 	bi.bytes_len = 4;
+	bi.sign = 0;
 
 	err = ehbi_set_l(&bi, 0);
 	failures += check_int_m(err, 0, "ehbi_set_l(0)");

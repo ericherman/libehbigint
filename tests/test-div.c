@@ -35,18 +35,22 @@ int test_div(int verbose, char *snumerator, char *sdenominator, char *squotient,
 
 	numerator.bytes = bytes_numerator;
 	numerator.bytes_len = 10;
+	numerator.sign = 0;
 	numerator.bytes_used = 0;
 
 	denominator.bytes = bytes_denominator;
 	denominator.bytes_len = 10;
+	denominator.sign = 0;
 	denominator.bytes_used = 0;
 
 	quotient.bytes = bytes_quotient;
 	quotient.bytes_len = 10;
+	quotient.sign = 0;
 	quotient.bytes_used = 0;
 
 	remainder.bytes = bytes_remainder;
 	remainder.bytes_len = 10;
+	remainder.sign = 0;
 	remainder.bytes_used = 0;
 
 	err =
@@ -131,18 +135,22 @@ int test_div_by_zero(int verbose)
 
 	numerator.bytes = bytes_numerator;
 	numerator.bytes_len = 10;
+	numerator.sign = 0;
 	numerator.bytes_used = 0;
 
 	denominator.bytes = bytes_denominator;
 	denominator.bytes_len = 10;
+	denominator.sign = 0;
 	denominator.bytes_used = 0;
 
 	quotient.bytes = bytes_quotient;
 	quotient.bytes_len = 10;
+	quotient.sign = 0;
 	quotient.bytes_used = 0;
 
 	remainder.bytes = bytes_remainder;
 	remainder.bytes_len = 10;
+	remainder.sign = 0;
 	remainder.bytes_used = 0;
 
 	ehbi_set_l(&numerator, 10);

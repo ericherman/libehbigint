@@ -25,6 +25,7 @@ int test_shift_left(int verbose, char *val, size_t bytes, char *expected)
 
 	bi.bytes = bytes_buf1;
 	bi.bytes_len = 20;
+	bi.sign = 0;
 
 	err = ehbi_set_hex_string(&bi, val, strlen(val));
 	if (err) {

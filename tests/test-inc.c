@@ -24,9 +24,11 @@ int test_inc_hex(int verbose, const char *hexs1, const char *hexs2,
 
 	bi1.bytes = bytes_buf1;
 	bi1.bytes_len = 20;
+	bi1.sign = 0;
 
 	bi2.bytes = bytes_buf2;
 	bi2.bytes_len = 20;
+	bi2.sign = 0;
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
@@ -63,9 +65,11 @@ int test_inc(int verbose, const char *v1, const char *v2, const char *expect)
 
 	bi1.bytes = bytes_buf1;
 	bi1.bytes_len = 20;
+	bi1.sign = 0;
 
 	bi2.bytes = bytes_buf2;
 	bi2.bytes_len = 20;
+	bi2.sign = 0;
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;

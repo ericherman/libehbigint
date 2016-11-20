@@ -1,3 +1,13 @@
+2016-11-20  Eric Herman <eric@freesa.org>
+
+	introduce a sign field
+
+	* src/ehbigint.h: introduce the new field
+	* README: note the new field
+	* src/ehbigint.c: rework logic to use sign bit
+	* src/ehbigint-str.c: zero-out fields only to 0x00, not 0xFF
+	* tests: initialize the sign bit to zero
+
 2016-11-17  Eric Herman <eric@freesa.org>
 
 	ehbi_set_decimal_string allow negative numbers

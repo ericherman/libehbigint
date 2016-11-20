@@ -26,6 +26,7 @@ int test_to_string(int verbose)
 
 	a_bigint.bytes = bytes;
 	a_bigint.bytes_len = 4;
+	a_bigint.sign = 0;
 	a_bigint.bytes_used = 3;
 
 	failures +=

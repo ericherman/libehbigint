@@ -22,6 +22,7 @@ int test_from_decimal_to_decimal_round_trip(int verbose, const char *dec)
 	struct ehbigint a_bigint;
 	a_bigint.bytes = bytes_buf;
 	a_bigint.bytes_len = 20;
+	a_bigint.sign = 0;
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 	is_negative = dec[0] == '-';

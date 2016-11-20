@@ -34,14 +34,17 @@ int test_mul(int verbose, unsigned long aul, unsigned long bul, char *expected)
 
 	a_bigint.bytes = a_bytes;
 	a_bigint.bytes_len = 16;
+	a_bigint.sign = 0;
 	a_bigint.bytes_used = 0;
 
 	b_bigint.bytes = b_bytes;
 	b_bigint.bytes_len = 16;
+	b_bigint.sign = 0;
 	b_bigint.bytes_used = 0;
 
 	result.bytes = result_bytes;
 	result.bytes_len = 16;
+	result.sign = 0;
 
 	sprintf(buf, "%lu", aul);
 	err = ehbi_set_l(&a_bigint, aul);

@@ -418,9 +418,6 @@ int ehbi_inc_l(struct ehbigint *bi, long val)
 	unsigned char bytes[sizeof(unsigned long)];
 	struct ehbigint temp;
 
-	int err;
-	char buf[80];
-
 	val_negative = (val < 0) ? 1 : 0;
 
 	temp.bytes = bytes;
@@ -434,9 +431,6 @@ int ehbi_inc_l(struct ehbigint *bi, long val)
 		c = (v >> (8 * i));
 		j = (temp.bytes_len - 1) - i;
 		temp.bytes[j] = c;
-		fprintf(stderr, "i:%lu, j:%ld, c:%u, temp.bytes[%ld]:%u\n",
-			(unsigned long)i, (unsigned long)j, (unsigned int)c,
-			(unsigned long)j, (unsigned int)temp.bytes[j]);
 	}
 	for (i = 0; i < temp.bytes_len; ++i) {
 		if (temp.bytes[i] != 0x00) {
@@ -447,10 +441,6 @@ int ehbi_inc_l(struct ehbigint *bi, long val)
 	if (temp.bytes_used == 0) {
 		++temp.bytes_used;
 	}
-
-	ehbi_debug_to_string(0, &temp, "temp");
-	fprintf(stderr, "done: %s:%d: val:%ld, tem_hex_string:%s\n", __FILE__,
-		__LINE__, val, ehbi_to_hex_string(bi, buf, 80, &err));
 
 	return val_negative ? ehbi_dec(bi, &temp) : ehbi_inc(bi, &temp);
 }
@@ -492,7 +482,7 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 
 	err = 0;
 	if (ehbi_greater_than(val, bi, &err)) {
-		size = 1 + val->bytes_used;
+		size = val->bytes_used;
 		tmp.bytes = (unsigned char *)ehbi_stack_alloc(size);
 		if (!tmp.bytes) {
 			Ehbi_log_error2("Could not %s(%lu) bytes",
@@ -502,10 +492,12 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 		}
 		tmp.bytes_len = size;
 		tmp.bytes_used = 0;
+		tmp.sign = 0;
 		err = ehbi_subtract(&tmp, val, bi);
 		err = err || ehbi_set(bi, &tmp);
 		ehbi_stack_free(tmp.bytes, tmp.bytes_len);
 		err = err || ehbi_negate(bi);
+		return err;
 	}
 	if (err) {
 		return err;
@@ -568,6 +560,9 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 	if (res->bytes == NULL || bi1->bytes == NULL || bi2->bytes == NULL) {
 		Ehbi_log_error0("Null bytes[]");
 		return EHBI_NULL_BYTES;
+	}
+	if (bi2->bytes_used == 1 && bi2->bytes[bi2->bytes_len - 1] == 0x00) {
+		return ehbi_set(res, bi1);
 	}
 
 	tmp.bytes = NULL;

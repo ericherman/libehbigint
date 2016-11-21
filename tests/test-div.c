@@ -174,6 +174,9 @@ int main(int argc, char **argv)
 	v = (argc > 1) ? atoi(argv[1]) : 0;
 	failures = 0;
 
+	failures += test_div(v, "20000", "100", "200", "0");
+	failures += test_div(v, "20001", "100", "200", "1");
+	failures += test_div(v, "20013", "200", "100", "13");
 	failures += test_div(v, "287713", "571", "503", "500");
 
 	/*
@@ -182,12 +185,6 @@ int main(int argc, char **argv)
 	 */
 	failures +=
 	    test_div(v, "5088824049625", "33554393", "151658", "31916031");
-
-	failures += test_div(v, "20000", "100", "200", "0");
-
-	failures += test_div(v, "20001", "100", "200", "1");
-
-	failures += test_div(v, "20013", "200", "100", "13");
 
 	failures += test_div_by_zero(v);
 

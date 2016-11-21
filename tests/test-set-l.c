@@ -1,5 +1,5 @@
 /*
-test-set-ul.c
+test-set-l.c
 Copyright (C) 2016 Eric Herman <eric@freesa.org>
 
 This work is free software: you can redistribute it and/or modify it
@@ -56,9 +56,7 @@ int main(int argc, char **argv)
 	failures = 0;
 
 	failures += test_set_l(v, 1234567890);
-/*
 	failures += test_set_l(v, -1);
-*/
 
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);

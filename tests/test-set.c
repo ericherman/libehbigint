@@ -14,13 +14,12 @@ License for more details.
 */
 #include "test-ehbigint-private-utils.h"
 
-int test_set(int verbose)
+int test_set(int verbose, long lval, const char *expect)
 {
 	int err, failures;
 
 	unsigned char a_bytes[10];
 	struct ehbigint a_bigint;
-	unsigned long three = 3;
 
 	unsigned char b_bytes[10];
 	struct ehbigint b_bigint;
@@ -38,13 +37,13 @@ int test_set(int verbose)
 	b_bigint.sign = 0;
 	b_bigint.bytes_used = 0;
 
-	err = ehbi_set_l(&a_bigint, three);
+	err = ehbi_set_l(&a_bigint, lval);
 	if (err) {
 		Test_log_error1("error %d from ehbi_set_l\n", err);
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
-	failures += check_ehbigint_hex(&a_bigint, "0x03", __LINE__, TEST_FUNC);
+	failures += check_ehbigint_dec(&a_bigint, expect, __LINE__, TEST_FUNC);
 
 	err = ehbi_set(&b_bigint, &a_bigint);
 	if (err) {
@@ -52,7 +51,7 @@ int test_set(int verbose)
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
-	failures += check_ehbigint_hex(&b_bigint, "0x03", __LINE__, TEST_FUNC);
+	failures += check_ehbigint_dec(&b_bigint, expect, __LINE__, TEST_FUNC);
 
 	if (failures) {
 		Test_log_error1("%d failures in test_set\n", failures);
@@ -68,7 +67,8 @@ int main(int argc, char **argv)
 	v = (argc > 1) ? atoi(argv[1]) : 0;
 	failures = 0;
 
-	failures += test_set(v);
+	failures += test_set(v, 3, "3");
+	failures += test_set(v, -5, "-5");
 
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);

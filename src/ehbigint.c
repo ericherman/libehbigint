@@ -98,6 +98,7 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 		}
 		return err;
 	}
+	res->sign = bi1->sign;
 
 	if (bi1->bytes_used < bi2->bytes_used) {
 		swp = bi1;

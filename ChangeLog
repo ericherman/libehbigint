@@ -2,7 +2,7 @@
 
 	find the bug with decrement (failing to early return)
 
-	* src/ehbigint.c: return correctly; remove debug prints
+	* src/ehbigint.c: return correctly; remove debug prints, fix sign bug
 	* tests/test-dec.c: add more tests
 	* tests/test-div.c: adjust test order
 	* tests/test-inc-l.c: add two more tests

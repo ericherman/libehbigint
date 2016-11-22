@@ -61,6 +61,8 @@ int ehbi_set_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 		return EHBI_ZERO_LEN_STRING;
 	}
 
+	bi->sign = 0;
+
 	/* ignore characters starting with the first NULL in string */
 	for (i = 1; i < str_len; ++i) {
 		if (str[i] == 0) {
@@ -117,6 +119,7 @@ int ehbi_set_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 		Ehbi_log_error0("Null argument(s)");
 		return EHBI_NULL_ARGS;
 	}
+
 	if (len == 0) {
 		str = "0x00";
 		len = 4;

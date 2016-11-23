@@ -1,3 +1,10 @@
+2016-11-23  Eric Herman <eric@freesa.org>
+
+	subtraction now works with negative numbers
+
+	* src/ehbigint.c: re-work ehbi_subtract to work with negatives
+	* tests/test-subtract.c: add more tests
+
 2016-11-21  Eric Herman <eric@freesa.org>
 
 	find the bug with decrement (failing to early return)

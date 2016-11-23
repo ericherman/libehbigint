@@ -549,54 +549,93 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 		  const struct ehbigint *bi2)
 {
-	size_t i, size, max_len;
-	unsigned char a, b, c;
-	struct ehbigint tmp;
+	size_t i, size;
+	unsigned char a, b, c, negate;
+	const struct ehbigint *swp;
+	struct ehbigint abs;
 	int err;
+
+	abs.bytes = NULL;
+	abs.bytes_len = 0;
+	abs.sign = 0;
 
 	if (res == NULL || bi1 == NULL || bi2 == NULL) {
 		Ehbi_log_error0("Null argument(s)");
-		return EHBI_NULL_ARGS;
+		err = EHBI_NULL_ARGS;
+		goto ehbi_subtract_end;
 	}
 	if (res->bytes == NULL || bi1->bytes == NULL || bi2->bytes == NULL) {
 		Ehbi_log_error0("Null bytes[]");
-		return EHBI_NULL_BYTES;
-	}
-	if (bi2->bytes_used == 1 && bi2->bytes[bi2->bytes_len - 1] == 0x00) {
-		return ehbi_set(res, bi1);
+		err = EHBI_NULL_BYTES;
+		goto ehbi_subtract_end;
 	}
 
-	tmp.bytes = NULL;
-	tmp.bytes_len = 0;
-	if (bi1->sign != bi2->sign) {
+	/* subtract zero */
+	if (bi2->bytes_used == 1 && bi2->bytes[bi2->bytes_len - 1] == 0x00) {
+		err = ehbi_set(res, bi1);
+		goto ehbi_subtract_end;
+	}
+
+	/* subtract from 0 */
+	if (bi1->bytes_used == 1 && bi1->bytes[bi1->bytes_len - 1] == 0x00) {
+		err = ehbi_set(res, bi2);
+		err = err || ehbi_negate(res);
+		goto ehbi_subtract_end;
+	}
+
+	if (bi1->sign == 0 && bi2->sign != 0) {
 		size = bi2->bytes_len;
-		tmp.bytes = (unsigned char *)ehbi_stack_alloc(size);
-		if (!tmp.bytes) {
+		abs.bytes = (unsigned char *)ehbi_stack_alloc(size);
+		if (!abs.bytes) {
 			Ehbi_log_error2("Could not %s(%lu) bytes",
 					ehbi_stack_alloc_str,
 					(unsigned long)size);
 			err = EHBI_STACK_TOO_SMALL;
+			goto ehbi_subtract_end;
 		}
-		tmp.bytes_len = size;
-		err = ehbi_set(&tmp, bi2);
-		err = err || ehbi_negate(&tmp);
-		err = err || ehbi_add(res, bi1, &tmp);
-		ehbi_stack_free(tmp.bytes, size);
-		if (err) {
-			ehbi_zero(res);
-		}
-		return err;
+		abs.bytes_len = size;
+		err = ehbi_set(&abs, bi2);
+		err = err || ehbi_negate(&abs);
+		err = err || ehbi_add(res, bi1, &abs);
+		goto ehbi_subtract_end;
 	}
 
-	if (bi1->bytes_used >= bi2->bytes_used) {
-		max_len = bi1->bytes_used;
+	if (bi1->sign != 0 && bi2->sign == 0) {
+		size = bi1->bytes_len;
+		abs.bytes = (unsigned char *)ehbi_stack_alloc(size);
+		if (!abs.bytes) {
+			Ehbi_log_error2("Could not %s(%lu) bytes",
+					ehbi_stack_alloc_str,
+					(unsigned long)size);
+			err = EHBI_STACK_TOO_SMALL;
+			goto ehbi_subtract_end;
+		}
+		abs.bytes_len = size;
+		err = ehbi_set(&abs, bi1);
+		err = err || ehbi_negate(&abs);
+		err = err || ehbi_add(res, &abs, bi2);
+		err = err || ehbi_negate(res);
+		goto ehbi_subtract_end;
+	}
+
+	if ((bi1->sign == 0 && bi2->sign == 0
+	     && ehbi_greater_than(bi2, bi1, &err)) || (bi1->sign != 0
+						       && bi2->sign != 0
+						       && ehbi_less_than(bi2,
+									 bi1,
+									 &err)))
+	{
+		negate = 1;
+		swp = bi1;
+		bi1 = bi2;
+		bi2 = swp;
 	} else {
-		max_len = bi2->bytes_used;
+		negate = 0;
 	}
 
 	res->bytes_used = 0;
 	c = 0;
-	for (i = 1; i <= max_len; ++i) {
+	for (i = 1; i <= bi1->bytes_used; ++i) {
 		if (bi1->bytes_used < i) {
 			a = ((1 << 7) & bi1->bytes[0]) ? 0xFF : 0;
 		} else {
@@ -622,7 +661,8 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 	if (c) {
 		if (i > res->bytes_len) {
 			Ehbi_log_error0("Result byte[] too small for carry");
-			return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
+			err = EHBI_BYTES_TOO_SMALL_FOR_CARRY;
+			goto ehbi_subtract_end;
 		}
 		while (i <= res->bytes_len) {
 			res->bytes[res->bytes_len - i] = 0xFF;
@@ -630,6 +670,17 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 		}
 	}
 
+	res->sign = (negate) ? !(bi1->sign) : bi1->sign;
+
+	err = err || EHBI_SUCCESS;
+
+ehbi_subtract_end:
+	if (err && res) {
+		ehbi_zero(res);
+	}
+	if (abs.bytes) {
+		ehbi_stack_free(abs.bytes, abs.bytes_len);
+	}
 	return EHBI_SUCCESS;
 }
 

@@ -77,6 +77,16 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 		return EHBI_NULL_BYTES;
 	}
 
+	/* adding zero */
+	if (bi2->bytes_used == 1 && bi2->bytes[bi2->bytes_len - 1] == 0x00) {
+		return ehbi_set(res, bi1);
+	}
+
+	/* adding to zero */
+	if (bi1->bytes_used == 1 && bi1->bytes[bi1->bytes_len - 1] == 0x00) {
+		return ehbi_set(res, bi2);
+	}
+
 	tmp.bytes = NULL;
 	tmp.bytes_len = 0;
 	if (bi1->sign != bi2->sign) {

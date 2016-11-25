@@ -14,7 +14,7 @@ License for more details.
 */
 #include "test-ehbigint-private-utils.h"
 
-int test_mul(int verbose, unsigned long aul, unsigned long bul, char *expected)
+int test_mul(int verbose, long al, long bl, char *expected)
 {
 	int err, failures;
 
@@ -46,8 +46,8 @@ int test_mul(int verbose, unsigned long aul, unsigned long bul, char *expected)
 	result.bytes_len = 16;
 	result.sign = 0;
 
-	sprintf(buf, "%lu", aul);
-	err = ehbi_set_l(&a_bigint, aul);
+	sprintf(buf, "%ld", al);
+	err = ehbi_set_l(&a_bigint, al);
 	if (err) {
 		Test_log_error1("error %d from ehbi_set_l\n", err);
 		Test_log_error("Aborting test\n");
@@ -60,8 +60,8 @@ int test_mul(int verbose, unsigned long aul, unsigned long bul, char *expected)
 		return (1 + failures);
 	}
 
-	sprintf(buf, "%lu", bul);
-	err = ehbi_set_l(&b_bigint, bul);
+	sprintf(buf, "%ld", bl);
+	err = ehbi_set_l(&b_bigint, bl);
 	if (err) {
 		Test_log_error1("error %d from ehbi_set_l\n", err);
 		Test_log_error("Aborting test\n");
@@ -83,7 +83,7 @@ int test_mul(int verbose, unsigned long aul, unsigned long bul, char *expected)
 
 	if (failures) {
 		Test_log_error4("%d failures in test_mul(%lu,%lu,%s)\n",
-				failures, aul, bul, expected);
+				failures, al, bl, expected);
 	}
 
 	return failures;
@@ -97,6 +97,9 @@ int main(int argc, char **argv)
 	failures = 0;
 
 	failures += test_mul(v, 2, 256, "512");
+
+	failures += test_mul(v, 7, -3, "-21");
+	failures += test_mul(v, -41, -2, "82");
 
 	failures += test_mul(v, 500, 333, "166500");
 

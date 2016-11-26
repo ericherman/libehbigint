@@ -1,5 +1,4 @@
-* compare understands negative numbers, but little else in the library does
-  e.g. hex_to_decimal and decimal_to_hex do not understand negative numbers
+* hex_to_decimal and decimal_to_hex do not understand negative numbers
        (treats as unsigned)
   (note some GMP funcs are also a bit lose: mpz_get_si, mpz_get_ui)
 
@@ -7,7 +6,7 @@
   perhaps the other functions should not return the err_code,
   but rather pass an &err in?
 
-* multiplication is very slow; division is painfully slow
+* multiplication is slow; division is very slow
   (maybe revisit "Seminumerical Algorithms")
 
 * would there be an advantage to creating an abstract interface?

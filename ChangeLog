@@ -1,3 +1,14 @@
+2016-11-26  Eric Herman <eric@freesa.org>
+
+	division now works with negative numbers
+
+	* src/ehbigint.c: re-work ehbi_div to work with negatives
+	* tests/test-div.c: add more tests
+
+2016-11-25  Eric Herman <eric@freesa.org>
+
+	* tests/test-mul.c: add more tests
+
 2016-11-23  Eric Herman <eric@freesa.org>
 
 	subtraction now works with negative numbers

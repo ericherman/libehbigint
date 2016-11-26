@@ -179,6 +179,10 @@ int main(int argc, char **argv)
 	failures += test_div(v, "20013", "200", "100", "13");
 	failures += test_div(v, "287713", "571", "503", "500");
 
+	failures += test_div(v, "-13", "6", "-2", "1");
+	failures += test_div(v, "20", "-7", "-2", "6");
+	failures += test_div(v, "-100", "-9", "11", "1");
+
 	/*
 	   lldiv_t result = lldiv(5088824049625,33554393);
 	   result.quot: 151658, result.remainder: 31916031

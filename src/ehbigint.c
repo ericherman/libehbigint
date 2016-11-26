@@ -225,7 +225,11 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	     const struct ehbigint *denominator)
 {
 	int err;
-	size_t i, num_idx;
+	size_t i, size, num_idx;
+	struct ehbigint s_abs_numer;
+	struct ehbigint s_abs_denom;
+	const struct ehbigint *abs_numer;
+	const struct ehbigint *abs_denom;
 
 	if (quotient == NULL || remainder == NULL || numerator == NULL
 	    || denominator == NULL) {
@@ -243,10 +247,61 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		return EHBI_BYTES_TOO_SMALL;
 	}
 
-	/* just early return if denominator is bigger than numerator */
-	if (ehbi_greater_than(denominator, numerator, &err)) {
+	s_abs_numer.bytes = NULL;
+	s_abs_denom.bytes = NULL;
+
+	if (numerator->sign == 0) {
+		abs_numer = numerator;
+	} else {
+		s_abs_numer.bytes_used = 0;
+		s_abs_numer.bytes_len = 0;
+		s_abs_numer.sign = 0;
+		size = numerator->bytes_used;
+		s_abs_numer.bytes = (unsigned char *)ehbi_stack_alloc(size);
+		if (!s_abs_numer.bytes) {
+			Ehbi_log_error2("Could not %s(%lu) bytes",
+					ehbi_stack_alloc_str,
+					(unsigned long)size);
+			err = EHBI_STACK_TOO_SMALL;
+			goto ehbi_div_end;
+		}
+		s_abs_numer.bytes_len = size;
+		err = ehbi_set(&s_abs_numer, numerator);
+		err = err || ehbi_negate(&s_abs_numer);
+		if (err) {
+			goto ehbi_div_end;
+		}
+		abs_numer = &s_abs_numer;
+	}
+
+	if (denominator->sign == 0) {
+		abs_denom = denominator;
+	} else {
+		s_abs_denom.bytes_used = 0;
+		s_abs_denom.bytes_len = 0;
+		s_abs_denom.sign = 0;
+		size = numerator->bytes_used;
+		s_abs_denom.bytes = (unsigned char *)ehbi_stack_alloc(size);
+		if (!s_abs_denom.bytes) {
+			Ehbi_log_error2("Could not %s(%lu) bytes",
+					ehbi_stack_alloc_str,
+					(unsigned long)size);
+			err = EHBI_STACK_TOO_SMALL;
+			goto ehbi_div_end;
+		}
+		s_abs_denom.bytes_len = size;
+		err = ehbi_set(&s_abs_denom, denominator);
+		err = err || ehbi_negate(&s_abs_denom);
+		if (err) {
+			goto ehbi_div_end;
+		}
+		abs_denom = &s_abs_denom;
+	}
+
+	/* just early return if abs_denom is bigger than abs_numer */
+	if (ehbi_greater_than(abs_denom, abs_numer, &err)) {
 		ehbi_zero(quotient);
-		err = ehbi_set(remainder, numerator);
+		err = ehbi_set(remainder, abs_numer);
 		goto ehbi_div_end;
 	}
 	if (err) {
@@ -257,7 +312,7 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	ehbi_zero(quotient);
 	ehbi_zero(remainder);
 
-	if (ehbi_equals(denominator, quotient, &err)) {
+	if (ehbi_equals(abs_denom, quotient, &err)) {
 		Ehbi_log_error0("denominator == 0");
 		err = EHBI_DIVIDE_BY_ZERO;
 		goto ehbi_div_end;
@@ -266,8 +321,8 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		goto ehbi_div_end;
 	}
 
-	num_idx = numerator->bytes_len - numerator->bytes_used;
-	for (i = 0; i < denominator->bytes_used; ++i) {
+	num_idx = abs_numer->bytes_len - abs_numer->bytes_used;
+	for (i = 0; i < abs_denom->bytes_used; ++i) {
 		if ((remainder->bytes_used > 1)
 		    || (remainder->bytes[remainder->bytes_len - 1] != 0x00)) {
 			err = ehbi_bytes_shift_left(remainder, 1);
@@ -275,22 +330,22 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 				goto ehbi_div_end;
 			}
 		}
-		ehbi_inc_l(remainder, numerator->bytes[num_idx++]);
+		ehbi_inc_l(remainder, abs_numer->bytes[num_idx++]);
 	}
-	if (ehbi_greater_than(denominator, remainder, &err)) {
+	if (ehbi_greater_than(abs_denom, remainder, &err)) {
 		err = ehbi_bytes_shift_left(remainder, 1);
 		if (err) {
 			goto ehbi_div_end;
 		}
-		ehbi_inc_l(remainder, numerator->bytes[num_idx++]);
+		ehbi_inc_l(remainder, abs_numer->bytes[num_idx++]);
 	}
 	if (err) {
 		goto ehbi_div_end;
 	}
 
 	i = 0;
-	while (ehbi_greater_than(remainder, denominator, &err)
-	       || ehbi_equals(remainder, denominator, &err)) {
+	while (ehbi_greater_than(remainder, abs_denom, &err)
+	       || ehbi_equals(remainder, abs_denom, &err)) {
 		if (err) {
 			goto ehbi_div_end;
 		}
@@ -298,12 +353,12 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		if (err) {
 			goto ehbi_div_end;
 		}
-		err = ehbi_dec(remainder, denominator);
+		err = ehbi_dec(remainder, abs_denom);
 		if (err) {
 			goto ehbi_div_end;
 		}
-		while (ehbi_less_than(remainder, denominator, &err)
-		       && (num_idx < numerator->bytes_len)) {
+		while (ehbi_less_than(remainder, abs_denom, &err)
+		       && (num_idx < abs_numer->bytes_len)) {
 			err = ehbi_bytes_shift_left(quotient, 1);
 			if (err) {
 				goto ehbi_div_end;
@@ -314,7 +369,7 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 				goto ehbi_div_end;
 			}
 			remainder->bytes[remainder->bytes_len - 1] =
-			    numerator->bytes[num_idx++];
+			    abs_numer->bytes[num_idx++];
 		}
 		if (err) {
 			goto ehbi_div_end;
@@ -322,6 +377,12 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	}
 
 ehbi_div_end:
+	if (s_abs_denom.bytes) {
+		ehbi_stack_free(s_abs_denom.bytes, s_abs_denom.bytes_len);
+	}
+	if (s_abs_numer.bytes) {
+		ehbi_stack_free(s_abs_numer.bytes, s_abs_numer.bytes_len);
+	}
 	/* if error, let's not return garbage or 1/2 an answer */
 	if (err) {
 		ehbi_zero(quotient);

@@ -20,6 +20,7 @@ extern "C" {
 #endif
 
 #ifdef EHBI_NO_ALLOCA
+#include <stdlib.h>
 void ehbi_do_stack_free(void *ptr, size_t size);
 #define ehbi_stack_alloc malloc
 #define ehbi_stack_alloc_str "malloc"

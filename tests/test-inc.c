@@ -84,6 +84,8 @@ int test_inc(int verbose, const char *v1, const char *v2, const char *expect)
 	}
 	failures += check_ehbigint_dec(&bi1, expect, __LINE__, TEST_FUNC);
 
+	check_int(bi1.sign, expect[0] == '-');
+
 	if (failures) {
 		Test_log_error1("%d failures in test_inc\n", failures);
 	}
@@ -100,6 +102,7 @@ int main(int argc, char **argv)
 
 	failures += test_inc(v, "254", "1", "255");
 	failures += test_inc(v, "254", "-1", "253");
+	failures += test_inc(v, "-1", "1", "0");
 
 	/*
 	   $ echo "9415273 + 3154116455" | bc

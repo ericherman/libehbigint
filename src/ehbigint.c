@@ -149,6 +149,10 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 		}
 	}
 
+	if ((res->bytes_used == 1) && (res->bytes[res->bytes_len - 1] == 0x00)) {
+		res->sign = 0;
+	}
+
 	return EHBI_SUCCESS;
 }
 
@@ -397,8 +401,7 @@ ehbi_div_end:
 
 int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 {
-	size_t i;
-	unsigned char a, b, c;
+	size_t size;
 	int err;
 	struct ehbigint temp;
 
@@ -415,71 +418,25 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 		return EHBI_BYTES_TOO_SMALL;
 	}
 
-	err = 0;
-	if (ehbi_is_negative(val, &err)) {
-		temp.bytes_used = 0;
-		temp.bytes_len = 0;
-		temp.sign = 0;
-		temp.bytes = (unsigned char *)ehbi_stack_alloc(val->bytes_used);
-		if (!temp.bytes) {
-			Ehbi_log_error2("Could not %s(%lu) bytes",
-					ehbi_stack_alloc_str,
-					(unsigned long)val->bytes_used);
-			err = EHBI_STACK_TOO_SMALL;
-			return err;
-		}
-		temp.bytes_len = val->bytes_used;
-		err = ehbi_set(&temp, val);
-		err = err || ehbi_negate(&temp);
-		err = err || ehbi_dec(bi, &temp);
-		ehbi_stack_free(temp.bytes, temp.bytes_len);
+	err = EHBI_SUCCESS;
+
+	size = bi->bytes_used;
+
+	temp.bytes_used = 0;
+	temp.bytes_len = 0;
+	temp.sign = 0;
+	temp.bytes = (unsigned char *)ehbi_stack_alloc(size);
+	if (!temp.bytes) {
+		Ehbi_log_error2("Could not %s(%lu) bytes",
+				ehbi_stack_alloc_str, (unsigned long)size);
+		err = EHBI_STACK_TOO_SMALL;
 		return err;
 	}
-	if (err) {
-		return err;
-	}
-
-	c = 0;
-
-	for (i = 1; i <= val->bytes_used; ++i) {
-		a = val->bytes[val->bytes_len - i];
-		b = (bi->bytes_used < i) ? 0 : bi->bytes[bi->bytes_len - i];
-		c = c + a + b;
-
-		bi->bytes[bi->bytes_len - i] = c;
-		if (bi->bytes_used < i) {
-			bi->bytes_used = i;
-		}
-
-		c = (c < a) || (c == a && b != 0) ? 1 : 0;
-	}
-	while (c) {
-		if (i > bi->bytes_len) {
-			Ehbi_log_error0("byte[] too small for carry");
-			return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
-		}
-		a = c;
-		b = (bi->bytes_used < i) ? 0 : bi->bytes[bi->bytes_len - i];
-		c = a + b;
-
-		bi->bytes[bi->bytes_len - i] = c;
-		if (bi->bytes_used < i) {
-			bi->bytes_used = i;
-		}
-
-		c = (c < a) || (c == a && b != 0) ? 1 : 0;
-		++i;
-	}
-	if (bi->bytes[bi->bytes_len - bi->bytes_used] == 0xFF) {
-		if (bi->bytes_used == bi->bytes_len) {
-			Ehbi_log_error0("byte[] too small for carry");
-			return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
-		}
-		++bi->bytes_used;
-		bi->bytes[bi->bytes_len - bi->bytes_used] = 0x00;
-	}
-
-	return EHBI_SUCCESS;
+	temp.bytes_len = size;
+	err = ehbi_set(&temp, bi);
+	err = err || ehbi_add(bi, &temp, val);
+	ehbi_stack_free(temp.bytes, temp.bytes_len);
+	return err;
 }
 
 int ehbi_inc_l(struct ehbigint *bi, long val)
@@ -742,6 +699,10 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 	}
 
 	res->sign = (negate) ? !(bi1->sign) : bi1->sign;
+
+	if ((res->bytes_used == 1) && (res->bytes[res->bytes_len - 1] == 0x00)) {
+		res->sign = 0;
+	}
 
 	err = err || EHBI_SUCCESS;
 

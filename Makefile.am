@@ -174,9 +174,13 @@ spotless:
 	pushd tests && rm -rf `cat ../.gitignore | sed -e 's/#.*//'`; popd
 	pushd demos && rm -rf `cat ../.gitignore | sed -e 's/#.*//'`; popd
 
+bi-calc:
+	$(CC) $(CSTD_CFLAGS) $(DEBUG_CFLAGS) $(NOISY_CFLAGS) \
+		-o bi-calc $(libehbigint_la_SOURCES) \
+		demos/bi-calc.c src/ehbigint.h
+
 demo: bi-calc
-	libtool --mode=execute ./bi-calc \
-		132904811234120000312412 + 123412413132500
+	./bi-calc 132904811234120000312412 + 123412413132500
 
 valgrind: $(check_PROGRAMS)
 	libtool --mode=execute valgrind -q ./test-add

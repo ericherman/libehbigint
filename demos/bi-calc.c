@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
 	struct ehbigint bigint_2;
 	struct ehbigint bigint_3;
 	struct ehbigint bigint_4;
+	int err;
 
 	if (argc < 4) {
 		fprintf(stderr, "usage:\n\t%s decimal1 [+-*/%%] decimal2\n",
@@ -70,11 +71,11 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	ehbi_to_decimal_string(&bigint_1, buf, 1024);
+	ehbi_to_decimal_string(&bigint_1, buf, 1024, &err);
 	printf("   %40s\n", buf);
-	ehbi_to_decimal_string(&bigint_2, buf, 1024);
+	ehbi_to_decimal_string(&bigint_2, buf, 1024, &err);
 	printf(" %c %40s\n", *argv[2], buf);
-	ehbi_to_decimal_string(&bigint_3, buf, 1024);
+	ehbi_to_decimal_string(&bigint_3, buf, 1024, &err);
 	printf(" = %40s\n", buf);
 
 	return 0;

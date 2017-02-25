@@ -85,8 +85,7 @@ int test_scenario_mul_mod(int verbose)
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
-	failures +=
-	    check_ehbigint_dec(&bresult, expect_mul, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&bresult, expect_mul);
 
 	/*
 	   r = lldiv(5088824049625, 33554393);

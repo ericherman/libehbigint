@@ -60,8 +60,7 @@ int test_div(int verbose, char *snumerator, char *sdenominator, char *squotient,
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
-	failures +=
-	    check_ehbigint_dec(&numerator, snumerator, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&numerator, snumerator);
 	if (failures) {
 		Test_log_error1("round trip failed %s\n", snumerator);
 		Test_log_error("Aborting test\n");
@@ -76,8 +75,7 @@ int test_div(int verbose, char *snumerator, char *sdenominator, char *squotient,
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
-	failures +=
-	    check_ehbigint_dec(&denominator, sdenominator, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&denominator, sdenominator);
 	if (failures) {
 		Test_log_error1("round trip failed %s\n", sdenominator);
 		Test_log_error("Aborting test\n");
@@ -91,11 +89,9 @@ int test_div(int verbose, char *snumerator, char *sdenominator, char *squotient,
 		return (1 + failures);
 	}
 
-	failures +=
-	    check_ehbigint_dec(&quotient, squotient, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&quotient, squotient);
 
-	failures +=
-	    check_ehbigint_dec(&remainder, sremainder, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&remainder, sremainder);
 
 	return failures;
 }

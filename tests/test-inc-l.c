@@ -41,7 +41,7 @@ int test_inc_l(int verbose, const char *dec_str1, long v2, const char *expect)
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_dec(&bi1, expect, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&bi1, expect);
 
 	if (failures) {
 		Test_log_error1("%d failures in test_inc_l\n", failures);

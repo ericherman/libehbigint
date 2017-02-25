@@ -14,5 +14,4 @@
 
 * add sqrt() function (Newton's method?)
 
-* make use of "alloca" optional?
-  (then what? malloc? Then make allocation plugable, like libdeque?)
+* make stack allocation plugable for embedded non-alloca environments

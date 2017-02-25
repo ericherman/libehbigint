@@ -29,9 +29,8 @@ int test_to_string(int verbose)
 	a_bigint.sign = 0;
 	a_bigint.bytes_used = 3;
 
-	failures +=
-	    check_ehbigint_hex(&a_bigint, "0x010045", __LINE__, TEST_FUNC);
-	failures += check_ehbigint_dec(&a_bigint, "65605", __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_hex(&a_bigint, "0x010045");
+	failures += Check_ehbigint_dec(&a_bigint, "65605");
 
 	if (failures) {
 		Test_log_error1("%d failures in test_to_string\n", failures);

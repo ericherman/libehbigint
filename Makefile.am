@@ -11,6 +11,30 @@
 #FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 #License for more details.
 
+# for environments that do not have alloca, malloc is used
+# malloc instead of alloca can be forced: #define EHBI_NO_ALLOCA 1
+# TODO: make this plugable for non-alloca embedded environments
+#ALLOCA_CFLAGS=-DEHBI_NO_ALLOCA=1
+ALLOCA_CFLAGS=
+
+# typical builds:
+CSTD_CFLAGS=-std=c89
+DEBUG_CFLAGS=-ggdb -O2
+NOISY_CFLAGS=-Wall -Wextra -pedantic -Werror
+# if debugging, these flags may be better:
+# CSTD_CFLAGS=-std=gnu11
+# DEBUG_CFLAGS=-ggdb -O0 -D_GNU_SOURCE
+# NOISY_CFLAGS=-Wall -Wextra -Werror
+
+#TODO get configure/autoconf to work right with BACKTRACE
+#if HAVE_BACKTRACE
+#if HAVE_BACKTRACE_SYMBOLS_FD
+BACKTRACE_CFLAGS=-D_POSIX_SOURCE -DEBHI_CAN_BACKTRACE -rdynamic
+#endif
+#else
+#BACKTRACE_CFLAGS=
+#endif
+
 lib_LTLIBRARIES=libehbigint.la
 include_HEADERS=src/ehbigint.h
 
@@ -128,28 +152,6 @@ ACLOCAL_AMFLAGS=-I m4 --install
 
 EXTRA_DIST=COPYING.GPL3 misc
 
-CSTD_CFLAGS=-std=c89
-#CSTD_CFLAGS=-std=gnu11
-
-DEBUG_CFLAGS=-ggdb -O2
-#DEBUG_CFLAGS=-ggdb -O0
-
-NOISY_CFLAGS=-Wall -Wextra -pedantic -Werror
-
-ALLOCA_CFLAGS=
-#ALLOCA_CFLAGS=-DEHBI_NO_ALLOCA=1
-
-#TODO get configure/autoconf to work right here
-#if HAVE_BACKTRACE
-#if HAVE_BACKTRACE_SYMBOLS_FD
-BACKTRACE_CFLAGS=-D_POSIX_SOURCE -DEBHI_CAN_BACKTRACE -rdynamic
-#endif
-#else
-#BACKTRACE_CFLAGS=
-#endif
-
-VERBOSE_ANNOUNCE=0
-#VERBOSE_ANNOUNCE=1
 
 AM_CFLAGS=$(CSTD_CFLAGS) \
  $(DEBUG_CFLAGS) \

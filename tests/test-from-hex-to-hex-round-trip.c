@@ -41,8 +41,7 @@ int test_from_hex_to_hex_round_trip(int verbose)
 		return (1 + failures);
 	}
 
-	failures +=
-	    check_ehbigint_hex(&a_bigint, expected_str, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_hex(&a_bigint, expected_str);
 
 	if (failures) {
 		Test_log_error1("%d failures in test_hex_round_trip\n",

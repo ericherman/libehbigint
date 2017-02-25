@@ -54,7 +54,7 @@ int test_dec_corner_case(int verbose)
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
-	failures += check_ehbigint_dec(&bi1, str_3, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&bi1, str_3);
 
 	if (failures) {
 		Test_log_error1("%d failures in test_subtract\n", failures);

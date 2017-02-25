@@ -57,8 +57,14 @@ License for more details.
 int check_ehbigint_dec(struct ehbigint *val, const char *expected, int line,
 		       const char *msg);
 
+#define Check_ehbigint_dec(val, expected) \
+	check_ehbigint_dec(val, expected, __LINE__, TEST_FUNC)
+
 int check_ehbigint_hex(struct ehbigint *val, const char *expected, int line,
 		       const char *msg);
+
+#define Check_ehbigint_hex(val, expected) \
+	check_ehbigint_hex(val, expected, __LINE__, TEST_FUNC)
 
 unsigned long ehbigint_to_unsigned_long(struct ehbigint *val, int *err);
 

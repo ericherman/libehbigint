@@ -31,15 +31,15 @@ int test_set_l(int verbose, long v1)
 
 	err = ehbi_set_l(&bi, 0);
 	failures += check_int_m(err, 0, "ehbi_set_l(0)");
-	failures += check_ehbigint_hex(&bi, "0x00", __LINE__, TEST_FUNC);
-	failures += check_ehbigint_dec(&bi, "0", __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_hex(&bi, "0x00");
+	failures += Check_ehbigint_dec(&bi, "0");
 
 	sprintf(buf, "ehbi_set_l(%ld)", v1);
 	err = ehbi_set_l(&bi, v1);
 	failures += check_int_m(err, 0, buf);
 
 	sprintf(expect, "%ld", v1);
-	failures += check_ehbigint_dec(&bi, expect, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&bi, expect);
 
 	if (failures) {
 		Test_log_error1("%d failures in test_set_l\n", failures);

@@ -50,7 +50,7 @@ int test_subtract(int verbose, const char *str_1, const char *str_2,
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_dec(&bi3, expect, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&bi3, expect);
 
 	return failures;
 }
@@ -98,7 +98,7 @@ int test_subtract_big(int verbose)
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_hex(&bi3, str_3, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_hex(&bi3, str_3);
 
 	if (failures) {
 		Test_log_error1("%d failures in test_subtract\n", failures);

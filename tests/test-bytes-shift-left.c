@@ -41,7 +41,7 @@ int test_bytes_shift_left(int verbose, char *val, size_t bytes, char *expected)
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_hex(&bi, expected, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_hex(&bi, expected);
 
 	if (failures) {
 		Test_log_error4

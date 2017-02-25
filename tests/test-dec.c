@@ -48,7 +48,7 @@ int test_dec_hex(int verbose, const char *str_1, const char *str_2,
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_hex(&bi1, expect, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_hex(&bi1, expect);
 
 	if (failures) {
 		Test_log_error1("%d failures in test_dec\n", failures);
@@ -91,7 +91,7 @@ int test_dec(int verbose, const char *str_1, const char *str_2,
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_dec(&bi1, expect, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&bi1, expect);
 
 	if (failures) {
 		Test_log_error1("%d failures in test_dec\n", failures);

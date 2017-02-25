@@ -53,7 +53,7 @@ int test_mul(int verbose, long al, long bl, char *expected)
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
-	failures += check_ehbigint_dec(&a_bigint, buf, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&a_bigint, buf);
 	if (failures) {
 		Test_log_error1("assign failed %s\n", buf);
 		Test_log_error("Aborting test\n");
@@ -67,7 +67,7 @@ int test_mul(int verbose, long al, long bl, char *expected)
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
-	failures += check_ehbigint_dec(&b_bigint, buf, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&b_bigint, buf);
 	if (failures) {
 		Test_log_error1("assign failed %s\n", buf);
 		Test_log_error("Aborting test\n");
@@ -79,7 +79,7 @@ int test_mul(int verbose, long al, long bl, char *expected)
 		Test_log_error1("error %d from ehbi_mul\n", err);
 	}
 
-	failures += check_ehbigint_dec(&result, expected, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&result, expected);
 
 	if (failures) {
 		Test_log_error4("%d failures in test_mul(%lu,%lu,%s)\n",

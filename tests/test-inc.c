@@ -48,7 +48,7 @@ int test_inc_hex(int verbose, const char *hexs1, const char *hexs2,
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_hex(&bi1, expct, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_hex(&bi1, expct);
 
 	if (failures) {
 		Test_log_error1("%d failures in test_inc_hex\n", failures);
@@ -82,7 +82,7 @@ int test_inc(int verbose, const char *v1, const char *v2, const char *expect)
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
-	failures += check_ehbigint_dec(&bi1, expect, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&bi1, expect);
 
 	check_int(bi1.sign, expect[0] == '-');
 

@@ -43,7 +43,7 @@ int test_set(int verbose, long lval, const char *expect)
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
-	failures += check_ehbigint_dec(&a_bigint, expect, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&a_bigint, expect);
 
 	err = ehbi_set(&b_bigint, &a_bigint);
 	if (err) {
@@ -51,7 +51,7 @@ int test_set(int verbose, long lval, const char *expect)
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
-	failures += check_ehbigint_dec(&b_bigint, expect, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&b_bigint, expect);
 
 	if (failures) {
 		Test_log_error1("%d failures in test_set\n", failures);

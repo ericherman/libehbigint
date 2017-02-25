@@ -30,8 +30,8 @@ extern "C" {
 #define ECHECK_FUNC __func__
 #else
 #define ECHECK_FUNC NULL
-#endif /* _GNU_SOURCE */
-#endif /* __STDC_VERSION__ */
+#endif
+#endif
 
 /*check char*/
 int echeck_char_m(FILE *err, const char *func, const char *file,

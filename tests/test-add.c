@@ -53,7 +53,7 @@ int test_add(int verbose, const char *str_1, const char *str_2,
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_dec(&bi3, str_3, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_dec(&bi3, str_3);
 
 	if (failures) {
 		Test_log_error1("%d failures in test_add\n", failures);
@@ -101,7 +101,7 @@ int test_add_hex(int verbose, const char *str_1, const char *str_2,
 		return (1 + failures);
 	}
 
-	failures += check_ehbigint_hex(&bi3, str_3, __LINE__, TEST_FUNC);
+	failures += Check_ehbigint_hex(&bi3, str_3);
 
 	if (failures) {
 		Test_log_error1("%d failures in test_add\n", failures);

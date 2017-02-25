@@ -1,11 +1,15 @@
 2017-02-25  Eric Herman <eric@freesa.org>
 
+	add ehbi_bytes_shift_right
 	rename tests/test-shift-left.c -> tests/test-bytes-shift-left.c
 
+	* src/ehbigint.h: add ehbi_bytes_shift_right, fix comments
+	* src/ehbigint.c: ehbi_bytes_shift_right
+	* tests/test-bytes-shift-right.c: new test
 	* tests/test-bytes-shift-left.c: renamed from tests/test-shift-left.c
 	* tests/test-shift-left.c: renamed to tests/test-bytes-shift-left.c
-	* Makefile.am: adjust for rename
-	* src/ehbigint.h: fix comment
+	* Makefile.am: add new function, adjust for rename
+	* misc/pre-tidy.patch
 	* .gitignore: separate tests from generic output files
 
 

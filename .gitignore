@@ -17,6 +17,7 @@ test-set
 test-set-l
 test-subtract
 test-bytes-shift-left
+test-bytes-shift-right
 test-to-string
 test-*-dynamic
 test-*-static

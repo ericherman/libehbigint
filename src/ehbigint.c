@@ -763,6 +763,40 @@ int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes)
 	return EHBI_SUCCESS;
 }
 
+int ehbi_bytes_shift_right(struct ehbigint *bi, size_t num_bytes)
+{
+	size_t i;
+
+	if (bi == NULL) {
+		Ehbi_log_error0("Null argument(s)");
+		return EHBI_NULL_ARGS;
+	}
+	if (bi->bytes == NULL) {
+		Ehbi_log_error0("Null bytes[]");
+		return EHBI_NULL_BYTES;
+	}
+
+	if (num_bytes == 0) {
+		return EHBI_SUCCESS;
+	}
+
+	if (bi->bytes_used <= num_bytes) {
+		return ehbi_zero(bi);
+	}
+
+	/* shift the value left by num_bytes bytes */
+	for (i = bi->bytes_len; i > 0; --i) {
+		if (i > num_bytes) {
+			bi->bytes[i - 1] = bi->bytes[i - (1 + num_bytes)];
+		} else {
+			bi->bytes[i - 1] = 0x00;
+		}
+	}
+	bi->bytes_used -= num_bytes;
+
+	return EHBI_SUCCESS;
+}
+
 int ehbi_negate(struct ehbigint *bi)
 {
 	if (bi == NULL) {

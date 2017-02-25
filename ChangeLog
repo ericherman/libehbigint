@@ -1,3 +1,14 @@
+2017-02-25  Eric Herman <eric@freesa.org>
+
+	rename tests/test-shift-left.c -> tests/test-bytes-shift-left.c
+
+	* tests/test-bytes-shift-left.c: renamed from tests/test-shift-left.c
+	* tests/test-shift-left.c: renamed to tests/test-bytes-shift-left.c
+	* Makefile.am: adjust for rename
+	* src/ehbigint.h: fix comment
+	* .gitignore: separate tests from generic output files
+
+
 2017-02-24  Eric Herman <eric@freesa.org>
 
 	fix the "bi-calc" demo

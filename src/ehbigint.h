@@ -146,7 +146,7 @@ int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		 int *err);
 
 /*
-   returns 1 if the high used byte is greather than 7F
+   returns 1 if negative
    returns 0 otherwise
    populates the contents of err with 0 on success or error_code on error
 */

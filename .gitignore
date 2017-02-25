@@ -1,3 +1,27 @@
+bi-calc
+test-add
+test-compare
+test-compare-with-gmp
+test-compare2
+test-dec
+test-dec-corner-case
+test-div
+test-equals
+test-from-decimal-to-decimal-round-trip
+test-from-hex-to-hex-round-trip
+test-inc
+test-inc-l
+test-mul
+test-scenario-mul-mod
+test-set
+test-set-l
+test-subtract
+test-bytes-shift-left
+test-to-string
+test-*-dynamic
+test-*-static
+test-ehbigint
+
 ###################
 # backup files
 ###################
@@ -24,29 +48,6 @@ $*
 *.log
 *.trs
 *.log
-test-add
-test-compare
-test-compare-with-gmp
-test-compare2
-test-dec
-test-dec-corner-case
-test-div
-test-equals
-test-from-decimal-to-decimal-round-trip
-test-from-hex-to-hex-round-trip
-test-inc
-test-inc-l
-test-mul
-test-scenario-mul-mod
-test-set
-test-set-l
-test-subtract
-test-shift-left
-test-to-string
-test-*-dynamic
-test-*-static
-test-ehbigint
-bi-calc
 
 ################
 # autotools

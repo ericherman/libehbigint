@@ -14,7 +14,7 @@ License for more details.
 */
 #include "test-ehbigint-private-utils.h"
 
-int test_shift_left(int verbose, char *val, size_t bytes, char *expected)
+int test_bytes_shift_left(int verbose, char *val, size_t bytes, char *expected)
 {
 	int err, failures;
 	unsigned char bytes_buf1[20];
@@ -44,8 +44,9 @@ int test_shift_left(int verbose, char *val, size_t bytes, char *expected)
 	failures += check_ehbigint_hex(&bi, expected, __LINE__, TEST_FUNC);
 
 	if (failures) {
-		Test_log_error4("%d failures in test_shift_left(%s, %lu, %s)\n",
-				failures, val, (unsigned long)bytes, expected);
+		Test_log_error4
+		    ("%d failures in test_bytes_shift_left(%s, %lu, %s)\n",
+		     failures, val, (unsigned long)bytes, expected);
 	}
 
 	return failures;
@@ -58,11 +59,11 @@ int main(int argc, char **argv)
 	v = (argc > 1) ? atoi(argv[1]) : 0;
 	failures = 0;
 
-	failures += test_shift_left(v, "0x02", 0, "0x02");
-	failures += test_shift_left(v, "0x03", 1, "0x0300");
-	failures += test_shift_left(v, "0x05", 2, "0x050000");
-	failures += test_shift_left(v, "0x17", 3, "0x17000000");
-	failures += test_shift_left(v, "0x00FF", 3, "0x00FF000000");
+	failures += test_bytes_shift_left(v, "0x02", 0, "0x02");
+	failures += test_bytes_shift_left(v, "0x03", 1, "0x0300");
+	failures += test_bytes_shift_left(v, "0x05", 2, "0x050000");
+	failures += test_bytes_shift_left(v, "0x17", 3, "0x17000000");
+	failures += test_bytes_shift_left(v, "0x00FF", 3, "0x00FF000000");
 
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);

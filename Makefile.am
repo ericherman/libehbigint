@@ -46,6 +46,10 @@ libehbigint_la_SOURCES=\
  src/ehbigint-str.c \
  src/ehbigint-util.h \
  src/ehbigint-util.c \
+ src/ehbigint-eba.h \
+ src/ehbigint-eba.c \
+ src/eba.h \
+ src/eba.c \
  src/ehbigint.c
 
 libehbigint_la_LIBADD=
@@ -60,6 +64,7 @@ check_PROGRAMS=\
  test-dec \
  test-dec-corner-case \
  test-div \
+ test-exp-mod \
  test-equals \
  test-from-decimal-to-decimal-round-trip \
  test-from-hex-to-hex-round-trip \
@@ -104,6 +109,9 @@ test_dec_corner_case_LDADD=$(TEST_LDADDS)
 
 test_div_SOURCES=tests/test-div.c $(COMMON_TEST_SOURCES)
 test_div_LDADD=$(TEST_LDADDS)
+
+test_exp_mod_SOURCES=tests/test-exp-mod.c $(COMMON_TEST_SOURCES)
+test_exp_mod_LDADD=$(TEST_LDADDS)
 
 test_equals_SOURCES=tests/test-equals.c $(COMMON_TEST_SOURCES)
 test_equals_LDADD=$(TEST_LDADDS)
@@ -198,6 +206,7 @@ valgrind: $(check_PROGRAMS)
 	libtool --mode=execute valgrind -q ./test-dec
 	libtool --mode=execute valgrind -q ./test-dec-corner-case
 	libtool --mode=execute valgrind -q ./test-div
+	libtool --mode=execute valgrind -q ./test-exp-mod
 	libtool --mode=execute valgrind -q ./test-equals
 	libtool --mode=execute valgrind -q \
 		./test-from-decimal-to-decimal-round-trip

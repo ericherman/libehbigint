@@ -113,6 +113,15 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	     const struct ehbigint *numerator,
 	     const struct ehbigint *denominator);
 
+/*
+   populates the first ehbigint result with the value of the base
+   raised to the power of the exponent mod the modulus
+   returns 0 on success or error_code on error
+*/
+int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
+		 const struct ehbigint *exponent,
+		 const struct ehbigint *modulus);
+
 /* sign inversion
    returns 0 on success or error_code on error
 */
@@ -200,6 +209,7 @@ enum {
 	EHBI_CORRUPT_DATA,
 	EHBI_STACK_TOO_SMALL,
 	EHBI_DIVIDE_BY_ZERO,
+	EHBI_EBA_CRASH,
 	EHBI_LAST
 };
 

@@ -1,10 +1,22 @@
 2017-03-25  Eric Herman <eric@freesa.org>
 
+	implement ehbi_exp_mod(result, base, exp, mod)
+	import files from libeba ( https://github.com/ericherman/libeba )
 	fix tests/test-subtract.c
 	include more addition test cases
 
+	* src/ehbigint.h: add ehbi_exp_mod
+	* src/ehbigint.c: iplement ehbi_exp_mod
+	* src/eba.h: copy-paste from https://github.com/ericherman/libeba
+	* src/eba.c: copy-paste from https://github.com/ericherman/libeba
+	* src/ehbigint-eba.h: add some "shim" code to use libeba
+	* src/ehbigint-eba.c: for the extern "int ebhi_eba_err"
+	* tests/test-exp-mod.c: simple test case (need more here)
 	* tests/test-subtract.c: set buf_len to actual length of buffer
 	* tests/test-add.c: include tests which change sign
+	* misc/pre-tidy.patch: new header files, fixup line numbers
+	* Makefile.am: add new sources
+	* .gitignore: test-exp-mod
 
 2017-02-25  Eric Herman <eric@freesa.org>
 

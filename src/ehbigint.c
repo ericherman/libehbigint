@@ -16,8 +16,10 @@ License for more details.
 #include "ehbigint.h"
 #include "ehbigint-log.h"
 #include "ehbigint-util.h"
+#include "ehbigint-eba.h"
 
 static int ehbi_zero(struct ehbigint *bi);
+static int ehbi_is_odd(struct ehbigint *bi, int *err);
 
 int ehbi_set_l(struct ehbigint *bi, long val)
 {
@@ -246,8 +248,12 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		return EHBI_NULL_BYTES;
 	}
 
-	if (remainder->bytes_len < numerator->bytes_len) {
-		Ehbi_log_error0("byte[] too small");
+	if (remainder->bytes_len < numerator->bytes_used) {
+		Ehbi_log_error2("byte[] too small; "
+				"remainder->bytes_len <  numerator->bytes_used; "
+				"(%lu < %lu)",
+				(unsigned long)remainder->bytes_len,
+				(unsigned long)numerator->bytes_used);
 		return EHBI_BYTES_TOO_SMALL;
 	}
 
@@ -395,6 +401,170 @@ ehbi_div_end:
 		if (numerator->sign != denominator->sign) {
 			quotient->sign = 1;
 		}
+	}
+	return err;
+}
+
+int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
+		 const struct ehbigint *exponent,
+		 const struct ehbigint *modulus)
+{
+	int err;
+	size_t size;
+	struct ehbigint zero, tmp1, tquot, texp, tbase;
+	unsigned char zero_bytes[2];
+	struct eba_s eba_exp;
+
+	if (result == NULL || base == NULL || exponent == NULL
+	    || modulus == NULL) {
+		Ehbi_log_error0("Null argument(s)");
+		return EHBI_NULL_ARGS;
+	}
+	if (result->bytes == NULL || base->bytes == NULL
+	    || exponent->bytes == NULL || modulus->bytes == NULL) {
+		Ehbi_log_error0("Null bytes[]");
+		return EHBI_NULL_BYTES;
+	}
+
+	zero.bytes = zero_bytes;
+	zero.bytes_len = 2;
+	zero.bytes_used = 0;
+	zero.sign = 0;
+	ehbi_zero(&zero);
+
+	tmp1.bytes = NULL;
+	tmp1.bytes_len = 0;
+	tmp1.bytes_used = 0;
+	tmp1.sign = 0;
+
+	tbase.bytes = NULL;
+	tbase.bytes_len = 0;
+	tbase.bytes_used = 0;
+	tbase.sign = 0;
+
+	texp.bytes = NULL;
+	texp.bytes_len = 0;
+	texp.bytes_used = 0;
+	texp.sign = 0;
+
+	tquot.bytes = NULL;
+	tquot.bytes_len = 0;
+	tquot.bytes_used = 0;
+	tquot.sign = 0;
+
+	ehbi_eba_err = EHBI_SUCCESS;
+	err = EHBI_SUCCESS;
+
+	size = 2 + (2 * base->bytes_used) + exponent->bytes_used;
+
+	tmp1.bytes = (unsigned char *)ehbi_stack_alloc(size);
+	if (!tmp1.bytes) {
+		Ehbi_log_error2("Could not %s(%lu) bytes",
+				ehbi_stack_alloc_str, (unsigned long)size);
+		err = EHBI_STACK_TOO_SMALL;
+		goto ehbi_mod_exp_end;
+	}
+	tmp1.bytes_len = size;
+
+	tbase.bytes = (unsigned char *)ehbi_stack_alloc(size);
+	if (!tbase.bytes) {
+		Ehbi_log_error2("Could not %s(%lu) bytes",
+				ehbi_stack_alloc_str, (unsigned long)size);
+		err = EHBI_STACK_TOO_SMALL;
+		goto ehbi_mod_exp_end;
+	}
+	tbase.bytes_len = size;
+
+	texp.bytes = (unsigned char *)ehbi_stack_alloc(size);
+	if (!texp.bytes) {
+		Ehbi_log_error2("Could not %s(%lu) bytes",
+				ehbi_stack_alloc_str, (unsigned long)size);
+		err = EHBI_STACK_TOO_SMALL;
+		goto ehbi_mod_exp_end;
+	}
+	texp.bytes_len = size;
+	eba_exp.bits = texp.bytes;
+	eba_exp.size_bytes = texp.bytes_len;
+	eba_exp.endian = eba_big_endian;
+
+	tquot.bytes = (unsigned char *)ehbi_stack_alloc(size);
+	if (!tquot.bytes) {
+		Ehbi_log_error2("Could not %s(%lu) bytes",
+				ehbi_stack_alloc_str, (unsigned long)size);
+		err = EHBI_STACK_TOO_SMALL;
+		goto ehbi_mod_exp_end;
+	}
+	tquot.bytes_len = size;
+
+	/* prevent divide by zero */
+	err = err || ehbi_zero(&tmp1);
+	if (!err && ehbi_equals(modulus, &tmp1, &err)) {
+		Ehbi_log_error0("modulus == 0");
+		err = err || EHBI_DIVIDE_BY_ZERO;
+		goto ehbi_mod_exp_end;
+	}
+
+	/* prevent negative eponent */
+	if (!err && ehbi_is_negative(exponent, &err)) {
+		Ehbi_log_error0("exponent < 0");
+		err = err || EHBI_BAD_DATA;
+		goto ehbi_mod_exp_end;
+	}
+
+	/* if modulus == 1 then return 0 */
+	err = err || ehbi_set_l(&tmp1, 1);
+	if (!err && ehbi_equals(modulus, &tmp1, &err)) {
+		ehbi_zero(result);
+		goto ehbi_mod_exp_end;
+	}
+
+	err = err || ehbi_set(&tbase, base);
+	err = err || ehbi_set(&texp, exponent);
+	err = err || ehbi_set_l(result, 1);
+	if (err) {
+		goto ehbi_mod_exp_end;
+	}
+
+	while (ehbi_greater_than(&texp, &zero, &err)) {
+		if (err) {
+			goto ehbi_mod_exp_end;
+		}
+		if (ehbi_is_odd(&texp, &err)) {
+			err = err || ehbi_mul(&tmp1, result, &tbase);
+			err = err || ehbi_div(&tquot, result, &tmp1, modulus);
+		}
+		if (err) {
+			goto ehbi_mod_exp_end;
+		}
+		eba_shift_right(&eba_exp, 1);
+		if (ehbi_eba_err) {
+			err = ehbi_eba_err;
+			ehbi_eba_err = EHBI_SUCCESS;
+			goto ehbi_mod_exp_end;
+		}
+
+		err = err || ehbi_mul(&tmp1, &tbase, &tbase);
+		err = err || ehbi_div(&tquot, &tbase, &tmp1, modulus);
+		if (err) {
+			goto ehbi_mod_exp_end;
+		}
+	}
+
+ehbi_mod_exp_end:
+	if (tmp1.bytes) {
+		ehbi_stack_free(tmp1.bytes, tmp1.bytes_len);
+	}
+	if (tbase.bytes) {
+		ehbi_stack_free(tbase.bytes, tbase.bytes_len);
+	}
+	if (texp.bytes) {
+		ehbi_stack_free(texp.bytes, texp.bytes_len);
+	}
+	if (tquot.bytes) {
+		ehbi_stack_free(tquot.bytes, tmp1.bytes_len);
+	}
+	if (err) {
+		ehbi_zero(result);
 	}
 	return err;
 }
@@ -736,7 +906,12 @@ int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes)
 	/* by ensuring that we have at least one extra byte of freespace,
 	 * we avoid some werid sign issues */
 	if (bi->bytes_len < (bi->bytes_used + 1 + num_bytes)) {
-		Ehbi_log_error0("Result byte[] too small for shift");
+		Ehbi_log_error3("Result byte[] too small for shift"
+				" (bi->bytes_len < (bi->bytes_used + 1 + num_bytes))"
+				" (%lu < (%lu + 1 + %lu))",
+				(unsigned long)bi->bytes_len,
+				(unsigned long)bi->bytes_used,
+				(unsigned long)num_bytes);
 		return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
 	}
 
@@ -893,6 +1068,28 @@ int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 	int terr;
 	err = (err != NULL) ? err : &terr;
 	return ((ehbi_compare(bi1, bi2, err) > 0) && (*err == EHBI_SUCCESS));
+}
+
+static int ehbi_is_odd(struct ehbigint *bi, int *err)
+{
+	unsigned char bit;
+
+	if (bi == NULL) {
+		Ehbi_log_error0("Null struct");
+		*err = EHBI_NULL_STRUCT;
+		return 0;
+	}
+	if (bi->bytes == NULL) {
+		Ehbi_log_error0("Null bytes[]");
+		*err = EHBI_NULL_BYTES;
+		return 0;
+	}
+	if (bi->bytes_used == 0) {
+		return 0;
+	}
+
+	bit = 0x01 & bi->bytes[bi->bytes_len - 1];
+	return bit ? 1 : 0;
 }
 
 static int ehbi_zero(struct ehbigint *bi)

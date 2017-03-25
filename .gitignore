@@ -6,6 +6,7 @@ test-compare2
 test-dec
 test-dec-corner-case
 test-div
+test-exp-mod
 test-equals
 test-from-decimal-to-decimal-round-trip
 test-from-hex-to-hex-round-trip

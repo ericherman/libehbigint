@@ -15,7 +15,7 @@ License for more details.
 #include "test-ehbigint-private-utils.h"
 #include <gmp.h>
 
-int test_compare_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
+int test_comp_mul_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 {
 	int failures, i, err;
 	char ebuf[BUFLEN];
@@ -181,7 +181,84 @@ mpz_clean_up:
 	mpz_clear(grem);
 
 	if (failures) {
-		Test_log_error("failure in test_compare_with_gmp\n");
+		Test_log_error("failure in test_comp_mul_with_gmp\n");
+	}
+
+	return failures;
+}
+
+int test_comp_exp_with_gmp(int verbose, unsigned long base, unsigned long exp,
+			   unsigned long mod)
+{
+	int failures, err;
+	char ebuf[BUFLEN];
+	char gbuf[BUFLEN];
+	struct ehbigint eres, ebase, eexp, emod;
+	unsigned char base_bytes[BILEN], exp_bytes[BILEN], mod_bytes[BILEN];
+	unsigned char res_bytes[BILEN];
+
+	mpz_t gres, gbase, gexp, gmod;
+
+	VERBOSE_ANNOUNCE(verbose);
+
+	failures = 0;
+
+	ebase.bytes = base_bytes;
+	eres.bytes = res_bytes;
+	emod.bytes = mod_bytes;
+	eexp.bytes = exp_bytes;
+
+	ebase.bytes_len = BILEN;
+	eres.bytes_len = BILEN;
+	emod.bytes_len = BILEN;
+	eexp.bytes_len = BILEN;
+
+	ebase.sign = 0;
+	eres.sign = 0;
+	emod.sign = 0;
+	eexp.sign = 0;
+
+	ebase.bytes_used = 0;
+	eres.bytes_used = 0;
+	emod.bytes_used = 0;
+	eexp.bytes_used = 0;
+
+	ehbi_set_l(&ebase, (long)base);
+	ehbi_set_l(&eexp, (long)exp);
+	ehbi_set_l(&emod, (long)mod);
+	ehbi_set_l(&eres, 0);
+
+	ehbi_exp_mod(&eres, &ebase, &eexp, &emod);
+	ehbi_to_decimal_string(&eres, ebuf, BUFLEN, &err);
+	if (err) {
+		Test_log_error1("ehbi_to_decimal_string error: %d\n", err);
+	}
+
+	mpz_init(gbase);
+	mpz_set_ui(gbase, base);
+
+	mpz_init(gexp);
+	mpz_set_ui(gexp, exp);
+
+	mpz_init(gmod);
+	mpz_set_ui(gmod, mod);
+
+	mpz_init(gres);
+	mpz_set_ui(gres, 0);
+
+	mpz_powm(gres, gbase, gexp, gmod);
+	gmp_snprintf(gbuf, BUFLEN, "%Zd", gres);
+
+	failures += check_str_m(ebuf, gbuf, "ebuf,gbuf");
+
+	mpz_clear(gbase);
+	mpz_clear(gexp);
+	mpz_clear(gmod);
+	mpz_clear(gres);
+
+	if (failures) {
+		Test_log_error3("failure in test_comp_exp_with_gmp"
+				"(%lu,%lu,%lu)", base, exp, mod);
 	}
 
 	return failures;
@@ -197,7 +274,13 @@ int main(int argc, char **argv)
 	cmp_init_val = (argc > 3) ? argv[3] : NULL;
 	failures = 0;
 
-	failures += test_compare_with_gmp(v, slow_iterations, cmp_init_val);
+	failures += test_comp_mul_with_gmp(v, slow_iterations, cmp_init_val);
+
+	failures += test_comp_exp_with_gmp(v, 1, 2, 3);
+	failures += test_comp_exp_with_gmp(v, 10, 2, 7);
+	failures += test_comp_exp_with_gmp(v, 5, 3, 13);
+	failures += test_comp_exp_with_gmp(v, 4, 13, 497);
+	failures += test_comp_exp_with_gmp(v, 121, 23, 13);
 
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);

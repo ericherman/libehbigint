@@ -249,9 +249,9 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	}
 
 	if (remainder->bytes_len < numerator->bytes_used) {
-		Ehbi_log_error2("byte[] too small; "
-				"remainder->bytes_len <  numerator->bytes_used; "
-				"(%lu < %lu)",
+		Ehbi_log_error2("byte[] too small;"
+				" remainder->bytes_len < numerator->bytes_used"
+				" (%lu < %lu)",
 				(unsigned long)remainder->bytes_len,
 				(unsigned long)numerator->bytes_used);
 		return EHBI_BYTES_TOO_SMALL;
@@ -907,7 +907,8 @@ int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes)
 	 * we avoid some werid sign issues */
 	if (bi->bytes_len < (bi->bytes_used + 1 + num_bytes)) {
 		Ehbi_log_error3("Result byte[] too small for shift"
-				" (bi->bytes_len < (bi->bytes_used + 1 + num_bytes))"
+				" (bi->bytes_len <"
+				" (bi->bytes_used + 1 + num_bytes))"
 				" (%lu < (%lu + 1 + %lu))",
 				(unsigned long)bi->bytes_len,
 				(unsigned long)bi->bytes_used,

@@ -20,7 +20,7 @@ int test_subtract(int verbose, const char *str_1, const char *str_2,
 	int err, failures;
 	unsigned char bytes_buf1[20];
 	unsigned char bytes_buf2[20];
-	unsigned char bytes_buf3[14];
+	unsigned char bytes_buf3[20];
 	struct ehbigint bi1, bi2, bi3;
 
 	VERBOSE_ANNOUNCE(verbose);

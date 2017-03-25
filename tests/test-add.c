@@ -129,11 +129,9 @@ int main(int argc, char **argv)
 	failures += test_add(v, "0", "5000", "5000");
 	failures += test_add(v, "12000", "13000", "25000");
 	failures += test_add(v, "-1", "-2", "-3");
-/*
 	failures += test_add(v, "1", "-2", "-1");
 	failures += test_add(v, "-6", "2", "-4");
 	failures += test_add(v, "-6", "11", "5");
-*/
 
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);

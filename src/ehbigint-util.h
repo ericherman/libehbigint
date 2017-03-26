@@ -33,6 +33,12 @@ void ehbi_no_stack_free(void *ptr, size_t size);
 #define ehbi_stack_free ehbi_no_stack_free
 #endif
 
+#ifndef ehbi_random_bytes
+#define EHBI_RANDOM_FROM_LINUX_DEV_URANDOM
+int ehbi_dev_urandom_bytes(unsigned char *buf, size_t len);
+#define ehbi_random_bytes ehbi_dev_urandom_bytes
+#endif
+
 #ifdef __cplusplus
 }
 #endif

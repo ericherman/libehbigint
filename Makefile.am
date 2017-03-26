@@ -59,7 +59,8 @@ TESTS=$(check_PROGRAMS)
 check_PROGRAMS=\
  test-add \
  test-compare \
- test-compare-with-gmp \
+ test-comp-exp-mod-with-gmp \
+ test-comp-mul-with-gmp \
  test-compare2 \
  test-dec \
  test-dec-corner-case \
@@ -93,9 +94,13 @@ test_add_LDADD=$(TEST_LDADDS)
 test_compare_SOURCES=tests/test-compare.c $(COMMON_TEST_SOURCES)
 test_compare_LDADD=$(TEST_LDADDS)
 
-test_compare_with_gmp_SOURCES=tests/test-compare-with-gmp.c \
+test_comp_exp_mod_with_gmp_SOURCES=tests/test-comp-exp-mod-with-gmp.c \
  $(COMMON_TEST_SOURCES)
-test_compare_with_gmp_LDADD=$(TEST_LDADDS) -lgmp
+test_comp_exp_mod_with_gmp_LDADD=$(TEST_LDADDS) -lgmp
+
+test_comp_mul_with_gmp_SOURCES=tests/test-comp-mul-with-gmp.c \
+ $(COMMON_TEST_SOURCES)
+test_comp_mul_with_gmp_LDADD=$(TEST_LDADDS) -lgmp
 
 test_compare2_SOURCES=tests/test-compare2.c $(COMMON_TEST_SOURCES)
 test_compare2_LDADD=$(TEST_LDADDS)
@@ -201,7 +206,8 @@ demo: bi-calc
 valgrind: $(check_PROGRAMS)
 	libtool --mode=execute valgrind -q ./test-add
 	libtool --mode=execute valgrind -q ./test-compare
-	libtool --mode=execute valgrind -q ./test-compare-with-gmp
+	libtool --mode=execute valgrind -q ./test-comp-exp-mod-with-gmp
+	libtool --mode=execute valgrind -q ./test-comp-mul-with-gmp
 	libtool --mode=execute valgrind -q ./test-compare2
 	libtool --mode=execute valgrind -q ./test-dec
 	libtool --mode=execute valgrind -q ./test-dec-corner-case

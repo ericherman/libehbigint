@@ -1,7 +1,8 @@
 bi-calc
 test-add
 test-compare
-test-compare-with-gmp
+test-comp-exp-mod-with-gmp
+test-comp-mul-with-gmp
 test-compare2
 test-dec
 test-dec-corner-case

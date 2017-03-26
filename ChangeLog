@@ -1,3 +1,12 @@
+2017-03-26  Eric Herman <eric@freesa.org>
+
+	split "compare-with-gmp" into two tests
+
+	* tests/test-comp-exp-mod-with-gmp.c: from test-comp-mul-with-gmp
+	* tests/test-comp-mul-with-gmp.c: from test-comp-mul-with-gmp
+	* tests/test-compare-with-gmp.c: removed
+
+
 2017-03-25  Eric Herman <eric@freesa.org>
 
 	implement ehbi_exp_mod(result, base, exp, mod)

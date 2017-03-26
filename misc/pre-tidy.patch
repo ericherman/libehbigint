@@ -149,7 +149,7 @@
  #endif /* EHBIGINT_EBA_H */
 --- orig/tests/echeck.h
 +++ tidy/tests/echeck.h
-@@ -16,9 +16,11 @@ License for more details.
+@@ -16,9 +16,11 @@
  #ifndef ECHECK_H
  #define ECHECK_H
  
@@ -161,7 +161,7 @@
  
  #include <stdlib.h>		/* for size_t */
  #include <stdio.h>		/* for FILE */
-@@ -238,7 +240,10 @@ char echeck_status_m(FILE *err, const char *func, const char *file,
+@@ -234,8 +236,10 @@
  #define check_status(val)\
  	echeck_status_m(stderr, ECHECK_FUNC, __FILE__, __LINE__, val, NULL)
  
@@ -170,5 +170,5 @@
  }
  #endif
 +*/
-+
+ 
  #endif /* ECHECK_H */

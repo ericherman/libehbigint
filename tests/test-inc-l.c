@@ -65,5 +65,5 @@ int main(int argc, char **argv)
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);
 	}
 
-	return cap_failures(failures);
+	return check_status(failures);
 }

@@ -1,10 +1,16 @@
 2017-03-26  Eric Herman <eric@freesa.org>
 
+	add ehbi_shift_left, ehbi_shift_right functions to API
+	find/fix bug with failing to reset bytes used
 	split "compare-with-gmp" into two tests
 
+	* src/ehbigint.h: add ehbi_shift_left, ehbi_shift_right functions
+	* src/ehbigint.c: fix bug with failing to reset bytes_used
+	* tests/test-comp-exp-mod-with-gmp.c: add tests which demo bug
 	* tests/test-comp-exp-mod-with-gmp.c: from test-comp-mul-with-gmp
 	* tests/test-comp-mul-with-gmp.c: from test-comp-mul-with-gmp
 	* tests/test-compare-with-gmp.c: removed
+	* misc/pre-tidy.patch: adjust for new API functions
 
 
 2017-03-25  Eric Herman <eric@freesa.org>

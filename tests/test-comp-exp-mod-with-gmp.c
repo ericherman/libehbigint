@@ -114,6 +114,7 @@ int main(int argc, char **argv)
 	failures += test_comp_exp_with_gmp(v, 5, 3, 13);
 	failures += test_comp_exp_with_gmp(v, 4, 13, 497);
 	failures += test_comp_exp_with_gmp(v, 121, 23, 13);
+	failures += test_comp_exp_with_gmp(v, 1254, 523, 5513);
 
 	if (extra) {
 		failures += test_comp_exp_with_gmp(v, base, exp, mod);

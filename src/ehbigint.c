@@ -20,6 +20,7 @@ License for more details.
 
 static int ehbi_zero(struct ehbigint *bi);
 static int ehbi_is_odd(struct ehbigint *bi, int *err);
+static int ehbi_reset_bytes_used(struct ehbigint *bi);
 
 int ehbi_set_l(struct ehbigint *bi, long val)
 {
@@ -413,7 +414,6 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 	size_t size;
 	struct ehbigint zero, tmp1, tquot, texp, tbase;
 	unsigned char zero_bytes[2];
-	struct eba_s eba_exp;
 
 	if (result == NULL || base == NULL || exponent == NULL
 	    || modulus == NULL) {
@@ -452,7 +452,6 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 	tquot.bytes_used = 0;
 	tquot.sign = 0;
 
-	ehbi_eba_err = EHBI_SUCCESS;
 	err = EHBI_SUCCESS;
 
 	size = 2 + (2 * base->bytes_used) + exponent->bytes_used;
@@ -483,9 +482,6 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 		goto ehbi_mod_exp_end;
 	}
 	texp.bytes_len = size;
-	eba_exp.bits = texp.bytes;
-	eba_exp.size_bytes = texp.bytes_len;
-	eba_exp.endian = eba_big_endian;
 
 	tquot.bytes = (unsigned char *)ehbi_stack_alloc(size);
 	if (!tquot.bytes) {
@@ -529,22 +525,15 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 		if (err) {
 			goto ehbi_mod_exp_end;
 		}
+
 		if (ehbi_is_odd(&texp, &err)) {
 			err = err || ehbi_mul(&tmp1, result, &tbase);
 			err = err || ehbi_div(&tquot, result, &tmp1, modulus);
 		}
-		if (err) {
-			goto ehbi_mod_exp_end;
-		}
-		eba_shift_right(&eba_exp, 1);
-		if (ehbi_eba_err) {
-			err = ehbi_eba_err;
-			ehbi_eba_err = EHBI_SUCCESS;
-			goto ehbi_mod_exp_end;
-		}
-
+		err = err || ehbi_shift_right(&texp, 1);
 		err = err || ehbi_mul(&tmp1, &tbase, &tbase);
 		err = err || ehbi_div(&tquot, &tbase, &tmp1, modulus);
+
 		if (err) {
 			goto ehbi_mod_exp_end;
 		}
@@ -973,6 +962,78 @@ int ehbi_bytes_shift_right(struct ehbigint *bi, size_t num_bytes)
 	return EHBI_SUCCESS;
 }
 
+int ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits)
+{
+	size_t bytes;
+	int err;
+	struct eba_s eba;
+
+	if (bi == NULL) {
+		Ehbi_log_error0("Null argument(s)");
+		return EHBI_NULL_ARGS;
+	}
+	if (bi->bytes == NULL) {
+		Ehbi_log_error0("Null bytes[]");
+		return EHBI_NULL_BYTES;
+	}
+
+	if ((num_bits % 8UL) == 0) {
+		bytes = (size_t)(num_bits / 8UL);
+		return ehbi_bytes_shift_right(bi, bytes);
+	}
+
+	eba.endian = eba_big_endian;
+	eba.bits = bi->bytes;
+	eba.size_bytes = bi->bytes_len;
+
+	ehbi_eba_err = EHBI_SUCCESS;
+	eba_shift_right(&eba, 1);
+	err = ehbi_eba_err;
+
+	err = err || ehbi_reset_bytes_used(bi);
+
+	if (err) {
+		ehbi_zero(bi);
+	}
+	return err;
+}
+
+int ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits)
+{
+	size_t bytes;
+	int err;
+	struct eba_s eba;
+
+	if (bi == NULL) {
+		Ehbi_log_error0("Null argument(s)");
+		return EHBI_NULL_ARGS;
+	}
+	if (bi->bytes == NULL) {
+		Ehbi_log_error0("Null bytes[]");
+		return EHBI_NULL_BYTES;
+	}
+
+	if ((num_bits % 8UL) == 0) {
+		bytes = (size_t)(num_bits / 8UL);
+		return ehbi_bytes_shift_left(bi, bytes);
+	}
+
+	eba.endian = eba_big_endian;
+	eba.bits = bi->bytes;
+	eba.size_bytes = bi->bytes_len;
+
+	ehbi_eba_err = EHBI_SUCCESS;
+	eba_shift_left(&eba, 1);
+	err = ehbi_eba_err;
+
+	err = err || ehbi_reset_bytes_used(bi);
+
+	if (err) {
+		ehbi_zero(bi);
+	}
+	return err;
+}
+
 int ehbi_negate(struct ehbigint *bi)
 {
 	if (bi == NULL) {
@@ -994,6 +1055,23 @@ int ehbi_is_negative(const struct ehbigint *bi, int *err)
 		}
 		return 0;
 	}
+	if (bi->bytes == NULL) {
+		Ehbi_log_error0("Null bytes[]");
+		if (err) {
+			*err = EHBI_NULL_BYTES;
+		}
+		return 0;
+	}
+
+	/* guard for negative zero? */
+	if (bi->bytes_used == 0) {
+		return 0;
+	}
+	if (bi->bytes_used == 1) {
+		if (bi->bytes[bi->bytes_len - 1] == 0x00) {
+			return 0;
+		}
+	}
 
 	return (bi->sign == 0) ? 0 : 1;
 }
@@ -1003,7 +1081,7 @@ int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 {
 	size_t i;
 	unsigned char a, b;
-	int b1_pos, b2_pos;
+	int rv, b1_pos, b2_pos;
 
 	if (bi1 == NULL || bi2 == NULL || err == NULL) {
 		Ehbi_log_error0("Null argument(s)");
@@ -1026,25 +1104,31 @@ int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 	b2_pos = !ehbi_is_negative(bi2, err);
 
 	if (b1_pos != b2_pos) {
-		return b1_pos ? 1 : -1;
+		rv = b1_pos ? 1 : -1;
+		return rv;
 	}
 
 	if (bi1->bytes_used > bi2->bytes_used) {
-		return b1_pos ? 1 : -1;
+		rv = b1_pos ? 1 : -1;
+		return rv;
 	} else if (bi1->bytes_used < bi2->bytes_used) {
-		return b1_pos ? -1 : 1;
+		rv = b1_pos ? -1 : 1;
+		return rv;
 	}
 
 	for (i = 0; i < bi1->bytes_used; ++i) {
 		a = bi1->bytes[(bi1->bytes_len - bi1->bytes_used) + i];
 		b = bi2->bytes[(bi2->bytes_len - bi2->bytes_used) + i];
 		if (a > b) {
-			return b1_pos ? 1 : -1;
+			rv = b1_pos ? 1 : -1;
+			return rv;
 		} else if (a < b) {
-			return b1_pos ? -1 : 1;
+			rv = b1_pos ? -1 : 1;
+			return rv;
 		}
 	}
-	return 0;
+	rv = 0;
+	return rv;
 }
 
 int ehbi_equals(const struct ehbigint *bi1, const struct ehbigint *bi2,
@@ -1091,6 +1175,29 @@ static int ehbi_is_odd(struct ehbigint *bi, int *err)
 
 	bit = 0x01 & bi->bytes[bi->bytes_len - 1];
 	return bit ? 1 : 0;
+}
+
+static int ehbi_reset_bytes_used(struct ehbigint *bi)
+{
+	size_t i;
+
+	if (bi == NULL) {
+		Ehbi_log_error0("Null struct");
+		return EHBI_NULL_STRUCT;
+	}
+	if (bi->bytes == NULL) {
+		Ehbi_log_error0("Null bytes[]");
+		return EHBI_NULL_BYTES;
+	}
+
+	for (i = 0; i < bi->bytes_len; ++i) {
+		if (bi->bytes[i] != 0) {
+			break;
+		}
+	}
+	bi->bytes_used = (bi->bytes_len - i || 1);
+
+	return EHBI_SUCCESS;
 }
 
 static int ehbi_zero(struct ehbigint *bi)

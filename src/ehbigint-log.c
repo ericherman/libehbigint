@@ -26,6 +26,13 @@ License for more details.
 #include <stdio.h>		/* fileno */
 #endif
 
+#if EHBI_DEBUG
+unsigned EHBI_DBUG_i = 0;
+unsigned EHBI_DBUG_depth = 0;
+char EHBI_DBUG_Buf0[80];
+char EHBI_DBUG_Buf1[80];
+#endif
+
 int ehbi_debug_log_level = 0;
 int ehbi_debugf(int level, const char *fmt, ...)
 {

@@ -1,3 +1,13 @@
+2017-04-01  Eric Herman <eric@freesa.org>
+
+	add "ehbi_zero" setter
+	add some debug tracing options for printf debugging
+
+	* src/ehbigint.h: add a set "zero" function
+	* src/ehbigint.c: add the printf tracing
+	* misc/pre-tidy.patch: adjust the patch
+
+
 2017-03-26  Eric Herman <eric@freesa.org>
 
 	add ehbi_shift_left, ehbi_shift_right functions to API

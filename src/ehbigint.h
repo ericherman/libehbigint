@@ -29,6 +29,12 @@ struct ehbigint {
 };
 
 /*
+   populates an ehbigint with a value of zero
+   returns 0 on success or error_code on error
+*/
+int ehbi_zero(struct ehbigint *bi);
+
+/*
    populates an ehbigint with a hex string value e.g. "0x4badc0de"
    returns 0 on success or error_code on error
 */

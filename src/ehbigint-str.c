@@ -112,7 +112,7 @@ int ehbi_set_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 	size_t size;
 	int err, negative;
 
-	Trace_bi_s(bi, dec);
+	Trace_bi(bi);
 
 	Ehbi_struct_is_not_null(bi);
 
@@ -159,7 +159,7 @@ char *ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len,
 	size_t i, j;
 	char *rv;
 
-	Trace_bi_s(bi, buf);
+	Trace_bi(bi);
 
 	Ehbi_struct_is_not_null_e_j(bi, err, ehbi_to_hex_string_end);
 
@@ -168,6 +168,8 @@ char *ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len,
 		*err = EHBI_NULL_STRING_BUF;
 		goto ehbi_to_hex_string_end;
 	}
+	buf[0] = '\0';
+
 	if (buf_len < (bi->bytes_used + 3)) {
 		Ehbi_log_error0("Buffer too small");
 		*err = EHBI_STRING_BUF_TOO_SMALL;
@@ -244,6 +246,8 @@ char *ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len,
 		}
 		goto ehbi_to_decimal_string_end;
 	}
+	buf[0] = '\0';
+
 	*err = EHBI_SUCCESS;
 
 	size = strlen("0x00") + (2 * bi->bytes_used) + 1;
@@ -369,6 +373,7 @@ static int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
 		Ehbi_log_error0("Null argument");
 		return EHBI_NULL_ARGS;
 	}
+	buf[0] = '\0';
 
 	if (buf_len < 2 || buf_len < hex_len) {
 		Ehbi_log_error0("Buffer too small");
@@ -516,6 +521,7 @@ static char *ehbi_hex_to_decimal_raw(const char *hex, size_t hex_len, char *buf,
 	if (hex == 0 || buf == 0 || buf_len < 2 || buf_len < hex_len) {
 		return NULL;
 	}
+	buf[0] = '\0';
 
 	/* skip over leading '0x' in string */
 	if (hex_len >= 2 && hex[0] == '0' && (hex[1] == 'x' || hex[1] == 'X')) {

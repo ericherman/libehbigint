@@ -1,13 +1,14 @@
 2017-04-02  Eric Herman <eric@freesa.org>
 
 	Add a ehbi_init for struct initialization
+	Add a test-shift-right and fix bug in shifting
 	Use the ehbi_init in tests
 	enhance trace-ing
 
 	* src/ehbigint.h: add ehbi_init
-	* src/ehbigint.c: add ehbi_init, minor TODOs
+	* src/ehbigint.c: add ehbi_init, minor TODOs, easier debug
 	* src/ehbigint-log.h: more tracing options
-	* src/ehbigint-str.c: use tracing
+	* src/ehbigint-str.c: use tracing, debug friendly++
 	* tests/test-add.c: ehbi_init
 	* tests/test-bytes-shift-left.c: ehbi_init
 	* tests/test-bytes-shift-right.c: ehbi_init
@@ -28,8 +29,11 @@
 	* tests/test-scenario-mul-mod.c: ehbi_init
 	* tests/test-set-l.c: ehbi_init
 	* tests/test-set.c: ehbi_init
+	* tests/test-shift-right.c: new test
 	* tests/test-subtract.c: ehbi_init
 	* misc/pre-tidy.patch: respin
+	* Makefile.am: test-shift-right
+	* .gitignore: test-shift-right
 
 
 2017-04-01  Eric Herman <eric@freesa.org>

@@ -75,6 +75,7 @@ check_PROGRAMS=\
  test-scenario-mul-mod \
  test-set \
  test-set-l \
+ test-shift-right \
  test-subtract \
  test-bytes-shift-left \
  test-bytes-shift-right \
@@ -147,6 +148,10 @@ test_set_LDADD=$(TEST_LDADDS)
 
 test_set_l_SOURCES=tests/test-set-l.c $(COMMON_TEST_SOURCES)
 test_set_l_LDADD=$(TEST_LDADDS)
+
+test_shift_right_SOURCES=tests/test-shift-right.c \
+ $(COMMON_TEST_SOURCES)
+test_shift_right_LDADD=$(TEST_LDADDS)
 
 test_subtract_SOURCES=tests/test-subtract.c $(COMMON_TEST_SOURCES)
 test_subtract_LDADD=$(TEST_LDADDS)
@@ -223,6 +228,7 @@ valgrind: $(check_PROGRAMS)
 	libtool --mode=execute valgrind -q ./test-scenario-mul-mod
 	libtool --mode=execute valgrind -q ./test-set
 	libtool --mode=execute valgrind -q ./test-set-l
+	libtool --mode=execute valgrind -q ./test-shift-right
 	libtool --mode=execute valgrind -q ./test-subtract
 	libtool --mode=execute valgrind -q ./test-bytes-shift-left
 	libtool --mode=execute valgrind -q ./test-bytes-shift-right

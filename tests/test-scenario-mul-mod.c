@@ -25,35 +25,12 @@ int test_scenario_mul_mod(int verbose)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	bx.bytes = xb;
-	bx.bytes_len = 16;
-	bx.sign = 0;
-	bx.bytes_used = 0;
-
-	by.bytes = yb;
-	by.bytes_len = 16;
-	by.sign = 0;
-	by.bytes_used = 0;
-
-	bz.bytes = zb;
-	bz.bytes_len = 16;
-	bz.sign = 0;
-	bz.bytes_used = 0;
-
-	bresult.bytes = resb;
-	bresult.bytes_len = 16;
-	bresult.sign = 0;
-	bresult.bytes_used = 0;
-
-	bquot.bytes = quotb;
-	bquot.bytes_len = 16;
-	bquot.sign = 0;
-	bquot.bytes_used = 0;
-
-	brem.bytes = remb;
-	brem.bytes_len = 16;
-	brem.sign = 0;
-	brem.bytes_used = 0;
+	ehbi_init(&bx, xb, 16);
+	ehbi_init(&by, yb, 16);
+	ehbi_init(&bz, zb, 16);
+	ehbi_init(&bresult, resb, 16);
+	ehbi_init(&bquot, quotb, 16);
+	ehbi_init(&brem, remb, 16);
 
 	x = 20151125;
 	err = ehbi_set_l(&bx, x);

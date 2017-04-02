@@ -23,9 +23,7 @@ int test_bytes_shift_right(int verbose, char *val, size_t bytes, char *expected)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	bi.bytes = bytes_buf1;
-	bi.bytes_len = 20;
-	bi.sign = 0;
+	ehbi_init(&bi, bytes_buf1, 20);
 
 	err = ehbi_set_hex_string(&bi, val, strlen(val));
 	if (err) {

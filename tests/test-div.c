@@ -33,25 +33,10 @@ int test_div(int verbose, char *snumerator, char *sdenominator, char *squotient,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	numerator.bytes = bytes_numerator;
-	numerator.bytes_len = 10;
-	numerator.sign = 0;
-	numerator.bytes_used = 0;
-
-	denominator.bytes = bytes_denominator;
-	denominator.bytes_len = 10;
-	denominator.sign = 0;
-	denominator.bytes_used = 0;
-
-	quotient.bytes = bytes_quotient;
-	quotient.bytes_len = 10;
-	quotient.sign = 0;
-	quotient.bytes_used = 0;
-
-	remainder.bytes = bytes_remainder;
-	remainder.bytes_len = 10;
-	remainder.sign = 0;
-	remainder.bytes_used = 0;
+	ehbi_init(&numerator, bytes_numerator, 10);
+	ehbi_init(&denominator, bytes_denominator, 10);
+	ehbi_init(&quotient, bytes_quotient, 10);
+	ehbi_init(&remainder, bytes_remainder, 10);
 
 	err =
 	    ehbi_set_decimal_string(&numerator, snumerator, strlen(snumerator));
@@ -129,25 +114,10 @@ int test_div_by_zero(int verbose)
 	log = tmpfile();
 	set_ehbi_log_file(log);
 
-	numerator.bytes = bytes_numerator;
-	numerator.bytes_len = 10;
-	numerator.sign = 0;
-	numerator.bytes_used = 0;
-
-	denominator.bytes = bytes_denominator;
-	denominator.bytes_len = 10;
-	denominator.sign = 0;
-	denominator.bytes_used = 0;
-
-	quotient.bytes = bytes_quotient;
-	quotient.bytes_len = 10;
-	quotient.sign = 0;
-	quotient.bytes_used = 0;
-
-	remainder.bytes = bytes_remainder;
-	remainder.bytes_len = 10;
-	remainder.sign = 0;
-	remainder.bytes_used = 0;
+	ehbi_init(&numerator, bytes_numerator, 10);
+	ehbi_init(&denominator, bytes_denominator, 10);
+	ehbi_init(&quotient, bytes_quotient, 10);
+	ehbi_init(&remainder, bytes_remainder, 10);
 
 	ehbi_set_l(&numerator, 10);
 	ehbi_set_l(&denominator, 0);

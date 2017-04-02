@@ -32,19 +32,9 @@ int test_mul(int verbose, long al, long bl, char *expected)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	a_bigint.bytes = a_bytes;
-	a_bigint.bytes_len = 16;
-	a_bigint.sign = 0;
-	a_bigint.bytes_used = 0;
-
-	b_bigint.bytes = b_bytes;
-	b_bigint.bytes_len = 16;
-	b_bigint.sign = 0;
-	b_bigint.bytes_used = 0;
-
-	result.bytes = result_bytes;
-	result.bytes_len = 16;
-	result.sign = 0;
+	ehbi_init(&a_bigint, a_bytes, 16);
+	ehbi_init(&b_bigint, b_bytes, 16);
+	ehbi_init(&result, result_bytes, 16);
 
 	sprintf(buf, "%ld", al);
 	err = ehbi_set_l(&a_bigint, al);

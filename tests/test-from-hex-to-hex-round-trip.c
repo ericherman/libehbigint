@@ -24,12 +24,10 @@ int test_from_hex_to_hex_round_trip(int verbose)
 
 	struct ehbigint a_bigint;
 
-	a_bigint.bytes = bytes_buf;
-	a_bigint.bytes_len = 20;
-	a_bigint.sign = 0;
-
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
+
+	ehbi_init(&a_bigint, bytes_buf, 20);
 
 	err =
 	    ehbi_set_hex_string(&a_bigint, expected_str, strlen(expected_str));

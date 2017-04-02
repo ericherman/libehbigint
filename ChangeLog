@@ -1,3 +1,37 @@
+2017-04-02  Eric Herman <eric@freesa.org>
+
+	Add a ehbi_init for struct initialization
+	Use the ehbi_init in tests
+	enhance trace-ing
+
+	* src/ehbigint.h: add ehbi_init
+	* src/ehbigint.c: add ehbi_init, minor TODOs
+	* src/ehbigint-log.h: more tracing options
+	* src/ehbigint-str.c: use tracing
+	* tests/test-add.c: ehbi_init
+	* tests/test-bytes-shift-left.c: ehbi_init
+	* tests/test-bytes-shift-right.c: ehbi_init
+	* tests/test-comp-exp-mod-with-gmp.c: ehbi_init
+	* tests/test-comp-mul-with-gmp.c: ehbi_init
+	* tests/test-compare.c: ehbi_init
+	* tests/test-compare2.c: ehbi_init
+	* tests/test-dec-corner-case.c: ehbi_init
+	* tests/test-dec.c: ehbi_init
+	* tests/test-div.c: ehbi_init
+	* tests/test-equals.c: ehbi_init
+	* tests/test-exp-mod.c: ehbi_init
+	* tests/test-from-decimal-to-decimal-round-trip.c: ehbi_init
+	* tests/test-from-hex-to-hex-round-trip.c: ehbi_init
+	* tests/test-inc-l.c: ehbi_init
+	* tests/test-inc.c: ehbi_init
+	* tests/test-mul.c: ehbi_init
+	* tests/test-scenario-mul-mod.c: ehbi_init
+	* tests/test-set-l.c: ehbi_init
+	* tests/test-set.c: ehbi_init
+	* tests/test-subtract.c: ehbi_init
+	* misc/pre-tidy.patch: respin
+
+
 2017-04-01  Eric Herman <eric@freesa.org>
 
 	add "ehbi_zero" setter

@@ -27,15 +27,8 @@ int test_set(int verbose, long lval, const char *expect)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	a_bigint.bytes = a_bytes;
-	a_bigint.bytes_len = 10;
-	a_bigint.sign = 0;
-	a_bigint.bytes_used = 0;
-
-	b_bigint.bytes = b_bytes;
-	b_bigint.bytes_len = 10;
-	b_bigint.sign = 0;
-	b_bigint.bytes_used = 0;
+	ehbi_init(&a_bigint, a_bytes, 10);
+	ehbi_init(&b_bigint, b_bytes, 10);
 
 	err = ehbi_set_l(&a_bigint, lval);
 	if (err) {

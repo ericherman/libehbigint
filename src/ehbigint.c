@@ -22,36 +22,20 @@ static void ehbi_unsafe_zero(struct ehbigint *bi);
 static void ehbi_unsafe_reset_bytes_used(struct ehbigint *bi);
 static int ehbi_is_odd(const struct ehbigint *bi, int *err);
 
-#define Ehbi_struct_is_not_null(bi) \
-	do { \
-		if (bi == NULL) { \
-			Ehbi_log_error0("Null struct"); \
-			Return_i(EHBI_NULL_STRUCT); \
-		} \
-		if (bi->bytes == NULL) { \
-			Ehbi_log_error0("Null bytes[]"); \
-			Return_i(EHBI_NULL_BYTES); \
-		} \
-	} while(0)
+int ehbi_init(struct ehbigint *bi, unsigned char *bytes, size_t len)
+{
+	if (bi == NULL) {
+		Ehbi_log_error0("Null struct");
+		return EHBI_NULL_STRUCT;
+	}
 
-#define Ehbi_struct_is_not_null_e(bi, err) \
-	do { \
-		if (bi == NULL) { \
-			Ehbi_log_error0("Null argument(s)"); \
-			if (err) { \
-				*err = EHBI_NULL_ARGS; \
-			} \
-			Return_i(0); \
-		} \
-		if (bi->bytes == NULL) { \
-			Ehbi_log_error0("Null bytes[]"); \
-			if (err) { \
-				*err = EHBI_NULL_BYTES; \
-			} \
-			Return_i(0); \
-		} \
-	} while(0)
+	bi->bytes = bytes;
+	bi->bytes_len = len;
 
+	ehbi_zero(bi);
+
+	return EHBI_SUCCESS;
+}
 
 int ehbi_zero(struct ehbigint *bi)
 {
@@ -110,7 +94,7 @@ int ehbi_set(struct ehbigint *bi, const struct ehbigint *val)
 		bi->bytes[i] = 0x00;
 	}
 
-	/* TODO: enusre bytes used ? */
+	ehbi_unsafe_reset_bytes_used(bi);
 
 	Trace_msg_s_bi("end", bi);
 	Return_i(EHBI_SUCCESS);
@@ -1095,7 +1079,8 @@ int ehbi_negate(struct ehbigint *bi)
 	bi->sign = (bi->sign == 0) ? 1 : 0;
 
 	err = EHBI_SUCCESS;
-	/* TODO: err = ehbi_reset_bytes_used(bi); ? */
+
+	ehbi_unsafe_reset_bytes_used(bi);
 
 	Trace_msg_s_bi("end", bi);
 	Return_i(err);

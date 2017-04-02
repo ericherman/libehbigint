@@ -23,9 +23,7 @@ int test_inc_l(int verbose, const char *dec_str1, long v2, const char *expect)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	bi1.bytes = bytes_buf1;
-	bi1.bytes_len = 20;
-	bi1.sign = 0;
+	ehbi_init(&bi1, bytes_buf1, 20);
 
 	err = ehbi_set_decimal_string(&bi1, dec_str1, strlen(dec_str1));
 	if (err) {

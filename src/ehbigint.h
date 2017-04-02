@@ -29,6 +29,12 @@ struct ehbigint {
 };
 
 /*
+   assignes the byte[] to the struct, sets to zero
+   returns 0 on success or error_code on error
+*/
+int ehbi_init(struct ehbigint *bi, unsigned char *bytes, size_t len);
+
+/*
    populates an ehbigint with a value of zero
    returns 0 on success or error_code on error
 */

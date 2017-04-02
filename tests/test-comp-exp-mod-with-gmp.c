@@ -30,26 +30,10 @@ int test_comp_exp_with_gmp(int verbose, unsigned long base, unsigned long exp,
 	VERBOSE_ANNOUNCE(verbose);
 
 	failures = 0;
-
-	ebase.bytes = base_bytes;
-	eres.bytes = res_bytes;
-	emod.bytes = mod_bytes;
-	eexp.bytes = exp_bytes;
-
-	ebase.bytes_len = BILEN;
-	eres.bytes_len = BILEN;
-	emod.bytes_len = BILEN;
-	eexp.bytes_len = BILEN;
-
-	ebase.sign = 0;
-	eres.sign = 0;
-	emod.sign = 0;
-	eexp.sign = 0;
-
-	ebase.bytes_used = 0;
-	eres.bytes_used = 0;
-	emod.bytes_used = 0;
-	eexp.bytes_used = 0;
+	ehbi_init(&eres, res_bytes, BILEN);
+	ehbi_init(&ebase, base_bytes, BILEN);
+	ehbi_init(&emod, mod_bytes, BILEN);
+	ehbi_init(&eexp, exp_bytes, BILEN);
 
 	ehbi_set_l(&ebase, (long)base);
 	ehbi_set_l(&eexp, (long)exp);

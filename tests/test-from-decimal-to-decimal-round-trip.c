@@ -20,11 +20,12 @@ int test_from_decimal_to_decimal_round_trip(int verbose, const char *dec)
 	unsigned char bytes_buf[20];
 	char as_string[BUFLEN];
 	struct ehbigint a_bigint;
-	a_bigint.bytes = bytes_buf;
-	a_bigint.bytes_len = 20;
-	a_bigint.sign = 0;
+
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
+
+	ehbi_init(&a_bigint, bytes_buf, 20);
+
 	is_negative = dec[0] == '-';
 	err = ehbi_set_decimal_string(&a_bigint, dec, strlen(dec));
 	if (err) {

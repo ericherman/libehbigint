@@ -33,25 +33,10 @@ int test_exp_mod(int verbose, char *sbase, char *sexponent, char *smodulus,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	base.bytes = bytes_base;
-	base.bytes_len = 10;
-	base.sign = 0;
-	base.bytes_used = 0;
-
-	exponent.bytes = bytes_exponent;
-	exponent.bytes_len = 10;
-	exponent.sign = 0;
-	exponent.bytes_used = 0;
-
-	modulus.bytes = bytes_modulus;
-	modulus.bytes_len = 10;
-	modulus.sign = 0;
-	modulus.bytes_used = 0;
-
-	result.bytes = bytes_result;
-	result.bytes_len = 10;
-	result.sign = 0;
-	result.bytes_used = 0;
+	ehbi_init(&base, bytes_base, 10);
+	ehbi_init(&exponent, bytes_exponent, 10);
+	ehbi_init(&modulus, bytes_modulus, 10);
+	ehbi_init(&result, bytes_result, 10);
 
 	err = ehbi_set_decimal_string(&base, sbase, strlen(sbase));
 	if (err) {
@@ -143,25 +128,10 @@ int test_exp_mod_by_zero(int verbose)
 	log = tmpfile();
 	set_ehbi_log_file(log);
 
-	base.bytes = bytes_base;
-	base.bytes_len = 10;
-	base.sign = 0;
-	base.bytes_used = 0;
-
-	exponent.bytes = bytes_exponent;
-	exponent.bytes_len = 10;
-	exponent.sign = 0;
-	exponent.bytes_used = 0;
-
-	modulus.bytes = bytes_modulus;
-	modulus.bytes_len = 10;
-	modulus.sign = 0;
-	modulus.bytes_used = 0;
-
-	result.bytes = bytes_result;
-	result.bytes_len = 10;
-	result.sign = 0;
-	result.bytes_used = 0;
+	ehbi_init(&base, bytes_base, 10);
+	ehbi_init(&exponent, bytes_exponent, 10);
+	ehbi_init(&modulus, bytes_modulus, 10);
+	ehbi_init(&result, bytes_result, 10);
 
 	ehbi_set_l(&base, 10);
 	ehbi_set_l(&exponent, 2);

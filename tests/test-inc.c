@@ -22,16 +22,11 @@ int test_inc_hex(int verbose, const char *hexs1, const char *hexs2,
 	unsigned char bytes_buf2[20];
 	struct ehbigint bi1, bi2;
 
-	bi1.bytes = bytes_buf1;
-	bi1.bytes_len = 20;
-	bi1.sign = 0;
-
-	bi2.bytes = bytes_buf2;
-	bi2.bytes_len = 20;
-	bi2.sign = 0;
-
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
+
+	ehbi_init(&bi1, bytes_buf1, 20);
+	ehbi_init(&bi2, bytes_buf2, 20);
 
 	err = ehbi_set_hex_string(&bi1, hexs1, strlen(hexs1));
 	err += ehbi_set_hex_string(&bi2, hexs2, strlen(hexs2));
@@ -63,16 +58,11 @@ int test_inc(int verbose, const char *v1, const char *v2, const char *expect)
 	unsigned char bytes_buf2[20];
 	struct ehbigint bi1, bi2;
 
-	bi1.bytes = bytes_buf1;
-	bi1.bytes_len = 20;
-	bi1.sign = 0;
-
-	bi2.bytes = bytes_buf2;
-	bi2.bytes_len = 20;
-	bi2.sign = 0;
-
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
+
+	ehbi_init(&bi1, bytes_buf1, 20);
+	ehbi_init(&bi2, bytes_buf2, 20);
 
 	err = ehbi_set_decimal_string(&bi1, v1, strlen(v1));
 	err += ehbi_set_decimal_string(&bi2, v2, strlen(v2));

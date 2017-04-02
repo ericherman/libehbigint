@@ -53,7 +53,7 @@ extern char EHBI_DBUG_Buf1[80];
 #endif /* _GNU_SOURCE */
 #endif /* __STDC_VERSION__ */
 
-#define Trace_bi(bi) \
+#define Ehbi_trace_in() \
 	++EHBI_DBUG_depth; \
 	for (EHBI_DBUG_i= 0; EHBI_DBUG_i < EHBI_DBUG_depth; ++EHBI_DBUG_i) { \
 		EHBI_DBUG_Buf0[EHBI_DBUG_i] = '-'; \
@@ -61,206 +61,168 @@ extern char EHBI_DBUG_Buf1[80];
 	} \
 	EHBI_DBUG_Buf0[EHBI_DBUG_i] = '\0'; \
 	EHBI_DBUG_Buf1[EHBI_DBUG_i] = '\0'; \
-	fprintf(stderr, "%s%s(", EHBI_DBUG_Buf0, EHBI_FUNC); \
-	fprintf(stderr, "\n%s\t\tbi{bytes_len:%lu,bytes_used:%lu,sign:%u,0x", \
+	fprintf(stderr, "%s%s(", EHBI_DBUG_Buf0, EHBI_FUNC)
+
+#define Ehbi_trace_fprintf_bi(bi, name) \
+	for (EHBI_DBUG_i= 0; EHBI_DBUG_i < EHBI_DBUG_depth; ++EHBI_DBUG_i) { \
+		EHBI_DBUG_Buf1[EHBI_DBUG_i] = ' '; \
+	} \
+	EHBI_DBUG_Buf1[EHBI_DBUG_i] = '\0'; \
+	fprintf(stderr, "\n%s\t\t%s{bytes_len:%lu,bytes_used:%lu,sign:%u,0x", \
 		EHBI_DBUG_Buf1, \
+		name, \
 		((bi)) ? (unsigned long)((bi)->bytes_len) : 0, \
 		((bi)) ? (unsigned long)((bi)->bytes_used) : 0, \
 		((bi)) ? (unsigned)((bi)->sign) : 0); \
 	for (EHBI_DBUG_i = 0; EHBI_DBUG_i < (((bi))? (bi)->bytes_len : 0); ++EHBI_DBUG_i) { \
 		fprintf(stderr, "%02X",  ((bi)->bytes) ? (bi)->bytes[EHBI_DBUG_i] : 0); \
 	} \
-	fprintf(stderr, "}"); \
+	fprintf(stderr, "}")
+
+#define Ehbi_trace_fprintf_s(name, val) \
+	for (EHBI_DBUG_i= 0; EHBI_DBUG_i < EHBI_DBUG_depth; ++EHBI_DBUG_i) { \
+		EHBI_DBUG_Buf1[EHBI_DBUG_i] = ' '; \
+	} \
+	EHBI_DBUG_Buf1[EHBI_DBUG_i] = '\0'; \
+	fprintf(stderr, "\n%s\t\t%s: \"%s\"", EHBI_DBUG_Buf1, name, val)
+
+#define Trace_bi(bi) \
+	Ehbi_trace_in(); \
+	Ehbi_trace_fprintf_bi(bi, "bi"); \
 	fprintf(stderr, ")\n")
 
 #define Trace_bi_l(bi, l) \
-	++EHBI_DBUG_depth; \
-	for (EHBI_DBUG_i= 0; EHBI_DBUG_i < EHBI_DBUG_depth; ++EHBI_DBUG_i) { \
-		EHBI_DBUG_Buf0[EHBI_DBUG_i] = '-'; \
-		EHBI_DBUG_Buf1[EHBI_DBUG_i] = ' '; \
-	} \
-	EHBI_DBUG_Buf0[EHBI_DBUG_i] = '\0'; \
-	EHBI_DBUG_Buf1[EHBI_DBUG_i] = '\0'; \
-	fprintf(stderr, "%s%s(", EHBI_DBUG_Buf0, EHBI_FUNC); \
-	fprintf(stderr, "\n%s\t\tbi{bytes_len:%lu,bytes_used:%lu,sign:%u,0x", \
-		EHBI_DBUG_Buf1, \
-		((bi)) ? (unsigned long)((bi)->bytes_len) : 0, \
-		((bi)) ? (unsigned long)((bi)->bytes_used) : 0, \
-		((bi)) ? (unsigned)((bi)->sign) : 0); \
-	for (EHBI_DBUG_i = 0; EHBI_DBUG_i < (((bi))? (bi)->bytes_len : 0); ++EHBI_DBUG_i) { \
-		fprintf(stderr, "%02X",  ((bi)->bytes) ? (bi)->bytes[EHBI_DBUG_i] : 0); \
-	} \
-	fprintf(stderr, "}"); \
+	Ehbi_trace_in(); \
+	Ehbi_trace_fprintf_bi(bi, "bi"); \
 	fprintf(stderr, ",\n%s\t\t%ld)\n", EHBI_DBUG_Buf1, l)
 
+#define Trace_bi_s(bi, s) \
+	Ehbi_trace_in(); \
+	Ehbi_trace_fprintf_bi(bi, "bi"); \
+	fprintf(stderr, ",\n%s\t\t%s)\n", EHBI_DBUG_Buf1, s)
+
 #define Trace_bi_bi(bi1, bi2) \
-	++EHBI_DBUG_depth; \
-	for (EHBI_DBUG_i= 0; EHBI_DBUG_i < EHBI_DBUG_depth; ++EHBI_DBUG_i) { \
-		EHBI_DBUG_Buf0[EHBI_DBUG_i] = '-'; \
-		EHBI_DBUG_Buf1[EHBI_DBUG_i] = ' '; \
-	} \
-	EHBI_DBUG_Buf0[EHBI_DBUG_i] = '\0'; \
-	EHBI_DBUG_Buf1[EHBI_DBUG_i] = '\0'; \
-	fprintf(stderr, "%s%s(", EHBI_DBUG_Buf0, EHBI_FUNC); \
-	fprintf(stderr, "\n%s\t\tbi1{bytes_len:%lu,bytes_used:%lu,sign:%u,0x", \
-		EHBI_DBUG_Buf1, \
-		(unsigned long)((bi1)->bytes_len), \
-		(unsigned long)((bi1)->bytes_used), \
-		(unsigned)((bi1)->sign)); \
-	for (EHBI_DBUG_i = 0; EHBI_DBUG_i < (bi1)->bytes_len; ++EHBI_DBUG_i) { \
-		fprintf(stderr, "%02X",  (bi1)->bytes[EHBI_DBUG_i]); \
-	} \
-	fprintf(stderr, "}"); \
+	Ehbi_trace_in(); \
+	Ehbi_trace_fprintf_bi(bi1, "bi1"); \
 	fprintf(stderr, ","); \
-	fprintf(stderr, "\n%s\t\tbi2{bytes_len:%lu,bytes_used:%lu,sign:%u,0x", \
-		EHBI_DBUG_Buf1, \
-		(unsigned long)((bi2)->bytes_len), \
-		(unsigned long)((bi2)->bytes_used), \
-		(unsigned)((bi2)->sign)); \
-	for (EHBI_DBUG_i = 0; EHBI_DBUG_i < (bi2)->bytes_len; ++EHBI_DBUG_i) { \
-		fprintf(stderr, "%02X",  (bi2)->bytes[EHBI_DBUG_i]); \
-	} \
-	fprintf(stderr, "}"); \
+	Ehbi_trace_fprintf_bi(bi2, "bi2"); \
 	fprintf(stderr, ")\n")
 
 #define Trace_bi_bi_bi(bi1, bi2, bi3) \
-	++EHBI_DBUG_depth; \
-	for (EHBI_DBUG_i= 0; EHBI_DBUG_i < EHBI_DBUG_depth; ++EHBI_DBUG_i) { \
-		EHBI_DBUG_Buf0[EHBI_DBUG_i] = '-'; \
-		EHBI_DBUG_Buf1[EHBI_DBUG_i] = ' '; \
-	} \
-	EHBI_DBUG_Buf0[EHBI_DBUG_i] = '\0'; \
-	EHBI_DBUG_Buf1[EHBI_DBUG_i] = '\0'; \
-	fprintf(stderr, "%s%s(", EHBI_DBUG_Buf0, EHBI_FUNC); \
-	fprintf(stderr, "\n%s\t\tbi1{bytes_len:%lu,bytes_used:%lu,sign:%u,0x", \
-		EHBI_DBUG_Buf1, \
-		(unsigned long)((bi1)->bytes_len), \
-		(unsigned long)((bi1)->bytes_used), \
-		(unsigned)((bi1)->sign)); \
-	for (EHBI_DBUG_i = 0; EHBI_DBUG_i < (bi1)->bytes_len; ++EHBI_DBUG_i) { \
-		fprintf(stderr, "%02X",  (bi1)->bytes[EHBI_DBUG_i]); \
-	} \
-	fprintf(stderr, "}"); \
+	Ehbi_trace_in(); \
+	Ehbi_trace_fprintf_bi(bi1, "bi1"); \
 	fprintf(stderr, ","); \
-	fprintf(stderr, "%s\n\t\tbi2{bytes_len:%lu,bytes_used:%lu,sign:%u,0x", \
-		EHBI_DBUG_Buf1, \
-		(unsigned long)((bi2)->bytes_len), \
-		(unsigned long)((bi2)->bytes_used), \
-		(unsigned)((bi2)->sign)); \
-	for (EHBI_DBUG_i = 0; EHBI_DBUG_i < (bi2)->bytes_len; ++EHBI_DBUG_i) { \
-		fprintf(stderr, "%02X",  (bi2)->bytes[EHBI_DBUG_i]); \
-	} \
-	fprintf(stderr, "}"); \
+	Ehbi_trace_fprintf_bi(bi2, "bi2"); \
 	fprintf(stderr, ","); \
-	fprintf(stderr, "\n%s\t\tbi3{bytes_len:%lu,bytes_used:%lu,sign:%u,0x", \
-		EHBI_DBUG_Buf1, \
-		(unsigned long)((bi3)->bytes_len), \
-		(unsigned long)((bi3)->bytes_used), \
-		(unsigned)((bi3)->sign)); \
-	for (EHBI_DBUG_i = 0; EHBI_DBUG_i < (bi3)->bytes_len; ++EHBI_DBUG_i) { \
-		fprintf(stderr, "%02X",  (bi3)->bytes[EHBI_DBUG_i]); \
-	} \
-	fprintf(stderr, "}"); \
+	Ehbi_trace_fprintf_bi(bi3, "bi3"); \
 	fprintf(stderr, ")\n")
 
 #define Trace_bi_bi_bi_bi(bi1, bi2, bi3, bi4) \
-	++EHBI_DBUG_depth; \
-	for (EHBI_DBUG_i= 0; EHBI_DBUG_i < EHBI_DBUG_depth; ++EHBI_DBUG_i) { \
-		EHBI_DBUG_Buf0[EHBI_DBUG_i] = '-'; \
-		EHBI_DBUG_Buf1[EHBI_DBUG_i] = ' '; \
-	} \
-	EHBI_DBUG_Buf0[EHBI_DBUG_i] = '\0'; \
-	EHBI_DBUG_Buf1[EHBI_DBUG_i] = '\0'; \
-	fprintf(stderr, "%s%s(", EHBI_DBUG_Buf0, EHBI_FUNC); \
-	fprintf(stderr, "\n%s\t\tbi1{bytes_len:%lu,bytes_used:%lu,sign:%u,0x", \
-		EHBI_DBUG_Buf1, \
-		(unsigned long)((bi1)->bytes_len), \
-		(unsigned long)((bi1)->bytes_used), \
-		(unsigned)((bi1)->sign)); \
-	for (EHBI_DBUG_i = 0; EHBI_DBUG_i < (bi1)->bytes_len; ++EHBI_DBUG_i) { \
-		fprintf(stderr, "%02X",  (bi1)->bytes[EHBI_DBUG_i]); \
-	} \
-	fprintf(stderr, "}"); \
+	Ehbi_trace_in(); \
+	Ehbi_trace_fprintf_bi(bi1, "bi1"); \
 	fprintf(stderr, ","); \
-	fprintf(stderr, "\n%s\t\tbi2{bytes_len:%lu,bytes_used:%lu,sign:%u,0x", \
-		EHBI_DBUG_Buf1, \
-		(unsigned long)((bi2)->bytes_len), \
-		(unsigned long)((bi2)->bytes_used), \
-		(unsigned)((bi2)->sign)); \
-	for (EHBI_DBUG_i = 0; EHBI_DBUG_i < (bi2)->bytes_len; ++EHBI_DBUG_i) { \
-		fprintf(stderr, "%02X",  (bi2)->bytes[EHBI_DBUG_i]); \
-	} \
-	fprintf(stderr, "}"); \
+	Ehbi_trace_fprintf_bi(bi2, "bi2"); \
 	fprintf(stderr, ","); \
-	fprintf(stderr, "\n%s\t\tbi3{bytes_len:%lu,bytes_used:%lu,sign:%u,0x", \
-		EHBI_DBUG_Buf1, \
-		(unsigned long)((bi3)->bytes_len), \
-		(unsigned long)((bi3)->bytes_used), \
-		(unsigned)((bi3)->sign)); \
-	for (EHBI_DBUG_i = 0; EHBI_DBUG_i < (bi3)->bytes_len; ++EHBI_DBUG_i) { \
-		fprintf(stderr, "%02X",  (bi3)->bytes[EHBI_DBUG_i]); \
-	} \
-	fprintf(stderr, "}"); \
+	Ehbi_trace_fprintf_bi(bi3, "bi3"); \
 	fprintf(stderr, ","); \
-	fprintf(stderr, "\n%s\t\tbi4{bytes_len:%lu,bytes_used:%lu,sign:%u,0x", \
-		EHBI_DBUG_Buf1, \
-		(unsigned long)((bi4)->bytes_len), \
-		(unsigned long)((bi4)->bytes_used), \
-		(unsigned)((bi4)->sign)); \
-	for (EHBI_DBUG_i = 0; EHBI_DBUG_i < (bi4)->bytes_len; ++EHBI_DBUG_i) { \
-		fprintf(stderr, "%02X",  (bi4)->bytes[EHBI_DBUG_i]); \
-	} \
-	fprintf(stderr, "}"); \
+	Ehbi_trace_fprintf_bi(bi4, "bi4"); \
 	fprintf(stderr, ")\n")
 
-#define Trace_msg_s_bi(s, bi) \
-	for (EHBI_DBUG_i= 0; EHBI_DBUG_i < EHBI_DBUG_depth; ++EHBI_DBUG_i) { \
-		EHBI_DBUG_Buf1[EHBI_DBUG_i] = ' '; \
-	} \
-	EHBI_DBUG_Buf1[EHBI_DBUG_i] = '\0'; \
-	fprintf(stderr, "%s%s: {bytes_len:%lu,bytes_used:%lu,sign:%u,0x", \
-		EHBI_DBUG_Buf1, \
-		s, \
-		(unsigned long)((bi)->bytes_len), \
-		(unsigned long)((bi)->bytes_used), \
-		(unsigned)((bi)->sign)); \
-	for (EHBI_DBUG_i = 0; EHBI_DBUG_i < (bi)->bytes_len; ++EHBI_DBUG_i) { \
-		fprintf(stderr, "%02X",  (bi)->bytes[EHBI_DBUG_i]); \
-	} \
-	fprintf(stderr, "}\n")
+#define Trace_msg_s_bi(msg, bi) \
+	Ehbi_trace_fprintf_bi(bi, msg); \
+	fprintf(stderr, "\n")
 
-#define Return_i(val) \
+#define Trace_msg_s_s(msg, val) \
+	Ehbi_trace_fprintf_s(msg, val); \
+	fprintf(stderr, "\n")
+
+#define Return_stack() \
 	for (EHBI_DBUG_i= 0; EHBI_DBUG_i < EHBI_DBUG_depth; ++EHBI_DBUG_i) { \
 		EHBI_DBUG_Buf0[EHBI_DBUG_i] = '-'; \
 		EHBI_DBUG_Buf1[EHBI_DBUG_i] = ' '; \
 	} \
 	EHBI_DBUG_Buf0[EHBI_DBUG_i] = '\0'; \
 	EHBI_DBUG_Buf1[EHBI_DBUG_i] = '\0'; \
-	fprintf(stderr, "%sreturn (%d) (%s)\n", EHBI_DBUG_Buf0, val, EHBI_FUNC); \
-	--EHBI_DBUG_depth; \
+	--EHBI_DBUG_depth
+
+#define Return_i(val) \
+	Return_stack(); \
+	fprintf(stderr, "%s%s return (%d)\n", EHBI_DBUG_Buf0, EHBI_FUNC, val); \
+	return val
+
+#define Return_s(val) \
+	Return_stack(); \
+	fprintf(stderr, "%s%s return (\"%s\")\n", EHBI_DBUG_Buf0, EHBI_FUNC, val); \
 	return val
 
 #define Return_void() \
-	for (EHBI_DBUG_i= 0; EHBI_DBUG_i < EHBI_DBUG_depth; ++EHBI_DBUG_i) { \
-		EHBI_DBUG_Buf0[EHBI_DBUG_i] = '-'; \
-		EHBI_DBUG_Buf1[EHBI_DBUG_i] = ' '; \
-	} \
-	EHBI_DBUG_Buf0[EHBI_DBUG_i] = '\0'; \
-	EHBI_DBUG_Buf1[EHBI_DBUG_i] = '\0'; \
-	fprintf(stderr, "%sreturn (%s)\n", EHBI_DBUG_Buf0, EHBI_FUNC); \
-	--EHBI_DBUG_depth; \
+	Return_stack(); \
+	fprintf(stderr, "%s%s return\n", EHBI_DBUG_Buf0, EHBI_FUNC); \
 	return
 
-#else
+#else /* no EHBI_DEBUG */
+
 #define Trace_bi(bi)
 #define Trace_bi_l(bi, l)
+#define Trace_bi_s(bi, s)
 #define Trace_bi_bi(bi1, bi2)
 #define Trace_bi_bi_bi(bi1, bi2, bi3)
 #define Trace_bi_bi_bi_bi(bi1, bi2, bi3, bi4)
 #define Trace_msg_s_bi(s, bi)
+#define Trace_msg_s_s(msg, val)
 #define Return_i(val) return val
+#define Return_s(val) return val
 #define Return_void() return
-#endif
+
+#endif /* EHBI_DEBUG */
+
+#define Ehbi_struct_is_not_null(bi) \
+	do { \
+		if (bi == NULL) { \
+			Ehbi_log_error0("Null struct"); \
+			Return_i(EHBI_NULL_STRUCT); \
+		} \
+		if (bi->bytes == NULL) { \
+			Ehbi_log_error0("Null bytes[]"); \
+			Return_i(EHBI_NULL_BYTES); \
+		} \
+	} while(0)
+
+#define Ehbi_struct_is_not_null_e(bi, err) \
+	do { \
+		if (bi == NULL) { \
+			Ehbi_log_error0("Null argument(s)"); \
+			if (err) { \
+				*err = EHBI_NULL_ARGS; \
+			} \
+			Return_i(0); \
+		} \
+		if (bi->bytes == NULL) { \
+			Ehbi_log_error0("Null bytes[]"); \
+			if (err) { \
+				*err = EHBI_NULL_BYTES; \
+			} \
+			Return_i(0); \
+		} \
+	} while(0)
+
+#define Ehbi_struct_is_not_null_e_j(bi, err, jump_target) \
+	do { \
+		if (bi == NULL) { \
+			Ehbi_log_error0("Null argument(s)"); \
+			if (err) { \
+				*err = EHBI_NULL_ARGS; \
+			} \
+			goto jump_target; \
+		} \
+		if (bi->bytes == NULL) { \
+			Ehbi_log_error0("Null bytes[]"); \
+			if (err) { \
+				*err = EHBI_NULL_BYTES; \
+			} \
+			goto jump_target; \
+		} \
+	} while(0)
 
 /* if _POSIX_C_SOURCE backtrace_symbols_fd is used */
 void ehbi_log_backtrace(FILE *log);

@@ -26,14 +26,9 @@ int test_subtract(int verbose, const char *str_1, const char *str_2,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	bi1.bytes = bytes_buf1;
-	bi1.bytes_len = 20;
-
-	bi2.bytes = bytes_buf2;
-	bi2.bytes_len = 20;
-
-	bi3.bytes = bytes_buf3;
-	bi3.bytes_len = 20;
+	ehbi_init(&bi1, bytes_buf1, 20);
+	ehbi_init(&bi2, bytes_buf2, 20);
+	ehbi_init(&bi3, bytes_buf3, 20);
 
 	err = ehbi_set_decimal_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_set_decimal_string(&bi2, str_2, strlen(str_2));
@@ -71,17 +66,9 @@ int test_subtract_big(int verbose)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	bi1.bytes = bytes_buf1;
-	bi1.bytes_len = 20;
-	bi1.sign = 0;
-
-	bi2.bytes = bytes_buf2;
-	bi2.bytes_len = 20;
-	bi2.sign = 0;
-
-	bi3.bytes = bytes_buf3;
-	bi3.bytes_len = 14;
-	bi3.sign = 0;
+	ehbi_init(&bi1, bytes_buf1, 20);
+	ehbi_init(&bi2, bytes_buf2, 20);
+	ehbi_init(&bi3, bytes_buf3, 14);
 
 	err = ehbi_set_hex_string(&bi1, str_1, strlen(str_1));
 	err += ehbi_set_hex_string(&bi2, str_2, strlen(str_2));

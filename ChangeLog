@@ -1,14 +1,18 @@
 2017-04-02  Eric Herman <eric@freesa.org>
 
 	Add a ehbi_init for struct initialization
+	Add ehbi_is_odd function
 	Add a test-shift-right and fix bug in shifting
 	Use the ehbi_init in tests
 	enhance trace-ing
+	sketch out a 'is-probably-prime' (Miller-Rabin)
 
-	* src/ehbigint.h: add ehbi_init
+	* src/ehbigint.h: add ehbi_init, ehbi_is_odd
 	* src/ehbigint.c: add ehbi_init, minor TODOs, easier debug
 	* src/ehbigint-log.h: more tracing options
 	* src/ehbigint-str.c: use tracing, debug friendly++
+	* src/ehbigint-priv.h: move internal/private headers here
+	* src/ehbigint-priv.c: move internal/private functions here
 	* tests/test-add.c: ehbi_init
 	* tests/test-bytes-shift-left.c: ehbi_init
 	* tests/test-bytes-shift-right.c: ehbi_init
@@ -31,9 +35,10 @@
 	* tests/test-set.c: ehbi_init
 	* tests/test-shift-right.c: new test
 	* tests/test-subtract.c: ehbi_init
+	* tests/test-is-probably-prime.c: XFAIL test
 	* misc/pre-tidy.patch: respin
-	* Makefile.am: test-shift-right
-	* .gitignore: test-shift-right
+	* Makefile.am: test-shift-right, test-is-probably-prime
+	* .gitignore: test-shift-right, test-is-probably-prime
 
 
 2017-04-01  Eric Herman <eric@freesa.org>

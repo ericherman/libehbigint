@@ -42,12 +42,15 @@ libehbigint_la_SOURCES=\
  src/ehbigint.h \
  src/ehbigint-log.h \
  src/ehbigint-log.c \
+ src/ehbigint-priv.h \
+ src/ehbigint-priv.c \
  src/ehbigint-str.h \
  src/ehbigint-str.c \
  src/ehbigint-util.h \
  src/ehbigint-util.c \
  src/ehbigint-eba.h \
  src/ehbigint-eba.c \
+ src/eba.h \
  src/eba.h \
  src/eba.c \
  src/ehbigint.c
@@ -71,6 +74,7 @@ check_PROGRAMS=\
  test-from-hex-to-hex-round-trip \
  test-inc \
  test-inc-l \
+ test-is-probably-prime \
  test-mul \
  test-scenario-mul-mod \
  test-set \
@@ -80,6 +84,8 @@ check_PROGRAMS=\
  test-bytes-shift-left \
  test-bytes-shift-right \
  test-to-string
+
+XFAIL_TESTS=test-is-probably-prime
 
 COMMON_TEST_SOURCES=src/ehbigint.h \
  tests/echeck.h \
@@ -135,6 +141,10 @@ test_inc_LDADD=$(TEST_LDADDS)
 
 test_inc_l_SOURCES=tests/test-inc-l.c $(COMMON_TEST_SOURCES)
 test_inc_l_LDADD=$(TEST_LDADDS)
+
+test_is_probably_prime_SOURCES=tests/test-is-probably-prime.c \
+ $(COMMON_TEST_SOURCES)
+test_is_probably_prime_LDADD=$(TEST_LDADDS)
 
 test_mul_SOURCES=tests/test-mul.c $(COMMON_TEST_SOURCES)
 test_mul_LDADD=$(TEST_LDADDS)
@@ -224,6 +234,7 @@ valgrind: $(check_PROGRAMS)
 	libtool --mode=execute valgrind -q ./test-from-hex-to-hex-round-trip
 	libtool --mode=execute valgrind -q ./test-inc
 	libtool --mode=execute valgrind -q ./test-inc-l
+	libtool --mode=execute valgrind -q ./test-is-probably-prime
 	libtool --mode=execute valgrind -q ./test-mul
 	libtool --mode=execute valgrind -q ./test-scenario-mul-mod
 	libtool --mode=execute valgrind -q ./test-set

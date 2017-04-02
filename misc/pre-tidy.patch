@@ -12,7 +12,7 @@
  
  #include "ehbigint.h"		/* struct ehbigint */
  #include <stdio.h>		/* FILE */
-@@ -259,8 +261,10 @@ void ehbi_log_backtrace(FILE *log);
+@@ -305,8 +307,10 @@ void ehbi_log_backtrace(FILE *log);
   ehbi_log_backtrace(ehbi_log_file())
  #endif
  
@@ -86,7 +86,7 @@
  
  #include <stddef.h>		/* size_t */
  
-@@ -238,8 +240,10 @@ enum {
+@@ -254,8 +256,10 @@ enum {
  	EHBI_LAST
  };
  
@@ -172,3 +172,28 @@
 +*/
  
  #endif /* ECHECK_H */
+--- orig/src/ehbigint-priv.h
++++ tidy/src/ehbigint-priv.h
+@@ -15,9 +15,11 @@
+ #ifndef EHBIGINT_PRIV_H
+ #define EHBIGINT_PRIV_H
+ 
++/*
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
++*/
+ 
+ #include "ehbigint.h"		/* struct ehbigint */
+ 
+@@ -25,8 +27,10 @@
+ void ehbi_unsafe_clear_null_struct(struct ehbigint *bi);
+ void ehbi_unsafe_reset_bytes_used(struct ehbigint *bi);
+ 
++/*
+ #ifdef __cplusplus
+ }
+ #endif
++*/
+ 
+ #endif /* EHBIGINT_PRIV_H */

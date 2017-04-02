@@ -13,6 +13,7 @@ test-from-decimal-to-decimal-round-trip
 test-from-hex-to-hex-round-trip
 test-inc
 test-inc-l
+test-is-probably-prime
 test-mul
 test-scenario-mul-mod
 test-set

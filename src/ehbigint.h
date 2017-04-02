@@ -146,6 +146,15 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 		 const struct ehbigint *exponent,
 		 const struct ehbigint *modulus);
 
+/*
+  returns 1 if the values is prime or probably prime
+  returns 0 otherwise
+  uses the second parameter (accuracy) to determine strength of the test
+  populates the contents of err with 0 on success or error_code on error
+*/
+int ehbi_is_probably_prime(const struct ehbigint *bi,
+			   unsigned int accuracy, int *err);
+
 /* sign inversion
    returns 0 on success or error_code on error
 */
@@ -190,6 +199,13 @@ int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
    populates the contents of err with 0 on success or error_code on error
 */
 int ehbi_is_negative(const struct ehbigint *bi, int *err);
+
+/*
+   returns 1 if odd
+   returns 0 if even
+   populates the contents of err with 0 on success or error_code on error
+*/
+int ehbi_is_odd(const struct ehbigint *bi, int *err);
 
 /*
    populates the passed in buffer with a hex string representation

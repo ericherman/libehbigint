@@ -1251,9 +1251,15 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 		}
 
 		/* pick a random integer a in the range [2, n-2] */
-		/* but, no rand, so do something totally bogus: */
-		*err = *err || ehbi_set_l(&a, 2 + i);
+		*err =  ehbi_random_bytes(a.bytes, max_witness.bytes_used);
+		ehbi_unsafe_reset_bytes_used(&a);
 		if (ehbi_greater_than(&a, &max_witness, err)) {
+			/* but, too big, so do something totally bogus: */
+			*err = *err || ehbi_set_l(&a, 2 + i);
+		}
+		/* still too big, we are done */
+		if (ehbi_greater_than(&a, &max_witness, err)) {
+			is_probably_prime = 1;
 			goto ehbi_is_probably_prime_end;
 		}
 

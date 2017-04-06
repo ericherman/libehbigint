@@ -75,7 +75,7 @@ int ehbi_dev_urandom_bytes(unsigned char *buf, size_t len)
 	const char *urandom_str;
 
 	err = EHBI_SUCCESS;
-	urandom_str = "/dev/random";
+	urandom_str = "/dev/urandom";
 
 	urandom_fd = open(urandom_str, O_RDONLY);
 	if (-1 == urandom_fd) {

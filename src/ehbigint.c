@@ -1269,14 +1269,16 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 			goto ehbi_is_probably_prime_end;
 		}
 
-		/* if x == 1 or x == n  1 then continue WitnessLoop */
+		/* if x == 1 or x == n-1 then continue WitnessLoop */
 		if (ehbi_equals(&x, &one, err)) {
 			continue;
 		}
 		if (*err) {
 			goto ehbi_is_probably_prime_end;
 		}
-		if (ehbi_equals(&x, bi, err)) {
+		ehbi_set(&y, bi);
+		ehbi_dec(&y, &one);
+		if (ehbi_equals(&x, &y, err)) {
 			continue;
 		}
 		if (*err) {

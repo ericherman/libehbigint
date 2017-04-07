@@ -1098,7 +1098,7 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	int is_probably_prime, stop;
 	struct ehbigint zero, one, two;
 	unsigned char z_bytes[4], o_bytes[4], t_bytes[4];
-	struct ehbigint a, r, d, x, y, max_witness;
+	struct ehbigint bimin1, a, r, d, x, y, c, max_witness;
 
 	char buf[80];
 
@@ -1132,6 +1132,26 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	ehbi_init(&two, t_bytes, 4);
 	ehbi_inc_l(&two, 2);
 
+	size = bi->bytes_used;
+	if(size < 4) { size = 4; };
+	bimin1.bytes = (unsigned char *)ehbi_stack_alloc(size);
+	if (!bimin1.bytes) {
+		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
+				(unsigned long)size);
+		*err = EHBI_STACK_TOO_SMALL;
+		goto ehbi_is_probably_prime_end;
+	}
+	bimin1.bytes_len = size;
+
+	max_witness.bytes = (unsigned char *)ehbi_stack_alloc(size);
+	if (!max_witness.bytes) {
+		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
+				(unsigned long)size);
+		*err = EHBI_STACK_TOO_SMALL;
+		goto ehbi_is_probably_prime_end;
+	}
+	max_witness.bytes_len = size;
+
 	size = 2 + (bi->bytes_len * 2);
 	a.bytes = (unsigned char *)ehbi_stack_alloc(size);
 	if (!a.bytes) {
@@ -1141,6 +1161,7 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 		goto ehbi_is_probably_prime_end;
 	}
 	a.bytes_len = size;
+
 	r.bytes = (unsigned char *)ehbi_stack_alloc(size);
 	if (!r.bytes) {
 		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
@@ -1149,6 +1170,7 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 		goto ehbi_is_probably_prime_end;
 	}
 	r.bytes_len = size;
+
 	d.bytes = (unsigned char *)ehbi_stack_alloc(size);
 	if (!d.bytes) {
 		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
@@ -1176,14 +1198,15 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	}
 	y.bytes_len = size;
 
-	max_witness.bytes = (unsigned char *)ehbi_stack_alloc(size);
-	if (!max_witness.bytes) {
+	c.bytes = (unsigned char *)ehbi_stack_alloc(size);
+	if (!c.bytes) {
 		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
 				(unsigned long)size);
 		*err = EHBI_STACK_TOO_SMALL;
 		goto ehbi_is_probably_prime_end;
 	}
-	max_witness.bytes_len = size;
+	c.bytes_len = size;
+
 
 	/* set d to 2, the first prime */
 	*err = *err || ehbi_set_l(&d, SMALL_PRIMES[0]);
@@ -1238,6 +1261,9 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 		accuracy = 100;
 	}
 
+	ehbi_set(&bimin1, bi);
+	ehbi_dec(&bimin1, &one);
+
 	/* we will set max_witness at n-2 */
 	ehbi_set(&max_witness, bi);
 	ehbi_dec(&max_witness, &two);
@@ -1276,9 +1302,7 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 		if (*err) {
 			goto ehbi_is_probably_prime_end;
 		}
-		ehbi_set(&y, bi);
-		ehbi_dec(&y, &one);
-		if (ehbi_equals(&x, &y, err)) {
+		if (ehbi_equals(&x, &bimin1, err)) {
 			continue;
 		}
 		if (*err) {
@@ -1286,14 +1310,14 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 		}
 
 		/* repeat r-1 times: */
-		*err = *err || ehbi_set(&a, &r);
-		*err = *err || ehbi_dec(&a, &one);
+		*err = *err || ehbi_set(&c, &r);
+		*err = *err || ehbi_dec(&c, &one);
 		if (*err) {
 			goto ehbi_is_probably_prime_end;
 		}
 		stop = 0;
-		while (!stop && ehbi_greater_than(&a, &zero, err)) {
-			*err = *err || ehbi_dec(&a, &one);
+		while (!stop && ehbi_greater_than(&c, &zero, err)) {
+			*err = *err || ehbi_dec(&c, &one);
 
 			/* x := x^2 mod n */
 			*err = *err || ehbi_set(&y, &x);
@@ -1306,9 +1330,7 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 			}
 
 			/* if x == n-1 then continue WitnessLoop */
-			*err = *err || ehbi_set(&y, bi);
-			*err = *err || ehbi_dec(&y, &one);
-			if (ehbi_equals(&x, &y, err)) {
+			if (ehbi_equals(&x, &bimin1, err)) {
 				stop = 1;
 				break;
 			}
@@ -1329,23 +1351,29 @@ ehbi_is_probably_prime_end:
 				*err);
 		is_probably_prime = 0;
 	}
+	if (bimin1.bytes) {
+		ehbi_stack_free(bimin1.bytes, bimin1.bytes_len);
+	}
 	if (a.bytes) {
-		ehbi_stack_free(a.bytes, size);
+		ehbi_stack_free(a.bytes, a.bytes_len);
 	}
 	if (r.bytes) {
-		ehbi_stack_free(r.bytes, size);
+		ehbi_stack_free(r.bytes, r.bytes_len);
 	}
 	if (d.bytes) {
-		ehbi_stack_free(d.bytes, size);
+		ehbi_stack_free(d.bytes, d.bytes_len);
 	}
 	if (x.bytes) {
-		ehbi_stack_free(x.bytes, size);
+		ehbi_stack_free(x.bytes, x.bytes_len);
 	}
 	if (y.bytes) {
-		ehbi_stack_free(y.bytes, size);
+		ehbi_stack_free(y.bytes, y.bytes_len);
+	}
+	if (c.bytes) {
+		ehbi_stack_free(c.bytes, c.bytes_len);
 	}
 	if (max_witness.bytes) {
-		ehbi_stack_free(max_witness.bytes, size);
+		ehbi_stack_free(max_witness.bytes, max_witness.bytes_len);
 	}
 
 	Return_i(2, is_probably_prime);

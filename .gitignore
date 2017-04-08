@@ -9,6 +9,7 @@ test-dec-corner-case
 test-div
 test-exp-mod
 test-equals
+test-from-binstr-to-binstr-round-trip
 test-from-decimal-to-decimal-round-trip
 test-from-hex-to-hex-round-trip
 test-inc

@@ -17,6 +17,7 @@ License for more details.
 #include "ehbigint-log.h"
 #include "ehbigint-util.h"
 #include "ehbigint-priv.h"
+#include "ehbigint-eba.h"
 #include "ehstr.h"
 
 #include <string.h>		/* strlen */
@@ -35,6 +36,57 @@ static int ehbi_nibble_to_hex(unsigned char nibble, char *c);
 static int ehbi_from_hex_nibble(unsigned char *nibble, char c);
 
 /* public functions */
+int ehbi_set_binary_string(struct ehbigint *bi, const char *str, size_t len)
+{
+	size_t i, j;
+	struct eba_s eba;
+	int err;
+
+	Trace_bi_s(8, bi, str);
+
+	eba.endian = eba_big_endian;
+	eba.bits = NULL;
+	eba.size_bytes = 0;
+	eba.endian = eba_big_endian;
+
+	Ehbi_struct_is_not_null(8, bi);
+	ehbi_zero(bi);
+
+	eba.bits = bi->bytes;
+	eba.size_bytes = bi->bytes_len;
+
+	if (str == 0) {
+		Ehbi_log_error0("Null string");
+		Return_i(8, EHBI_NULL_STRING);
+	}
+	if (len == 0 || str[0] == 0) {
+		Ehbi_log_error0("Zero length string");
+		Return_i(8, EHBI_ZERO_LEN_STRING);
+	}
+	if (len > 2 && str[0] == '0' && (str[1] == 'b' || str[1] == 'B')) {
+		str = str + 2;
+		len -= 2;
+	}
+	len = strnlen(str, len);
+	for (i = 0; i < len; ++i) {
+		if (str[i] != '0' && str[i] != '1') {
+			len = i;
+		}
+	}
+
+	err = EHBI_SUCCESS;
+
+	for (i = 0, j = len - 1; i < len; ++i, --j) {
+		ehbi_eba_err = EHBI_SUCCESS;
+		eba_set(&eba, i, str[j] == '1' ? 1 : 0);
+		err = err || ehbi_eba_err;
+	}
+
+	ehbi_unsafe_reset_bytes_used(bi);
+
+	Return_i(8, err);
+}
+
 int ehbi_set_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 {
 	size_t i, j;
@@ -149,6 +201,71 @@ int ehbi_set_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 
 	Trace_msg_s_bi(8, "end", bi);
 	Return_i(8, err);
+}
+
+char *ehbi_to_binary_string(const struct ehbigint *bi, char *buf,
+			    size_t buf_len, int *err)
+{
+	size_t i, j, k, written;
+	unsigned char bit;
+	struct eba_s eba;
+
+	Trace_bi(8, bi);
+
+	eba.endian = eba_big_endian;
+	eba.bits = NULL;
+	eba.size_bytes = 0;
+	eba.endian = eba_big_endian;
+
+	Ehbi_struct_is_not_null_e_j(bi, err, ehbi_to_binary_string_end);
+
+	eba.bits = bi->bytes;
+	eba.size_bytes = bi->bytes_len;
+
+	if (buf == 0) {
+		Ehbi_log_error0("Null buffer");
+		*err = EHBI_NULL_STRING_BUF;
+		goto ehbi_to_binary_string_end;
+	}
+
+	written = 0;
+	buf[written] = '\0';
+	*err = EHBI_SUCCESS;
+
+	if (buf_len < ((bi->bytes_used * EBA_CHAR_BIT) + 3)) {
+		Ehbi_log_error0("Buffer too small");
+		*err = EHBI_STRING_BUF_TOO_SMALL;
+		goto ehbi_to_binary_string_end;
+	}
+	buf[written++] = '0';
+	buf[written++] = 'b';
+
+	for (i = 0; i < bi->bytes_used; ++i) {
+		for (j = 0; j < EBA_CHAR_BIT; ++j) {
+			if ((written + 2) >= buf_len) {
+				Ehbi_log_error0("Buffer too small");
+				*err = EHBI_STRING_BUF_TOO_SMALL;
+				goto ehbi_to_binary_string_end;
+			}
+			k = (bi->bytes_used * EBA_CHAR_BIT) - 1;
+			k = k - ((i * EBA_CHAR_BIT) + j);
+			ehbi_eba_err = EHBI_SUCCESS;
+			bit = eba_get(&eba, k);
+			*err = ehbi_eba_err;
+			if (*err) {
+				goto ehbi_to_binary_string_end;
+			}
+			buf[written++] = bit ? '1' : '0';
+			buf[written] = '\0';	/* this just makes debug nicer */
+		}
+	}
+	buf[written] = '\0';
+
+ehbi_to_binary_string_end:
+	if (*err) {
+		buf[0] = '\0';
+	}
+	return buf;
 }
 
 char *ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len,

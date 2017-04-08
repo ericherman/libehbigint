@@ -41,6 +41,13 @@ int ehbi_init(struct ehbigint *bi, unsigned char *bytes, size_t len);
 int ehbi_zero(struct ehbigint *bi);
 
 /*
+   populates an ehbigint with a binary string value e.g. "0b0101010111110000"
+   returns 0 on success or error_code on error
+*/
+
+int ehbi_set_binary_string(struct ehbigint *bi, const char *str, size_t len);
+
+/*
    populates an ehbigint with a hex string value e.g. "0x4badc0de"
    returns 0 on success or error_code on error
 */
@@ -206,6 +213,15 @@ int ehbi_is_negative(const struct ehbigint *bi, int *err);
    populates the contents of err with 0 on success or error_code on error
 */
 int ehbi_is_odd(const struct ehbigint *bi, int *err);
+
+/*
+   populates the passed in buffer with a binary string representation
+   of the ehbigint
+   returns pointer to buf success or NULL on error and sets the value of
+   err with error_code.
+*/
+char *ehbi_to_binary_string(const struct ehbigint *bi, char *buf,
+			    size_t buf_len, int *err);
 
 /*
    populates the passed in buffer with a hex string representation

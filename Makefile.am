@@ -71,6 +71,7 @@ check_PROGRAMS=\
  test-div \
  test-exp-mod \
  test-equals \
+ test-from-binstr-to-binstr-round-trip \
  test-from-decimal-to-decimal-round-trip \
  test-from-hex-to-hex-round-trip \
  test-inc \
@@ -128,6 +129,10 @@ test_exp_mod_LDADD=$(TEST_LDADDS)
 
 test_equals_SOURCES=tests/test-equals.c $(COMMON_TEST_SOURCES)
 test_equals_LDADD=$(TEST_LDADDS)
+
+test_from_binstr_to_binstr_round_trip_SOURCES=\
+ tests/test-from-binstr-to-binstr-round-trip.c $(COMMON_TEST_SOURCES)
+test_from_binstr_to_binstr_round_trip_LDADD=$(TEST_LDADDS)
 
 test_from_decimal_to_decimal_round_trip_SOURCES=\
  tests/test-from-decimal-to-decimal-round-trip.c $(COMMON_TEST_SOURCES)
@@ -230,6 +235,8 @@ valgrind: $(check_PROGRAMS)
 	libtool --mode=execute valgrind -q ./test-div
 	libtool --mode=execute valgrind -q ./test-exp-mod
 	libtool --mode=execute valgrind -q ./test-equals
+	libtool --mode=execute valgrind -q \
+		./test-from-binstr-to-binstr-round-trip
 	libtool --mode=execute valgrind -q \
 		./test-from-decimal-to-decimal-round-trip
 	libtool --mode=execute valgrind -q ./test-from-hex-to-hex-round-trip

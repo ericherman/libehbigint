@@ -1070,13 +1070,11 @@ static const long SMALL_PRIMES[] = {
 int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 			   int *err)
 {
-	size_t i, size;
+	size_t i, j, shift, size;
 	int is_probably_prime, stop;
 	struct ehbigint zero, one, two;
 	unsigned char z_bytes[4], o_bytes[4], t_bytes[4];
 	struct ehbigint bimin1, a, r, d, x, y, c, max_witness;
-
-	char buf[80];
 
 	Trace_bi_l(2, bi, ((long)accuracy));
 
@@ -1091,8 +1089,6 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	ehbi_unsafe_clear_null_struct(&max_witness);
 
 	Ehbi_struct_is_not_null(2, bi);
-
-	ehbi_to_decimal_string(bi, buf, 80, err);
 
 	*err = EHBI_SUCCESS;
 
@@ -1194,10 +1190,18 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 			goto ehbi_is_probably_prime_end;
 		}
 
+		j = 0;
 		/* pick a random integer a in the range [2, n-2] */
-		*err = ehbi_random_bytes(a.bytes, max_witness.bytes_used);
-		ehbi_unsafe_reset_bytes_used(&a);
-		if (ehbi_greater_than(&a, &max_witness, err)) {
+		do {
+			*err = ehbi_random_bytes(a.bytes, a.bytes_len);
+			a.bytes_used = a.bytes_len;
+			shift = a.bytes_len - max_witness.bytes_used;
+			*err = ehbi_bytes_shift_right(&a, shift);
+			ehbi_unsafe_reset_bytes_used(&a);
+		} while ((ehbi_greater_than(&a, &max_witness, err)
+			  || ehbi_less_than(&a, &two, err)) && (j++ < 1000));
+		if (ehbi_greater_than(&a, &max_witness, err)
+		    || ehbi_less_than(&a, &two, err)) {
 			/* but, too big, so do something totally bogus: */
 			*err = *err || ehbi_set_l(&a, 2 + i);
 		}

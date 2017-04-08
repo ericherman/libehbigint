@@ -88,7 +88,7 @@ check_PROGRAMS=\
  test-bytes-shift-right \
  test-to-string
 
-XFAIL_TESTS=test-is-probably-prime
+#XFAIL_TESTS=test-is-probably-prime
 
 COMMON_TEST_SOURCES=src/ehbigint.h \
  tests/echeck.h \

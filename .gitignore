@@ -7,6 +7,7 @@ test-compare2
 test-dec
 test-dec-corner-case
 test-div
+test-exp
 test-exp-mod
 test-equals
 test-from-binstr-to-binstr-round-trip

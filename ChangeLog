@@ -1,19 +1,22 @@
 2017-04-08  Eric Herman <eric@freesa.org>
 
+	Add ehbi_exp(result, base, exponent)
 	Add ehbi_set_binary_string, ehbi_to_binary_string functions
 	Copy in sources from libehstr git@github.com:ericherman/libehstr.git
 	replace hex_raw and decimal_raw with origin functions in ehstr
 
 
-	* src/ehbigint.h: add ehbi_set_binary_string, ehbi_to_binary_string
-	* src/ehbigint-str.c add set_binary, to_binary; replace raw with ehstr
+	* src/ehbigint.h: add set_binary_str, to_binary_str, exp()
+	* src/ehbigint-str.c: add set_binary, to_binary; exp,
+				replace raw with ehstr
 	* src/ehstr.c: copy from libehstr/src
 	* src/ehstr.h: copy from libehstr/src
 	* src/ehbigint.c: code tidy
+	* tests/test-exp.c: new test
 	* tests/test-from-binstr-to-binstr-round-trip.c: new test
 	* misc/pre-tidy.patch: respin
 	* Makefile.am: use the new sources
-	* .gitignore: test-from-binstr-to-binstr-round-trip
+	* .gitignore: test-from-binstr-to-binstr-round-trip, test-exp
 
 
 2017-04-02  Eric Herman <eric@freesa.org>

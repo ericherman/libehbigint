@@ -452,6 +452,44 @@ ehbi_div_end:
 	Return_i(2, err);
 }
 
+int ehbi_exp(struct ehbigint *result, const struct ehbigint *base,
+	     const struct ehbigint *exponent)
+{
+	int err;
+	struct ehbigint loop, tmp;
+
+	Trace_bi_bi_bi(2, result, base, exponent);
+
+	ehbi_unsafe_clear_null_struct(&loop);
+
+	err = EHBI_SUCCESS;
+
+	Ehbi_stack_alloc_struct_j(loop, exponent->bytes_used, err,
+				  ehbi_exp_end);
+	Ehbi_stack_alloc_struct_j(tmp, result->bytes_len, err, ehbi_exp_end);
+
+	err = ehbi_zero(&loop);
+	err = err || ehbi_set_l(result, 1);
+
+	while (ehbi_less_than(&loop, exponent, &err)) {
+		err = err || ehbi_mul(&tmp, result, base);
+		err = err || ehbi_set(result, &tmp);
+		ehbi_inc_l(&loop, 1);
+	}
+
+ehbi_exp_end:
+	if (loop.bytes) {
+		ehbi_stack_free(loop.bytes, loop.bytes_len);
+	}
+	if (tmp.bytes) {
+		ehbi_stack_free(tmp.bytes, tmp.bytes_len);
+	}
+	if (err) {
+		ehbi_zero(result);
+	}
+	return err;
+}
+
 int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 		 const struct ehbigint *exponent,
 		 const struct ehbigint *modulus)

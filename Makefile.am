@@ -69,6 +69,7 @@ check_PROGRAMS=\
  test-dec \
  test-dec-corner-case \
  test-div \
+ test-exp \
  test-exp-mod \
  test-equals \
  test-from-binstr-to-binstr-round-trip \
@@ -123,6 +124,9 @@ test_dec_corner_case_LDADD=$(TEST_LDADDS)
 
 test_div_SOURCES=tests/test-div.c $(COMMON_TEST_SOURCES)
 test_div_LDADD=$(TEST_LDADDS)
+
+test_exp_SOURCES=tests/test-exp.c $(COMMON_TEST_SOURCES)
+test_exp_LDADD=$(TEST_LDADDS)
 
 test_exp_mod_SOURCES=tests/test-exp-mod.c $(COMMON_TEST_SOURCES)
 test_exp_mod_LDADD=$(TEST_LDADDS)
@@ -233,6 +237,7 @@ valgrind: $(check_PROGRAMS)
 	libtool --mode=execute valgrind -q ./test-dec
 	libtool --mode=execute valgrind -q ./test-dec-corner-case
 	libtool --mode=execute valgrind -q ./test-div
+	libtool --mode=execute valgrind -q ./test-exp
 	libtool --mode=execute valgrind -q ./test-exp-mod
 	libtool --mode=execute valgrind -q ./test-equals
 	libtool --mode=execute valgrind -q \

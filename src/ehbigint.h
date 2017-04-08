@@ -146,6 +146,14 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 
 /*
    populates the first ehbigint result with the value of the base
+   raised to the power of the exponent
+   returns 0 on success or error_code on error
+*/
+int ehbi_exp(struct ehbigint *result, const struct ehbigint *base,
+	     const struct ehbigint *exponent);
+
+/*
+   populates the first ehbigint result with the value of the base
    raised to the power of the exponent mod the modulus
    returns 0 on success or error_code on error
 */

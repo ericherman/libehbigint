@@ -19,6 +19,28 @@ License for more details.
 #include "ehbigint-eba.h"
 #include "ehbigint-priv.h"
 
+#define Ehbi_stack_alloc_struct(tmp, size, err) \
+	do { \
+		tmp.bytes = (unsigned char *)ehbi_stack_alloc(size); \
+		if (!tmp.bytes) { \
+			tmp.bytes_len = 0; \
+			Ehbi_log_error2("Could not %s(%lu) bytes", \
+					ehbi_stack_alloc_str, \
+					(unsigned long)(size)); \
+			err = EHBI_STACK_TOO_SMALL; \
+		} else { \
+			tmp.bytes_len = size; \
+		} \
+	} while (0)
+
+#define Ehbi_stack_alloc_struct_j(tmp, size, err, err_jmp_label) \
+	do { \
+		Ehbi_stack_alloc_struct(tmp, size, err); \
+		if (err) { \
+			goto err_jmp_label; \
+		} \
+	} while (0)
+
 int ehbi_init(struct ehbigint *bi, unsigned char *bytes, size_t len)
 {
 	size_t i;
@@ -129,6 +151,8 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 	Ehbi_struct_is_not_null(2, bi1);
 	Ehbi_struct_is_not_null(2, bi2);
 
+	err = EHBI_SUCCESS;
+
 	/* adding zero */
 	if (bi2->bytes_used == 1 && bi2->bytes[bi2->bytes_len - 1] == 0x00) {
 		err = ehbi_set(res, bi1);
@@ -143,14 +167,10 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 
 	if (bi1->sign != bi2->sign) {
 		size = bi2->bytes_len;
-		tmp.bytes = (unsigned char *)ehbi_stack_alloc(size);
-		if (!tmp.bytes) {
-			Ehbi_log_error2("Could not %s(%lu) bytes",
-					ehbi_stack_alloc_str,
-					(unsigned long)size);
-			err = EHBI_STACK_TOO_SMALL;
+		Ehbi_stack_alloc_struct(tmp, size, err);
+		if (err) {
+			Return_i(2, err);
 		}
-		tmp.bytes_len = size;
 		err = ehbi_set(&tmp, bi2);
 		err = err || ehbi_negate(&tmp);
 		err = err || ehbi_subtract(res, bi1, &tmp);
@@ -234,14 +254,7 @@ int ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
 	}
 
 	size = res->bytes_len;
-	tmp.bytes = (unsigned char *)ehbi_stack_alloc(size);
-	if (!tmp.bytes) {
-		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
-				(unsigned long)size);
-		err = EHBI_STACK_TOO_SMALL;
-		goto ehbi_mul_end;
-	}
-	tmp.bytes_len = size;
+	Ehbi_stack_alloc_struct_j(tmp, size, err, ehbi_mul_end);
 	ehbi_unsafe_zero(&tmp);
 	ehbi_unsafe_zero(res);
 
@@ -306,6 +319,8 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		Return_i(2, EHBI_BYTES_TOO_SMALL);
 	}
 
+	err = EHBI_SUCCESS;
+
 	if (numerator->sign == 0) {
 		abs_numer = numerator;
 	} else {
@@ -313,15 +328,7 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		s_abs_numer.bytes_len = 0;
 		s_abs_numer.sign = 0;
 		size = numerator->bytes_used;
-		s_abs_numer.bytes = (unsigned char *)ehbi_stack_alloc(size);
-		if (!s_abs_numer.bytes) {
-			Ehbi_log_error2("Could not %s(%lu) bytes",
-					ehbi_stack_alloc_str,
-					(unsigned long)size);
-			err = EHBI_STACK_TOO_SMALL;
-			goto ehbi_div_end;
-		}
-		s_abs_numer.bytes_len = size;
+		Ehbi_stack_alloc_struct_j(s_abs_numer, size, err, ehbi_div_end);
 		err = ehbi_set(&s_abs_numer, numerator);
 		err = err || ehbi_negate(&s_abs_numer);
 		if (err) {
@@ -337,15 +344,7 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		s_abs_denom.bytes_len = 0;
 		s_abs_denom.sign = 0;
 		size = numerator->bytes_used;
-		s_abs_denom.bytes = (unsigned char *)ehbi_stack_alloc(size);
-		if (!s_abs_denom.bytes) {
-			Ehbi_log_error2("Could not %s(%lu) bytes",
-					ehbi_stack_alloc_str,
-					(unsigned long)size);
-			err = EHBI_STACK_TOO_SMALL;
-			goto ehbi_div_end;
-		}
-		s_abs_denom.bytes_len = size;
+		Ehbi_stack_alloc_struct_j(s_abs_denom, size, err, ehbi_div_end);
 		err = ehbi_set(&s_abs_denom, denominator);
 		err = err || ehbi_negate(&s_abs_denom);
 		if (err) {
@@ -481,41 +480,10 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 
 	size = 2 + (2 * base->bytes_used) + exponent->bytes_used;
 
-	tmp1.bytes = (unsigned char *)ehbi_stack_alloc(size);
-	if (!tmp1.bytes) {
-		Ehbi_log_error2("Could not %s(%lu) bytes",
-				ehbi_stack_alloc_str, (unsigned long)size);
-		err = EHBI_STACK_TOO_SMALL;
-		goto ehbi_mod_exp_end;
-	}
-	tmp1.bytes_len = size;
-
-	tbase.bytes = (unsigned char *)ehbi_stack_alloc(size);
-	if (!tbase.bytes) {
-		Ehbi_log_error2("Could not %s(%lu) bytes",
-				ehbi_stack_alloc_str, (unsigned long)size);
-		err = EHBI_STACK_TOO_SMALL;
-		goto ehbi_mod_exp_end;
-	}
-	tbase.bytes_len = size;
-
-	texp.bytes = (unsigned char *)ehbi_stack_alloc(size);
-	if (!texp.bytes) {
-		Ehbi_log_error2("Could not %s(%lu) bytes",
-				ehbi_stack_alloc_str, (unsigned long)size);
-		err = EHBI_STACK_TOO_SMALL;
-		goto ehbi_mod_exp_end;
-	}
-	texp.bytes_len = size;
-
-	tquot.bytes = (unsigned char *)ehbi_stack_alloc(size);
-	if (!tquot.bytes) {
-		Ehbi_log_error2("Could not %s(%lu) bytes",
-				ehbi_stack_alloc_str, (unsigned long)size);
-		err = EHBI_STACK_TOO_SMALL;
-		goto ehbi_mod_exp_end;
-	}
-	tquot.bytes_len = size;
+	Ehbi_stack_alloc_struct_j(tmp1, size, err, ehbi_mod_exp_end);
+	Ehbi_stack_alloc_struct_j(tbase, size, err, ehbi_mod_exp_end);
+	Ehbi_stack_alloc_struct_j(texp, size, err, ehbi_mod_exp_end);
+	Ehbi_stack_alloc_struct_j(tquot, size, err, ehbi_mod_exp_end);
 
 	/* prevent divide by zero */
 	ehbi_unsafe_zero(&tmp1);
@@ -607,14 +575,10 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 
 	size = bi->bytes_used;
 
-	temp.bytes = (unsigned char *)ehbi_stack_alloc(size);
-	if (!temp.bytes) {
-		Ehbi_log_error2("Could not %s(%lu) bytes",
-				ehbi_stack_alloc_str, (unsigned long)size);
-		err = EHBI_STACK_TOO_SMALL;
+	Ehbi_stack_alloc_struct(temp, size, err);
+	if (err) {
 		Return_i(4, err);
 	}
-	temp.bytes_len = size;
 	err = ehbi_set(&temp, bi);
 	err = err || ehbi_add(bi, &temp, val);
 	ehbi_stack_free(temp.bytes, temp.bytes_len);
@@ -688,16 +652,10 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 
 	if (ehbi_is_negative(val, &err)) {
 		size = val->bytes_used;
-		tmp.bytes = (unsigned char *)ehbi_stack_alloc(size);
-		if (!tmp.bytes) {
-			Ehbi_log_error2("Could not %s(%lu) bytes",
-					ehbi_stack_alloc_str,
-					(unsigned long)size);
-			Return_i(4, EHBI_STACK_TOO_SMALL);
+		Ehbi_stack_alloc_struct(tmp, size, err);
+		if (err) {
+			Return_i(4, err);
 		}
-		tmp.bytes_len = size;
-		tmp.bytes_used = 0;
-		tmp.sign = 0;
 		err = err || ehbi_set(&tmp, val);
 		err = err || ehbi_negate(&tmp);
 		err = err || ehbi_inc(bi, &tmp);
@@ -708,16 +666,10 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 	err = 0;
 	if (ehbi_greater_than(val, bi, &err)) {
 		size = val->bytes_used;
-		tmp.bytes = (unsigned char *)ehbi_stack_alloc(size);
-		if (!tmp.bytes) {
-			Ehbi_log_error2("Could not %s(%lu) bytes",
-					ehbi_stack_alloc_str,
-					(unsigned long)size);
-			Return_i(4, EHBI_STACK_TOO_SMALL);
+		Ehbi_stack_alloc_struct(tmp, size, err);
+		if (err) {
+			Return_i(4, err);
 		}
-		tmp.bytes_len = size;
-		tmp.bytes_used = 0;
-		tmp.sign = 0;
 		err = ehbi_subtract(&tmp, val, bi);
 		err = err || ehbi_set(bi, &tmp);
 		ehbi_stack_free(tmp.bytes, tmp.bytes_len);
@@ -789,6 +741,8 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 	Ehbi_struct_is_not_null(2, bi1);
 	Ehbi_struct_is_not_null(2, bi2);
 
+	err = EHBI_SUCCESS;
+
 	/* subtract zero */
 	if (bi2->bytes_used == 1 && bi2->bytes[bi2->bytes_len - 1] == 0x00) {
 		err = ehbi_set(res, bi1);
@@ -804,15 +758,7 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 
 	if (bi1->sign == 0 && bi2->sign != 0) {
 		size = bi2->bytes_len;
-		abs.bytes = (unsigned char *)ehbi_stack_alloc(size);
-		if (!abs.bytes) {
-			Ehbi_log_error2("Could not %s(%lu) bytes",
-					ehbi_stack_alloc_str,
-					(unsigned long)size);
-			err = EHBI_STACK_TOO_SMALL;
-			goto ehbi_subtract_end;
-		}
-		abs.bytes_len = size;
+		Ehbi_stack_alloc_struct_j(abs, size, err, ehbi_subtract_end);
 		err = ehbi_set(&abs, bi2);
 		err = err || ehbi_negate(&abs);
 		err = err || ehbi_add(res, bi1, &abs);
@@ -821,15 +767,7 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 
 	if (bi1->sign != 0 && bi2->sign == 0) {
 		size = bi1->bytes_len;
-		abs.bytes = (unsigned char *)ehbi_stack_alloc(size);
-		if (!abs.bytes) {
-			Ehbi_log_error2("Could not %s(%lu) bytes",
-					ehbi_stack_alloc_str,
-					(unsigned long)size);
-			err = EHBI_STACK_TOO_SMALL;
-			goto ehbi_subtract_end;
-		}
-		abs.bytes_len = size;
+		Ehbi_stack_alloc_struct_j(abs, size, err, ehbi_subtract_end);
 		err = ehbi_set(&abs, bi1);
 		err = err || ehbi_negate(&abs);
 		err = err || ehbi_add(res, &abs, bi2);
@@ -1136,78 +1074,19 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	if (size < 4) {
 		size = 4;
 	}
-	bimin1.bytes = (unsigned char *)ehbi_stack_alloc(size);
-	if (!bimin1.bytes) {
-		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
-				(unsigned long)size);
-		*err = EHBI_STACK_TOO_SMALL;
-		goto ehbi_is_probably_prime_end;
-	}
-	bimin1.bytes_len = size;
+	Ehbi_stack_alloc_struct_j(bimin1, size, *err,
+				  ehbi_is_probably_prime_end);
 
-	max_witness.bytes = (unsigned char *)ehbi_stack_alloc(size);
-	if (!max_witness.bytes) {
-		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
-				(unsigned long)size);
-		*err = EHBI_STACK_TOO_SMALL;
-		goto ehbi_is_probably_prime_end;
-	}
-	max_witness.bytes_len = size;
+	Ehbi_stack_alloc_struct_j(max_witness, size, *err,
+				  ehbi_is_probably_prime_end);
 
 	size = 2 + (bi->bytes_len * 2);
-	a.bytes = (unsigned char *)ehbi_stack_alloc(size);
-	if (!a.bytes) {
-		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
-				(unsigned long)size);
-		*err = EHBI_STACK_TOO_SMALL;
-		goto ehbi_is_probably_prime_end;
-	}
-	a.bytes_len = size;
-
-	r.bytes = (unsigned char *)ehbi_stack_alloc(size);
-	if (!r.bytes) {
-		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
-				(unsigned long)size);
-		*err = EHBI_STACK_TOO_SMALL;
-		goto ehbi_is_probably_prime_end;
-	}
-	r.bytes_len = size;
-
-	d.bytes = (unsigned char *)ehbi_stack_alloc(size);
-	if (!d.bytes) {
-		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
-				(unsigned long)size);
-		*err = EHBI_STACK_TOO_SMALL;
-		goto ehbi_is_probably_prime_end;
-	}
-	d.bytes_len = size;
-
-	x.bytes = (unsigned char *)ehbi_stack_alloc(size);
-	if (!x.bytes) {
-		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
-				(unsigned long)size);
-		*err = EHBI_STACK_TOO_SMALL;
-		goto ehbi_is_probably_prime_end;
-	}
-	x.bytes_len = size;
-
-	y.bytes = (unsigned char *)ehbi_stack_alloc(size);
-	if (!y.bytes) {
-		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
-				(unsigned long)size);
-		*err = EHBI_STACK_TOO_SMALL;
-		goto ehbi_is_probably_prime_end;
-	}
-	y.bytes_len = size;
-
-	c.bytes = (unsigned char *)ehbi_stack_alloc(size);
-	if (!c.bytes) {
-		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
-				(unsigned long)size);
-		*err = EHBI_STACK_TOO_SMALL;
-		goto ehbi_is_probably_prime_end;
-	}
-	c.bytes_len = size;
+	Ehbi_stack_alloc_struct_j(a, size, *err, ehbi_is_probably_prime_end);
+	Ehbi_stack_alloc_struct_j(r, size, *err, ehbi_is_probably_prime_end);
+	Ehbi_stack_alloc_struct_j(d, size, *err, ehbi_is_probably_prime_end);
+	Ehbi_stack_alloc_struct_j(x, size, *err, ehbi_is_probably_prime_end);
+	Ehbi_stack_alloc_struct_j(y, size, *err, ehbi_is_probably_prime_end);
+	Ehbi_stack_alloc_struct_j(c, size, *err, ehbi_is_probably_prime_end);
 
 	/* set d to 2, the first prime */
 	*err = *err || ehbi_set_l(&d, SMALL_PRIMES[0]);
@@ -1528,3 +1407,6 @@ int ehbi_is_odd(const struct ehbigint *bi, int *err)
 
 	Return_i(8, rv);
 }
+
+#undef Ehbi_stack_alloc_struct_j
+#undef Ehbi_stack_alloc_struct

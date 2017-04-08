@@ -1,3 +1,14 @@
+2017-04-08  Eric Herman <eric@freesa.org>
+
+	Copy in sources from libehstr git@github.com:ericherman/libehstr.git
+
+	* src/ehstr.c: copy from libehstr/src
+	* src/ehstr.h: copy from libehstr/src
+	* src/ehbigint-str.c: replace hex_raw and decimal_raw with ehstr
+	* src/ehbigint.c: code tidy
+	* Makefile.am: use the new sources
+
+
 2017-04-02  Eric Herman <eric@freesa.org>
 
 	Add a ehbi_init for struct initialization

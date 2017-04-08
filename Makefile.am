@@ -46,11 +46,12 @@ libehbigint_la_SOURCES=\
  src/ehbigint-priv.c \
  src/ehbigint-str.h \
  src/ehbigint-str.c \
+ src/ehstr.h \
+ src/ehstr.c \
  src/ehbigint-util.h \
  src/ehbigint-util.c \
  src/ehbigint-eba.h \
  src/ehbigint-eba.c \
- src/eba.h \
  src/eba.h \
  src/eba.c \
  src/ehbigint.c

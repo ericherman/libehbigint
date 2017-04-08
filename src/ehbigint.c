@@ -1133,7 +1133,9 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	ehbi_inc_l(&two, 2);
 
 	size = bi->bytes_used;
-	if(size < 4) { size = 4; };
+	if (size < 4) {
+		size = 4;
+	}
 	bimin1.bytes = (unsigned char *)ehbi_stack_alloc(size);
 	if (!bimin1.bytes) {
 		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
@@ -1207,7 +1209,6 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	}
 	c.bytes_len = size;
 
-
 	/* set d to 2, the first prime */
 	*err = *err || ehbi_set_l(&d, SMALL_PRIMES[0]);
 	if (*err || ehbi_less_than(bi, &d, err)) {
@@ -1277,7 +1278,7 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 		}
 
 		/* pick a random integer a in the range [2, n-2] */
-		*err =  ehbi_random_bytes(a.bytes, max_witness.bytes_used);
+		*err = ehbi_random_bytes(a.bytes, max_witness.bytes_used);
 		ehbi_unsafe_reset_bytes_used(&a);
 		if (ehbi_greater_than(&a, &max_witness, err)) {
 			/* but, too big, so do something totally bogus: */

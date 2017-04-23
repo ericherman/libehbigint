@@ -1,3 +1,10 @@
+2017-04-23  Eric Herman <eric@freesa.org>
+
+	remove un-needed calls to strlen
+
+	* src/ehbigint-str.c: remove un-needed calls to strlen
+
+
 2017-04-08  Eric Herman <eric@freesa.org>
 
 	Add ehbi_exp(result, base, exponent)

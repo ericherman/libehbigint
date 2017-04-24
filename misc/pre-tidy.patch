@@ -97,8 +97,8 @@
 +*/
  
  #endif /* EHBIGINT_H */
---- orig/src/eba.h	2017-03-25 12:57:39.538575781 +0100
-+++ tidy/src/eba.h	2017-03-25 13:38:41.537221148 +0100
+--- orig/src/eba.h
++++ tidy/src/eba.h
 @@ -16,9 +16,11 @@
  #ifndef EBA_H
  #define EBA_H
@@ -109,9 +109,9 @@
  #endif
 +*/
  
- #include <stddef.h>		/* size_t */
- 
-@@ -221,8 +223,10 @@
+ #ifdef EBA_SIZE_TYPE
+ typedef EBA_SIZE_TYPE size_t;
+@@ -225,8 +227,10 @@
  
  #endif /* Eba_log_error0 */
  

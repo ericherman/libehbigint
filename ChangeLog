@@ -1,8 +1,11 @@
 2017-04-23  Eric Herman <eric@freesa.org>
 
 	remove un-needed calls to strlen
+	import new src/eba.h
 
 	* src/ehbigint-str.c: remove un-needed calls to strlen
+	* src/eba.h: pulled from upstream
+	* misc/pre-tidy.patch: pulled from upstream
 
 
 2017-04-08  Eric Herman <eric@freesa.org>

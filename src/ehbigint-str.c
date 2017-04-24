@@ -20,8 +20,6 @@ License for more details.
 #include "ehbigint-eba.h"
 #include "ehstr.h"
 
-/* #include <string.h> */		/* strlen */
-
 static int ehbi_hex_to_decimal(const char *hex, size_t hex_len, char *buf,
 			       size_t buf_len);
 
@@ -172,7 +170,7 @@ int ehbi_set_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 		Return_i(8, EHBI_NULL_STRING);
 	}
 
-	size = 4 /* strlen("0x00") */ + len + 1;
+	size = 4 /* strlen("0x00") */  + len + 1;
 	hex = (char *)ehbi_stack_alloc(size);
 	if (!hex) {
 		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
@@ -365,7 +363,7 @@ char *ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len,
 
 	*err = EHBI_SUCCESS;
 
-	size = 4 /* strlen("0x00") */ + (2 * bi->bytes_used) + 1;
+	size = 4 /* strlen("0x00") */  + (2 * bi->bytes_used) + 1;
 	hex = (char *)ehbi_stack_alloc(size);
 	if (!hex) {
 		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,

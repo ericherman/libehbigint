@@ -1,5 +1,14 @@
 2017-04-23  Eric Herman <eric@freesa.org>
 
+	move stack-alloc defines to ehbigint-priv.h
+
+	 * src/ehbigint.c: move stack-alloc defines to ehbigint-priv.h
+	 * src/ehbigint-priv.h: moved stack-alloc defines from ehbigint.c
+	 * misc/pre-tidy.patch: respin
+
+
+2017-04-23  Eric Herman <eric@freesa.org>
+
 	remove un-needed calls to strlen
 	import new src/eba.h
 

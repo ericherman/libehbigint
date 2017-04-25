@@ -19,28 +19,6 @@ License for more details.
 #include "ehbigint-eba.h"
 #include "ehbigint-priv.h"
 
-#define Ehbi_stack_alloc_struct(tmp, size, err) \
-	do { \
-		tmp.bytes = (unsigned char *)ehbi_stack_alloc(size); \
-		if (!tmp.bytes) { \
-			tmp.bytes_len = 0; \
-			Ehbi_log_error2("Could not %s(%lu) bytes", \
-					ehbi_stack_alloc_str, \
-					(unsigned long)(size)); \
-			err = EHBI_STACK_TOO_SMALL; \
-		} else { \
-			tmp.bytes_len = size; \
-		} \
-	} while (0)
-
-#define Ehbi_stack_alloc_struct_j(tmp, size, err, err_jmp_label) \
-	do { \
-		Ehbi_stack_alloc_struct(tmp, size, err); \
-		if (err) { \
-			goto err_jmp_label; \
-		} \
-	} while (0)
-
 int ehbi_init(struct ehbigint *bi, unsigned char *bytes, size_t len)
 {
 	size_t i;

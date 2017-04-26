@@ -57,14 +57,12 @@ int main(int argc, char **argv)
 	v = (argc > 1) ? atoi(argv[1]) : 0;
 	failures = 0;
 
-	failures += test_shift_right(v, "0x0300", 4, "0x30");
-/*
 	failures += test_shift_right(v, "0x02", 0, "0x02");
 	failures += test_shift_right(v, "0x0300", 4, "0x30");
 	failures += test_shift_right(v, "0x050000", 16, "0x05");
 	failures += test_shift_right(v, "0x17000000", 20, "0x0170");
 	failures += test_shift_right(v, "0x00FF000000", 24, "0x00FF");
-*/
+	failures += test_shift_right(v, "0x03A8F057", 1, "0x01D4782B");
 
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);

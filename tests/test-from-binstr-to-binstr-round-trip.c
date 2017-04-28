@@ -20,7 +20,7 @@ int test_from_binstr_to_binstr_round_trip(int verbose, const char *bstr)
 	unsigned char bytes_buf[20];
 	char as_string[BUFLEN];
 	struct ehbigint a_bigint;
-	size_t prefix;
+	size_t i, prefix, skip, ones;
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
@@ -44,7 +44,18 @@ int test_from_binstr_to_binstr_round_trip(int verbose, const char *bstr)
 	}
 
 	/* skip the 0b */
-	failures += check_str(as_string + 2, bstr + prefix);
+	skip = 2;
+	/* skip extra byte of zero padding if present */
+	if ((strlen(as_string + skip) + 8) == (strlen(bstr + prefix))) {
+		ones = 0;
+		for (i = 0; i < 8; ++i) {
+			ones += ('0' - *(as_string + skip + i));
+		}
+		if (ones == 0) {
+			skip += 8;
+		}
+	}
+	failures += check_str(as_string + skip, bstr + prefix);
 	if (failures) {
 		Test_log_error1("%d failures in "
 				"check_binstr_to_binstr_round_trip\n",

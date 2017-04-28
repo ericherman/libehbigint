@@ -474,7 +474,7 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 {
 	int err;
 	size_t size;
-	struct ehbigint zero, tmp1, tquot, texp, tbase;
+	struct ehbigint zero, tmp1, tjunk, texp, tbase;
 	unsigned char zero_bytes[2];
 
 	Trace_bi_bi_bi_bi(2, result, base, exponent, modulus);
@@ -483,7 +483,7 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 	ehbi_unsafe_clear_null_struct(&tmp1);
 	ehbi_unsafe_clear_null_struct(&tbase);
 	ehbi_unsafe_clear_null_struct(&texp);
-	ehbi_unsafe_clear_null_struct(&tquot);
+	ehbi_unsafe_clear_null_struct(&tjunk);
 
 	Ehbi_struct_is_not_null(2, result);
 	Ehbi_struct_is_not_null(2, base);
@@ -494,12 +494,12 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 
 	err = EHBI_SUCCESS;
 
-	size = 2 + (2 * base->bytes_used) + exponent->bytes_used;
+	size = 4 + (2 * base->bytes_used) + exponent->bytes_used;
 
 	Ehbi_stack_alloc_struct_j(tmp1, size, err, ehbi_mod_exp_end);
 	Ehbi_stack_alloc_struct_j(tbase, size, err, ehbi_mod_exp_end);
 	Ehbi_stack_alloc_struct_j(texp, size, err, ehbi_mod_exp_end);
-	Ehbi_stack_alloc_struct_j(tquot, size, err, ehbi_mod_exp_end);
+	Ehbi_stack_alloc_struct_j(tjunk, size, err, ehbi_mod_exp_end);
 
 	/* prevent divide by zero */
 	ehbi_unsafe_zero(&tmp1);
@@ -516,6 +516,28 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 		goto ehbi_mod_exp_end;
 	}
 
+	/*
+	   The following is an example in pseudocode based on Applied
+	   Cryptography: Protocols, Algorithms, and Source Code in C,
+	   Second Edition (2nd ed.), page 244.
+	   Schneier, Bruce (1996). Wiley. ISBN 978-0-471-11709-4.
+
+	   function modular_pow(base, exponent, modulus)
+	   if modulus = 1 then return 0
+	   Assert :: (modulus - 1) * (modulus - 1) does not overflow base
+	   result := 1
+	   base := base mod modulus
+	   while exponent > 0
+	   if (exponent mod 2 == 1):
+	   result := (result * base) mod modulus
+	   exponent := exponent >> 1
+	   base := (base * base) mod modulus
+	   return result
+
+	   See Also:
+	   https://en.wikipedia.org/wiki/Modular_exponentiation#Right-to-left_binary_method
+	 */
+
 	/* if modulus == 1 then return 0 */
 	err = ehbi_set_l(&tmp1, 1);
 	if (!err && ehbi_equals(modulus, &tmp1, &err)) {
@@ -525,28 +547,42 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 
 	err = err || ehbi_set(&tbase, base);
 	err = err || ehbi_set(&texp, exponent);
+
+	/* result := 1 */
 	err = err || ehbi_set_l(result, 1);
 	if (err) {
 		goto ehbi_mod_exp_end;
 	}
 
+	/* base := base mod modulus */
+	err = err || ehbi_div(&tjunk, &tbase, base, modulus);
+
+	/* while exponent > 0 */
 	while (ehbi_greater_than(&texp, &zero, &err)) {
 		if (err) {
 			goto ehbi_mod_exp_end;
 		}
 
+		/* if (exponent mod 2 == 1): */
 		if (ehbi_is_odd(&texp, &err)) {
+			/* result := (result * base) mod modulus */
 			err = err || ehbi_mul(&tmp1, result, &tbase);
-			err = err || ehbi_div(&tquot, result, &tmp1, modulus);
+			err = err || ehbi_div(&tjunk, result, &tmp1, modulus);
 		}
+
+		/* exponent := exponent >> 1 */
 		err = err || ehbi_shift_right(&texp, 1);
+
+		/* base := (base * base) mod modulus */
 		err = err || ehbi_mul(&tmp1, &tbase, &tbase);
-		err = err || ehbi_div(&tquot, &tbase, &tmp1, modulus);
+		err = err || ehbi_div(&tjunk, &tbase, &tmp1, modulus);
 
 		if (err) {
 			goto ehbi_mod_exp_end;
 		}
 	}
+
+	/* return result */
 
 ehbi_mod_exp_end:
 	if (tmp1.bytes) {
@@ -558,8 +594,8 @@ ehbi_mod_exp_end:
 	if (texp.bytes) {
 		ehbi_stack_free(texp.bytes, texp.bytes_len);
 	}
-	if (tquot.bytes) {
-		ehbi_stack_free(tquot.bytes, tmp1.bytes_len);
+	if (tjunk.bytes) {
+		ehbi_stack_free(tjunk.bytes, tjunk.bytes_len);
 	}
 	if (err) {
 		ehbi_zero(result);

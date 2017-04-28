@@ -1058,8 +1058,7 @@ int ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits)
 	Return_i(2, err);
 }
 
-/*
-static const long THREE_DIGIT_PRIMES[] = {
+static const long SMALL_PRIMES[] = {
 	2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67,
 	71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139,
 	149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223,
@@ -1072,19 +1071,21 @@ static const long THREE_DIGIT_PRIMES[] = {
 	751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839,
 	853, 857, 859, 863, 877, 881, 883, 887, 907, 911, 919, 929, 937, 941,
 	947, 953, 967, 971, 977, 983, 991, 997,
-	0			/ * ZERO terminated * /
-};
-*/
-
-static const long SMALL_PRIMES[] = {
-	2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
 	0			/* ZERO terminated */
 };
+
+#ifndef EHBI_NUM_SMALL_PRIMES_TO_TRIAL_DIVIDE
+#define EHBI_NUM_SMALL_PRIMES_TO_TRIAL_DIVIDE 20U
+#endif
+
+#ifndef EHBI_MAX_TRIES_TO_GRAB_RANDOM_BYTES
+#define EHBI_MAX_TRIES_TO_GRAB_RANDOM_BYTES 100U
+#endif
 
 int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 			   int *err)
 {
-	size_t i, j, shift, size;
+	size_t i, j, trial_divs, max_rnd, shift, size;
 	int is_probably_prime, stop;
 	struct ehbigint zero, one, two;
 	unsigned char z_bytes[4], o_bytes[4], t_bytes[4];
@@ -1150,7 +1151,8 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	}
 
 	/* first some trial divsion */
-	for (i = 1; SMALL_PRIMES[i] != 0; ++i) {
+	trial_divs = EHBI_NUM_SMALL_PRIMES_TO_TRIAL_DIVIDE;
+	for (i = 1; SMALL_PRIMES[i] != 0 && i <= trial_divs; ++i) {
 		*err = *err || ehbi_set_l(&d, SMALL_PRIMES[i]);
 		if (ehbi_equals(bi, &d, err)) {
 			is_probably_prime = 1;
@@ -1205,6 +1207,7 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 		}
 
 		j = 0;
+		max_rnd = EHBI_MAX_TRIES_TO_GRAB_RANDOM_BYTES;
 		/* pick a random integer a in the range [2, n-2] */
 		do {
 			*err = ehbi_random_bytes(a.bytes, a.bytes_len);
@@ -1213,7 +1216,7 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 			*err = ehbi_bytes_shift_right(&a, shift);
 			ehbi_unsafe_reset_bytes_used(&a);
 		} while ((ehbi_greater_than(&a, &max_witness, err)
-			  || ehbi_less_than(&a, &two, err)) && (j++ < 1000));
+			  || ehbi_less_than(&a, &two, err)) && (j++ < max_rnd));
 		if (ehbi_greater_than(&a, &max_witness, err)
 		    || ehbi_less_than(&a, &two, err)) {
 			/* but, too big, so do something totally bogus: */

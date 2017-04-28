@@ -115,7 +115,7 @@ void ehbi_debug_to_string(int level, const struct ehbigint *bi,
 	}
 	fprintf(stderr, ",\n");
 
-	size = 5 + (4 * bi->bytes_used);
+	size = 5 + (8 * bi->bytes_used);
 	buf = (char *)ehbi_stack_alloc(size);
 	if (!buf) {
 		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
@@ -128,7 +128,8 @@ void ehbi_debug_to_string(int level, const struct ehbigint *bi,
 	}
 	fprintf(stderr, "%s,\n", ehbi_to_hex_string(bi, buf, size, &err));
 
-	ehbi_to_decimal_string(bi, buf, size, &err);
+	fprintf(stderr, "\tbin => %s,\n",
+		ehbi_to_binary_string(bi, buf, size, &err));
 	fprintf(stderr, "\tdec => %s,\n",
 		ehbi_to_decimal_string(bi, buf, size, &err));
 	ehbi_stack_free(buf, size);

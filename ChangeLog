@@ -1,3 +1,18 @@
+2017-04-29  Eric Herman <eric@freesa.org>
+
+	finally figured out there was a bug in exp-mod, which caused
+	is_probably_prime to fail from time to time ... was not doing
+	an initial modulus on the base
+
+	* src/ehbigint.c: fix bug with exp-mod, clarify, #define magic nums
+	* src/ehbigint-log.c: improve debug, add "0b00101011" format to output
+	* tests/test-comp-exp-mod-with-gmp.c: make non-trival, expose bug
+	* tests/test-from-binstr-to-binstr-round-trip.c: ignore zero byte pad
+	* tests/test-mul.c: add a longer number
+	* tests/test-shift-right.c: more tests
+	* Makefile.am: use local ./libtool
+
+
 2017-04-23  Eric Herman <eric@freesa.org>
 
 	move stack-alloc defines to ehbigint-priv.h

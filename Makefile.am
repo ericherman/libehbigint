@@ -229,31 +229,31 @@ demo: bi-calc
 	./bi-calc 132904811234120000312412 + 123412413132500
 
 valgrind: $(check_PROGRAMS)
-	libtool --mode=execute valgrind -q ./test-add
-	libtool --mode=execute valgrind -q ./test-compare
-	libtool --mode=execute valgrind -q ./test-comp-exp-mod-with-gmp
-	libtool --mode=execute valgrind -q ./test-comp-mul-with-gmp
-	libtool --mode=execute valgrind -q ./test-compare2
-	libtool --mode=execute valgrind -q ./test-dec
-	libtool --mode=execute valgrind -q ./test-dec-corner-case
-	libtool --mode=execute valgrind -q ./test-div
-	libtool --mode=execute valgrind -q ./test-exp
-	libtool --mode=execute valgrind -q ./test-exp-mod
-	libtool --mode=execute valgrind -q ./test-equals
-	libtool --mode=execute valgrind -q \
+	./libtool --mode=execute valgrind -q ./test-add
+	./libtool --mode=execute valgrind -q ./test-compare
+	./libtool --mode=execute valgrind -q ./test-comp-exp-mod-with-gmp
+	./libtool --mode=execute valgrind -q ./test-comp-mul-with-gmp
+	./libtool --mode=execute valgrind -q ./test-compare2
+	./libtool --mode=execute valgrind -q ./test-dec
+	./libtool --mode=execute valgrind -q ./test-dec-corner-case
+	./libtool --mode=execute valgrind -q ./test-div
+	./libtool --mode=execute valgrind -q ./test-exp
+	./libtool --mode=execute valgrind -q ./test-exp-mod
+	./libtool --mode=execute valgrind -q ./test-equals
+	./libtool --mode=execute valgrind -q \
 		./test-from-binstr-to-binstr-round-trip
-	libtool --mode=execute valgrind -q \
+	./libtool --mode=execute valgrind -q \
 		./test-from-decimal-to-decimal-round-trip
-	libtool --mode=execute valgrind -q ./test-from-hex-to-hex-round-trip
-	libtool --mode=execute valgrind -q ./test-inc
-	libtool --mode=execute valgrind -q ./test-inc-l
-	libtool --mode=execute valgrind -q ./test-is-probably-prime
-	libtool --mode=execute valgrind -q ./test-mul
-	libtool --mode=execute valgrind -q ./test-scenario-mul-mod
-	libtool --mode=execute valgrind -q ./test-set
-	libtool --mode=execute valgrind -q ./test-set-l
-	libtool --mode=execute valgrind -q ./test-shift-right
-	libtool --mode=execute valgrind -q ./test-subtract
-	libtool --mode=execute valgrind -q ./test-bytes-shift-left
-	libtool --mode=execute valgrind -q ./test-bytes-shift-right
-	libtool --mode=execute valgrind -q ./test-to-string
+	./libtool --mode=execute valgrind -q ./test-from-hex-to-hex-round-trip
+	./libtool --mode=execute valgrind -q ./test-inc
+	./libtool --mode=execute valgrind -q ./test-inc-l
+	./libtool --mode=execute valgrind -q ./test-is-probably-prime
+	./libtool --mode=execute valgrind -q ./test-mul
+	./libtool --mode=execute valgrind -q ./test-scenario-mul-mod
+	./libtool --mode=execute valgrind -q ./test-set
+	./libtool --mode=execute valgrind -q ./test-set-l
+	./libtool --mode=execute valgrind -q ./test-shift-right
+	./libtool --mode=execute valgrind -q ./test-subtract
+	./libtool --mode=execute valgrind -q ./test-bytes-shift-left
+	./libtool --mode=execute valgrind -q ./test-bytes-shift-right
+	./libtool --mode=execute valgrind -q ./test-to-string

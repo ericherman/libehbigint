@@ -98,6 +98,7 @@ int main(int argc, char **argv)
 	   2377667136509
 	 */
 	failures += test_mul(v, 9415273, 252533, "2377667136509");
+	failures += test_mul(v, 239862259L, 581571519L, "139497058317401421");
 
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);

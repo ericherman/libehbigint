@@ -7,6 +7,7 @@
 	* src/ehbigint.c: fix bug with exp-mod, clarify, #define magic nums
 	* src/ehbigint-log.c: improve debug, add "0b00101011" format to output
 	* tests/test-comp-exp-mod-with-gmp.c: make non-trival, expose bug
+	* tests/test-is-probably-prime.c: check a few more smallish primes
 	* tests/test-from-binstr-to-binstr-round-trip.c: ignore zero byte pad
 	* tests/test-mul.c: add a longer number
 	* tests/test-shift-right.c: more tests

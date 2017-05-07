@@ -18,6 +18,7 @@ int test_is_probably_prime(int verbose, const char *val, int expected)
 {
 	int err, failures, actual;
 	unsigned char bytes_buf1[20];
+	char buf[60];
 	struct ehbigint bi;
 
 	VERBOSE_ANNOUNCE(verbose);
@@ -35,6 +36,13 @@ int test_is_probably_prime(int verbose, const char *val, int expected)
 					failures, val, expected);
 			exit(EXIT_FAILURE);
 		}
+		return 1;
+	}
+	failures +=
+	    check_str_m(ehbi_to_decimal_string(&bi, buf, 60, &err), val,
+			"failed to round-trip?");
+	if (err || failures) {
+		Test_log_error("Aborting\n");
 		return 1;
 	}
 
@@ -71,6 +79,7 @@ static const char *PRIMES[] = {
 	"9999999769", "9999999781", "9999999787", "9999999817", "9999999833",
 	"9999999851", "9999999881", "9999999929", "9999999943", "9999999967",
 	"49999999957", "49999999961", "49999999967",
+	"170141183460469231731687303715884105727",
 	NULL
 };
 

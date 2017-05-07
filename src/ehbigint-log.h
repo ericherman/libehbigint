@@ -54,7 +54,7 @@ extern char EHBI_DBUG_Buf1[80];
 #endif /* __STDC_VERSION__ */
 
 #define Ehbi_trace_in(level) \
-	do { if (level > EHBI_DEBUG) { \
+	do { if (level < EHBI_DEBUG) { \
 		++EHBI_DBUG_depth; \
 		for (EHBI_DBUG_i= 0; \
 		     EHBI_DBUG_i < EHBI_DBUG_depth; \
@@ -68,7 +68,7 @@ extern char EHBI_DBUG_Buf1[80];
 	} } while(0)
 
 #define Ehbi_trace_fprintf_bi(level, bi, name) \
-	do { if (level > EHBI_DEBUG) { \
+	do { if (level < EHBI_DEBUG) { \
 		for (EHBI_DBUG_i= 0; \
 		     EHBI_DBUG_i < EHBI_DBUG_depth; \
 		     ++EHBI_DBUG_i) { \
@@ -92,7 +92,7 @@ extern char EHBI_DBUG_Buf1[80];
 	} } while(0)
 
 #define Ehbi_trace_fprintf_s(level, name, val) \
-	do { if (level > EHBI_DEBUG) { \
+	do { if (level < EHBI_DEBUG) { \
 		for (EHBI_DBUG_i= 0; \
 		     EHBI_DBUG_i < EHBI_DBUG_depth; \
 		     ++EHBI_DBUG_i) { \
@@ -104,28 +104,28 @@ extern char EHBI_DBUG_Buf1[80];
 	} } while(0)
 
 #define Trace_bi(level, bi) \
-	do { if (level > EHBI_DEBUG) { \
+	do { if (level < EHBI_DEBUG) { \
 		Ehbi_trace_in(level); \
 		Ehbi_trace_fprintf_bi(level, bi, "bi"); \
 		fprintf(stderr, ")\n"); \
 	} } while(0)
 
 #define Trace_bi_l(level, bi, l) \
-	do { if (level > EHBI_DEBUG) { \
+	do { if (level < EHBI_DEBUG) { \
 		Ehbi_trace_in(level); \
 		Ehbi_trace_fprintf_bi(level, bi, "bi"); \
 		fprintf(stderr, ",\n%s\t\t%ld)\n", EHBI_DBUG_Buf1, l); \
 	} } while(0)
 
 #define Trace_bi_s(level, bi, s) \
-	do { if (level > EHBI_DEBUG) { \
+	do { if (level < EHBI_DEBUG) { \
 		Ehbi_trace_in(level); \
 		Ehbi_trace_fprintf_bi(level, bi, "bi"); \
 		fprintf(stderr, ",\n%s\t\t%s)\n", EHBI_DBUG_Buf1, s); \
 	} } while(0)
 
 #define Trace_bi_bi(level, bi1, bi2) \
-	do { if (level > EHBI_DEBUG) { \
+	do { if (level < EHBI_DEBUG) { \
 		Ehbi_trace_in(level); \
 		Ehbi_trace_fprintf_bi(level, bi1, "bi1"); \
 		fprintf(stderr, ","); \
@@ -134,7 +134,7 @@ extern char EHBI_DBUG_Buf1[80];
 	} } while(0)
 
 #define Trace_bi_bi_bi(level, bi1, bi2, bi3) \
-	do { if (level > EHBI_DEBUG) { \
+	do { if (level < EHBI_DEBUG) { \
 		Ehbi_trace_in(level); \
 		Ehbi_trace_fprintf_bi(level, bi1, "bi1"); \
 		fprintf(stderr, ","); \
@@ -145,7 +145,7 @@ extern char EHBI_DBUG_Buf1[80];
 	} } while(0)
 
 #define Trace_bi_bi_bi_bi(level, bi1, bi2, bi3, bi4) \
-	do { if (level > EHBI_DEBUG) { \
+	do { if (level < EHBI_DEBUG) { \
 		Ehbi_trace_in(level); \
 		Ehbi_trace_fprintf_bi(level, bi1, "bi1"); \
 		fprintf(stderr, ","); \
@@ -158,19 +158,19 @@ extern char EHBI_DBUG_Buf1[80];
 	} } while(0)
 
 #define Trace_msg_s_bi(level, msg, bi) \
-	do { if (level > EHBI_DEBUG) { \
+	do { if (level < EHBI_DEBUG) { \
 		Ehbi_trace_fprintf_bi(level, bi, msg); \
 		fprintf(stderr, "\n"); \
 	} } while(0)
 
 #define Trace_msg_s_s(level, msg, val) \
-	do { if (level > EHBI_DEBUG) { \
+	do { if (level < EHBI_DEBUG) { \
 		Ehbi_trace_fprintf_s(level, msg, val); \
 		fprintf(stderr, "\n"); \
 	} } while(0)
 
 #define Return_stack(level) \
-	do { if (level > EHBI_DEBUG) { \
+	do { if (level < EHBI_DEBUG) { \
 		for (EHBI_DBUG_i= 0; \
 		     EHBI_DBUG_i < EHBI_DBUG_depth; \
 		     ++EHBI_DBUG_i) { \
@@ -183,7 +183,7 @@ extern char EHBI_DBUG_Buf1[80];
 	} } while(0)
 
 #define Return_i(level,val) \
-	if (level > EHBI_DEBUG) { \
+	if (level < EHBI_DEBUG) { \
 		Return_stack(level); \
 		fprintf(stderr, "%s%s return (%d)\n", \
 			EHBI_DBUG_Buf0, EHBI_FUNC, val); \
@@ -191,7 +191,7 @@ extern char EHBI_DBUG_Buf1[80];
 	return val
 
 #define Return_s(level, val) \
-	if (level > EHBI_DEBUG) { \
+	if (level < EHBI_DEBUG) { \
 		Return_stack(level); \
 		fprintf(stderr, "%s%s return (\"%s\")\n", \
 		EHBI_DBUG_Buf0, EHBI_FUNC, val); \
@@ -199,7 +199,7 @@ extern char EHBI_DBUG_Buf1[80];
 	return val
 
 #define Return_void(level) \
-	if (level > EHBI_DEBUG) { \
+	if (level < EHBI_DEBUG) { \
 		Return_stack(level); \
 		fprintf(stderr, "%s%s return\n", \
 		EHBI_DBUG_Buf0, EHBI_FUNC); \

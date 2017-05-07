@@ -23,7 +23,7 @@ DEBUG_CFLAGS=-ggdb -O2
 NOISY_CFLAGS=-Wall -Wextra -pedantic -Werror
 # if debugging, these flags may be better:
 # CSTD_CFLAGS=-std=gnu11
-# DEBUG_CFLAGS=-ggdb -O0 -D_GNU_SOURCE
+# DEBUG_CFLAGS=-ggdb -O0 -D_GNU_SOURCE -DEHBI_DEBUG=1
 # NOISY_CFLAGS=-Wall -Wextra -Werror
 
 #TODO get configure/autoconf to work right with BACKTRACE

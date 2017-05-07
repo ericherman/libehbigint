@@ -114,6 +114,7 @@ void ehbi_debug_to_string(int level, const struct ehbigint *bi,
 		fprintf(stderr, "%c%c", h, l);
 	}
 	fprintf(stderr, ",\n");
+	fprintf(stderr, "\tsign => %d\n", bi->sign);
 
 	size = 5 + (8 * bi->bytes_used);
 	buf = (char *)ehbi_stack_alloc(size);

@@ -53,6 +53,40 @@ int test_set(int verbose, long lval, const char *expect)
 	return failures;
 }
 
+int test_set_dec_str(int verbose, const char *val)
+{
+	int err, failures;
+
+	unsigned char bi_bytes[20];
+	struct ehbigint bi;
+	char buf[80];
+
+	VERBOSE_ANNOUNCE(verbose);
+	failures = 0;
+
+	ehbi_init(&bi, bi_bytes, 20);
+
+	err = ehbi_set_decimal_string(&bi, val, strlen(val));
+	if (err) {
+		Test_log_error1("error %d ehbi_set_decimal_string\n", err);
+		Test_log_error("Aborting test\n");
+		return (1 + failures);
+	}
+	ehbi_to_decimal_string(&bi, buf, 80, &err);
+	if (err) {
+		Test_log_error1("error %d ehbi_to_decimal_string\n", err);
+		Test_log_error("Aborting test\n");
+		return (1 + failures);
+	}
+	failures += check_str(buf, val);
+
+	if (failures) {
+		Test_log_error1("%d failures in test_set\n", failures);
+	}
+
+	return failures;
+}
+
 int main(int argc, char **argv)
 {
 	int v, failures;
@@ -62,6 +96,9 @@ int main(int argc, char **argv)
 
 	failures += test_set(v, 3, "3");
 	failures += test_set(v, -5, "-5");
+
+	failures += test_set_dec_str(v, "3");
+	failures += test_set_dec_str(v, "-3");
 
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);

@@ -13,8 +13,9 @@ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 */
 #include "test-ehbigint-private-utils.h"
+#include <limits.h>		/* LONG_MAX */
 
-int test_to_string(int verbose)
+int test_to_string_65605(int verbose)
 {
 	int failures;
 
@@ -39,6 +40,56 @@ int test_to_string(int verbose)
 	return failures;
 }
 
+int test_to_string_negative_3(int verbose)
+{
+	int failures;
+
+	unsigned char bytes[20];
+	struct ehbigint bi;
+
+	VERBOSE_ANNOUNCE(verbose);
+	failures = 0;
+
+	ehbi_init(&bi, bytes, 20);
+	bi.bytes[19] = 0x03;
+	bi.bytes_used = 1;
+	bi.sign = 1;
+
+	failures += Check_ehbigint_hex(&bi, "0x03");
+	failures += Check_ehbigint_dec(&bi, "-3");
+
+	if (failures) {
+		Test_log_error1("%d failures in test_to_string_negative_3\n",
+				failures);
+	}
+
+	return failures;
+}
+
+int test_to_string_ld(int verbose, long val)
+{
+	int failures;
+	unsigned char bytes[1 + sizeof(long)];
+	struct ehbigint bi;
+	char expected[80];
+
+	VERBOSE_ANNOUNCE(verbose);
+	failures = 0;
+
+	ehbi_init(&bi, bytes, 1 + sizeof(long));
+
+	ehbi_set_l(&bi, val);
+
+	sprintf(expected, "%ld", val);
+	failures += Check_ehbigint_dec(&bi, expected);
+
+	if (failures) {
+		Test_log_error1("%d failures in test_to_string_ld\n", failures);
+	}
+
+	return failures;
+}
+
 int main(int argc, char **argv)
 {
 	int v, failures;
@@ -46,7 +97,16 @@ int main(int argc, char **argv)
 	v = (argc > 1) ? atoi(argv[1]) : 0;
 	failures = 0;
 
-	failures += test_to_string(v);
+	failures += test_to_string_65605(v);
+
+	failures += test_to_string_negative_3(v);
+
+	failures += test_to_string_ld(v, 0L);
+	failures += test_to_string_ld(v, 3L);
+	failures += test_to_string_ld(v, -3L);
+	failures += test_to_string_ld(v, 12341234L);
+	failures += test_to_string_ld(v, LONG_MIN);
+	failures += test_to_string_ld(v, LONG_MAX);
 
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);

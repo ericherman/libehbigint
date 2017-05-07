@@ -189,14 +189,16 @@ int ehbi_set_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 	if (err) {
 		Return_i(8, err);
 	}
+
 	err = ehbi_set_hex_string(bi, hex, size);
-	ehbi_stack_free(hex, size);
+
 	if (negative) {
 		err = err ? err : ehbi_negate(bi);
 	}
 
 	ehbi_unsafe_reset_bytes_used(bi);
 
+	ehbi_stack_free(hex, size);
 	Trace_msg_s_bi(8, "end", bi);
 	Return_i(8, err);
 }
@@ -339,18 +341,15 @@ char *ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len,
 {
 	char *hex, *rv;
 	size_t size;
-	struct ehbigint tmp;
 
 	Trace_bi(8, bi);
 
 	hex = NULL;
-	tmp.bytes = NULL;
+	rv = NULL;
 
 	Ehbi_struct_is_not_null_e_j(bi, err, ehbi_to_decimal_string_end);
 
 	size = 0;
-	tmp.bytes_len = 0;
-	tmp.bytes_used = 0;
 
 	if (buf == NULL || len == 0) {
 		Ehbi_log_error0("Null Arguments(s)");
@@ -359,6 +358,7 @@ char *ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len,
 		}
 		goto ehbi_to_decimal_string_end;
 	}
+	rv = buf;
 	buf[0] = '\0';
 
 	*err = EHBI_SUCCESS;
@@ -373,38 +373,19 @@ char *ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len,
 	}
 
 	if (ehbi_is_negative(bi, err)) {
-		tmp.bytes = (unsigned char *)ehbi_stack_alloc(bi->bytes_used);
-		if (!tmp.bytes) {
-			Ehbi_log_error2("Could not %s(%lu) bytes",
-					ehbi_stack_alloc_str,
-					(unsigned long)bi->bytes_used);
-			*err = EHBI_STACK_TOO_SMALL;
-			goto ehbi_to_decimal_string_end;
-		}
-		tmp.bytes_len = bi->bytes_used;
-		ehbi_set(&tmp, bi);
-		*err = ehbi_negate(&tmp);
-		if (*err) {
-			goto ehbi_to_decimal_string_end;
-		}
-		ehbi_to_hex_string(&tmp, hex, size, err);
-
 		buf[0] = '-';
 		buf[1] = '\0';
 		buf = buf + 1;
 		len -= 1;
-	} else {
-		ehbi_to_hex_string(bi, hex, size, err);
 	}
+
+	ehbi_to_hex_string(bi, hex, size, err);
 	if (*err) {
 		goto ehbi_to_decimal_string_end;
 	}
 	*err = ehbi_hex_to_decimal(hex, size, buf, len);
 
 ehbi_to_decimal_string_end:
-	if (tmp.bytes) {
-		ehbi_stack_free(tmp.bytes, tmp.bytes_len);
-	}
 	if (hex) {
 		ehbi_stack_free(hex, size);
 	}
@@ -412,7 +393,7 @@ ehbi_to_decimal_string_end:
 		buf[0] = '\0';
 	}
 
-	rv = (err == NULL || *err) ? NULL : buf;
+	rv = (err == NULL || *err) ? NULL : rv;
 
 	Trace_msg_s_s(8, "end", buf);
 	Return_s(8, rv);

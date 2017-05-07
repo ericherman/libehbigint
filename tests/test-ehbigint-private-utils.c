@@ -19,18 +19,21 @@ int check_ehbigint_dec(struct ehbigint *val, const char *expected, int line,
 		       const char *msg)
 {
 	int err;
-	char actual[BUFLEN];
+	char actual1[BUFLEN];
+	char *actual2;
 	char buf[BUFLEN];
 
 	sprintf(buf, "%s:%d", msg, line);
-	ehbi_to_decimal_string(val, actual, BUFLEN, &err);
+	actual2 = ehbi_to_decimal_string(val, actual1, BUFLEN, &err);
 	if (err) {
 		Test_log_error2("error %d ehbi_to_decimal_string (%s)\n", err,
 				buf);
 		return 1;
 	}
 
-	return check_str_m(actual, expected, buf);
+	return check_str_m(actual1, expected, buf) || check_str_m(actual2,
+								  expected,
+								  buf);
 }
 
 int check_ehbigint_hex(struct ehbigint *val, const char *expected, int line,

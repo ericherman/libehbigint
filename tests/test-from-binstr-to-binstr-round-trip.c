@@ -46,10 +46,12 @@ int test_from_binstr_to_binstr_round_trip(int verbose, const char *bstr)
 	/* skip the 0b */
 	skip = 2;
 	/* skip extra byte of zero padding if present */
-	if ((strlen(as_string + skip) + 8) == (strlen(bstr + prefix))) {
+	if ((strlen(as_string + skip) - 8) == (strlen(bstr + prefix))) {
 		ones = 0;
 		for (i = 0; i < 8; ++i) {
-			ones += ('0' - *(as_string + skip + i));
+			if (*(as_string + skip + i) != '0') {
+				++ones;
+			}
 		}
 		if (ones == 0) {
 			skip += 8;

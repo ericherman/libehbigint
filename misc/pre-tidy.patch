@@ -186,7 +186,7 @@
  
  #include "ehbigint.h"		/* struct ehbigint */
  
-@@ -47,8 +49,10 @@
+@@ -52,8 +54,10 @@
  void ehbi_unsafe_clear_null_struct(struct ehbigint *bi);
  void ehbi_unsafe_reset_bytes_used(struct ehbigint *bi);
  

@@ -6,11 +6,13 @@
 	always prefix an extra 00 of bytes used regardless of sign
 	cleaner temp struct initialization in macro
 	fix offset compensation for zero prefixing in test
+	add some prime tests above 900000000000
 
 	* src/ehbigint.c: clarify subtract; collapse ebhi_dec into subtract
 	* src/ehbigint-priv.h: cleaner temp struct initialization
 	* src/ehbigint-priv.c: always add an extra 00 regardless of sign
 	* tests/test-from-binstr-to-binstr-round-trip.c: fix sign error
+	* tests/test-is-probably-prime.c: add some big numbers
 	* misc/pre-tidy.patch: respin
 
 

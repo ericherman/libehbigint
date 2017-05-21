@@ -38,7 +38,7 @@ void ehbi_unsafe_reset_bytes_used(struct ehbigint *bi)
 		bi->sign = 0;
 	}
 
-	if (bi->sign && bi->bytes_used < bi->bytes_len
+	if ((bi->bytes_used < bi->bytes_len)
 	    && (bi->bytes[bi->bytes_len - bi->bytes_used] > 0x7F)) {
 		++(bi->bytes_used);
 	}

@@ -1,8 +1,11 @@
 2017-05-21  Eric Herman <eric@freesa.org>
 
-	fix offset compensation for zero prefixing
+	always prefix an extra 00 of bytes used regardless of sign
+	cleaner temp struct initialization in macro
+	fix offset compensation for zero prefixing in test
 
 	* src/ehbigint-priv.h: cleaner temp struct initialization
+	* src/ehbigint-priv.c: always add an extra 00 regardless of sign
 	* tests/test-from-binstr-to-binstr-round-trip.c: fix sign error
 	* misc/pre-tidy.patch: respin
 

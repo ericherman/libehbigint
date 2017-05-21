@@ -1,14 +1,15 @@
 2017-05-21  Eric Herman <eric@freesa.org>
 
 	cleanup ehbi_subtract borrowing to make it easier to understand,
-	and fix possible bug.
+	and fix corner-case bug. Allow ehbi_exp_mod to have plenty of bytes
+	in case of unusual input.
 	collapse ebhi_dec into ehbi_subtract
 	always prefix an extra 00 of bytes used regardless of sign
 	cleaner temp struct initialization in macro
 	fix offset compensation for zero prefixing in test
 	add some prime tests above 900000000000
 
-	* src/ehbigint.c: clarify subtract; collapse ebhi_dec into subtract
+	* src/ehbigint.c: fix subtract; merge ebhi_dec to subtract; fix expmod
 	* src/ehbigint-priv.h: cleaner temp struct initialization
 	* src/ehbigint-priv.c: always add an extra 00 regardless of sign
 	* tests/test-from-binstr-to-binstr-round-trip.c: fix sign error

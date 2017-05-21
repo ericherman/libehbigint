@@ -494,7 +494,7 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 
 	err = EHBI_SUCCESS;
 
-	size = 4 + (2 * base->bytes_used) + exponent->bytes_used;
+	size = 4 + (2 * base->bytes_used) + (2 * exponent->bytes_used);
 
 	Ehbi_stack_alloc_struct_j(tmp1, size, err, ehbi_mod_exp_end);
 	Ehbi_stack_alloc_struct_j(tbase, size, err, ehbi_mod_exp_end);

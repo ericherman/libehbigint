@@ -690,104 +690,50 @@ int ehbi_inc_l(struct ehbigint *bi, long val)
 
 int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 {
-	size_t i, j, size;
-	unsigned char a, b, c;
-	struct ehbigint tmp;
+	size_t size;
 	int err;
+	struct ehbigint temp;
 
 	Trace_bi_bi(4, bi, val);
 
-	ehbi_unsafe_clear_null_struct(&tmp);
+	ehbi_unsafe_clear_null_struct(&temp);
 
 	Ehbi_struct_is_not_null(4, bi);
 	Ehbi_struct_is_not_null(4, val);
 
-	if (ehbi_is_negative(val, &err)) {
-		size = val->bytes_used;
-		Ehbi_stack_alloc_struct(tmp, size, err);
-		if (err) {
-			Return_i(4, err);
-		}
-		err = err || ehbi_set(&tmp, val);
-		err = err || ehbi_negate(&tmp);
-		err = err || ehbi_inc(bi, &tmp);
-		ehbi_stack_free(tmp.bytes, tmp.bytes_len);
-		Return_i(4, err);
-	}
+	err = EHBI_SUCCESS;
 
-	err = 0;
-	if (ehbi_greater_than(val, bi, &err)) {
-		size = val->bytes_used;
-		Ehbi_stack_alloc_struct(tmp, size, err);
-		if (err) {
-			Return_i(4, err);
-		}
-		err = ehbi_subtract(&tmp, val, bi);
-		err = err || ehbi_set(bi, &tmp);
-		ehbi_stack_free(tmp.bytes, tmp.bytes_len);
-		err = err || ehbi_negate(bi);
-		Return_i(4, err);
-	}
+	size = bi->bytes_len;
+
+	Ehbi_stack_alloc_struct(temp, size, err);
 	if (err) {
 		Return_i(4, err);
 	}
+	ehbi_unsafe_zero(&temp);
 
-	c = 0;
-	for (i = 1; i <= val->bytes_used; ++i) {
-		a = (bi->bytes_used < i) ? 0 : bi->bytes[bi->bytes_len - i];
-		b = val->bytes[val->bytes_len - i];
-		c = a - b;
+	err = err || ehbi_subtract(&temp, bi, val);
+	err = err || ehbi_set(bi, &temp);
 
-		bi->bytes[bi->bytes_len - i] = c;
-
-		j = i;
-		while (c > a) {
-			if ((bi->bytes_len - j) == 0) {
-				Ehbi_log_error0("byte[] too small for borrow");
-				Return_i(4, EHBI_BYTES_TOO_SMALL_FOR_BORROW);
-			}
-			bi->bytes[bi->bytes_len - (j + 1)] -= 1;
-			if (bi->bytes[bi->bytes_len - (j + 1)] == 0xFF) {
-				c = 1;
-				a = 0;
-			} else {
-				c = 0;
-				a = 0;
-			}
-			++j;
-		}
-	}
-	for (i = 0; i < bi->bytes_len; ++i) {
-		if (bi->bytes[i] != 0x00) {
-			break;
-		}
-	}
-	bi->bytes_used = bi->bytes_len - i;
-	if ((bi->bytes_used > 0) && (bi->bytes_used < bi->bytes_len)
-	    && (bi->bytes[i] > 0x7F) && (i > 0) && (i <= bi->bytes_len)) {
-		++bi->bytes_used;
-	}
-
-	if (bi->bytes_used == 0) {
-		bi->bytes_used = 1;
-	}
+	ehbi_stack_free(temp.bytes, temp.bytes_len);
 
 	Trace_msg_s_bi(4, "end", bi);
-	Return_i(4, EHBI_SUCCESS);
+	Return_i(4, err);
 }
 
 int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 		  const struct ehbigint *bi2)
 {
-	size_t i, size;
+	size_t i, j, size;
 	unsigned char a, b, c, negate;
 	const struct ehbigint *swp;
-	struct ehbigint abs;
+	struct ehbigint *bi1a;
+	struct ehbigint tmp;
 	int err;
+	/* char buf[80]; */
 
 	Trace_bi_bi_bi(2, res, bi1, bi2);
 
-	ehbi_unsafe_clear_null_struct(&abs);
+	ehbi_unsafe_clear_null_struct(&tmp);
 
 	Ehbi_struct_is_not_null(2, res);
 	Ehbi_struct_is_not_null(2, bi1);
@@ -808,21 +754,23 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 		goto ehbi_subtract_end;
 	}
 
+	/* subtracting a negative */
 	if (bi1->sign == 0 && bi2->sign != 0) {
 		size = bi2->bytes_len;
-		Ehbi_stack_alloc_struct_j(abs, size, err, ehbi_subtract_end);
-		err = ehbi_set(&abs, bi2);
-		err = err || ehbi_negate(&abs);
-		err = err || ehbi_add(res, bi1, &abs);
+		Ehbi_stack_alloc_struct_j(tmp, size, err, ehbi_subtract_end);
+		err = ehbi_set(&tmp, bi2);
+		err = err || ehbi_negate(&tmp);
+		err = err || ehbi_add(res, bi1, &tmp);
 		goto ehbi_subtract_end;
 	}
 
+	/* negative subtracting a positive */
 	if (bi1->sign != 0 && bi2->sign == 0) {
 		size = bi1->bytes_len;
-		Ehbi_stack_alloc_struct_j(abs, size, err, ehbi_subtract_end);
-		err = ehbi_set(&abs, bi1);
-		err = err || ehbi_negate(&abs);
-		err = err || ehbi_add(res, &abs, bi2);
+		Ehbi_stack_alloc_struct_j(tmp, size, err, ehbi_subtract_end);
+		err = ehbi_set(&tmp, bi1);
+		err = err || ehbi_negate(&tmp);
+		err = err || ehbi_add(res, &tmp, bi2);
 		err = err || ehbi_negate(res);
 		goto ehbi_subtract_end;
 	}
@@ -834,48 +782,66 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 									 bi1,
 									 &err)))
 	{
+		/* subtracting a bigger number */
 		negate = 1;
 		swp = bi1;
 		bi1 = bi2;
 		bi2 = swp;
 	} else {
+		/* subtracting normally */
 		negate = 0;
 	}
+	if (err) {
+		goto ehbi_subtract_end;
+	}
+
+	/* we don't wish to modify the real bi1, so use tmp */
+	size = bi1->bytes_len;
+	Ehbi_stack_alloc_struct_j(tmp, size, err, ehbi_subtract_end);
+	err = ehbi_set(&tmp, bi1);
+	if (err) {
+		goto ehbi_subtract_end;
+	}
+	bi1a = &tmp;
 
 	res->bytes_used = 0;
 	c = 0;
-	for (i = 1; i <= bi1->bytes_used; ++i) {
-		if (bi1->bytes_used < i) {
-			a = ((1 << 7) & bi1->bytes[0]) ? 0xFF : 0;
+	for (i = 1; i <= bi1a->bytes_used; ++i) {
+		if (bi1a->bytes_used < i) {
+			a = 0;
 		} else {
-			a = bi1->bytes[bi1->bytes_len - i];
+			a = bi1a->bytes[bi1a->bytes_len - i];
 		}
 		if ((bi2->bytes_used < i) || (i > bi2->bytes_len)) {
 			b = 0;
 		} else {
 			b = bi2->bytes[bi2->bytes_len - i];
 		}
-		c = c + (a - b);
+		c = (a - b);
 
 		if (i > res->bytes_len) {
 			Ehbi_log_error0("Result byte[] too small");
-			Return_i(2, EHBI_BYTES_TOO_SMALL);
+			goto ehbi_subtract_end;
 		}
 		res->bytes[res->bytes_len - i] = c;
 		res->bytes_used++;
 
-		c = (c > a) ? 0xFF : 0;
-	}
-
-	if (c) {
-		if (i > res->bytes_len) {
-			Ehbi_log_error0("Result byte[] too small for carry");
-			err = EHBI_BYTES_TOO_SMALL_FOR_CARRY;
-			goto ehbi_subtract_end;
-		}
-		while (i <= res->bytes_len) {
-			res->bytes[res->bytes_len - i] = 0xFF;
-			++i;
+		/* need to borrow */
+		if (b > a) {
+			c = 0x01;
+			j = i + 1;
+			while (c == 0x01) {
+				if (j > bi1a->bytes_used) {
+					Ehbi_log_error0("bytes for borrow");
+					err = EHBI_CORRUPT_DATA;
+					goto ehbi_subtract_end;
+				}
+				c = (bi1a->bytes[bi1a->bytes_len - j] ==
+				     0x00) ? 0x01 : 0x00;
+				--(bi1a->bytes[bi1a->bytes_len - j]);
+				++j;
+			}
+			ehbi_unsafe_reset_bytes_used(bi1a);
 		}
 	}
 
@@ -886,14 +852,12 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 	}
 	ehbi_unsafe_reset_bytes_used(res);
 
-	err = err || EHBI_SUCCESS;
-
 ehbi_subtract_end:
 	if (err && res) {
 		ehbi_zero(res);
 	}
-	if (abs.bytes) {
-		ehbi_stack_free(abs.bytes, abs.bytes_len);
+	if (tmp.bytes) {
+		ehbi_stack_free(tmp.bytes, tmp.bytes_len);
 	}
 
 	Trace_msg_s_bi(2, "end", res);

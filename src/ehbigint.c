@@ -19,6 +19,9 @@ License for more details.
 #include "ehbigint-eba.h"
 #include "ehbigint-priv.h"
 
+static int ehbi_bytes_shift_right(struct ehbigint *bi, size_t num_bytes);
+static int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes);
+
 int ehbi_init(struct ehbigint *bi, unsigned char *bytes, size_t len)
 {
 	size_t i;
@@ -864,7 +867,7 @@ ehbi_subtract_end:
 	Return_i(2, EHBI_SUCCESS);
 }
 
-int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes)
+static int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes)
 {
 	size_t i;
 
@@ -912,7 +915,7 @@ int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes)
 	Return_i(2, EHBI_SUCCESS);
 }
 
-int ehbi_bytes_shift_right(struct ehbigint *bi, size_t num_bytes)
+static int ehbi_bytes_shift_right(struct ehbigint *bi, size_t num_bytes)
 {
 	size_t i;
 

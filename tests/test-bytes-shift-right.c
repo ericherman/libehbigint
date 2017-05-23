@@ -32,9 +32,9 @@ int test_bytes_shift_right(int verbose, char *val, size_t bytes, char *expected)
 		return (1 + failures);
 	}
 
-	err = ehbi_bytes_shift_right(&bi, bytes);
+	err = ehbi_shift_right(&bi, 8 * bytes);
 	if (err) {
-		Test_log_error1("error %d from ehbi_bytes_shift_right\n", err);
+		Test_log_error1("error %d from ehbi_shift_right\n", err);
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}
@@ -43,7 +43,7 @@ int test_bytes_shift_right(int verbose, char *val, size_t bytes, char *expected)
 
 	if (failures) {
 		Test_log_error4
-		    ("%d failures in test_bytes_shift_right(%s, %lu, %s)\n",
+		    ("%d failures in test_shift_right(%s, %lu, %s)\n",
 		     failures, val, (unsigned long)bytes, expected);
 	}
 

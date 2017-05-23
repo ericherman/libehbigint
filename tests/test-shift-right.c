@@ -34,7 +34,7 @@ int test_shift_right(int verbose, char *val, unsigned long bits, char *expected)
 
 	err = ehbi_shift_right(&bi, bits);
 	if (err) {
-		Test_log_error1("error %d from ehbi_bytes_shift_right\n", err);
+		Test_log_error1("error %d from ehbi_shift_right\n", err);
 		Test_log_error("Aborting test\n");
 		return (1 + failures);
 	}

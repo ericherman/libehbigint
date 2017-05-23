@@ -1,3 +1,16 @@
+2017-05-23  Eric Herman <eric@freesa.org>
+
+	Remove ehbi_bytes_shift_left,_right public API functions since bit
+	shifting is now supported.
+
+	* README: use ehbi_shift_left in docs
+	* src/ehbigint.h: remove ehbi_bytes_shift_left,_right
+	* src/ehbigint.c: make _bytes_shift_ functions static
+	* tests/test-bytes-shift-left.c: use ehbi_shift_left
+	* tests/test-bytes-shift-right.c: use ehbi_shift_right
+	* tests/test-shift-right.c: fix comment
+	* misc/pre-tidy.patch: respin
+
 2017-05-21  Eric Herman <eric@freesa.org>
 
 	cleanup ehbi_subtract borrowing to make it easier to understand,

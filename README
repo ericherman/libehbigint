@@ -77,8 +77,8 @@ Populate the first ehbigint with the sum of the second multiplied by the
 third:
 	err = ehbi_mul(result, bi1, bi2);
 
-Shift the value of the ehbigint up by num_bytes number of bytes:
-	err = ehbi_bytes_shift_left(bi, num_bytes);
+Shift the value of the ehbigint up by num_bits number of bits:
+	err = ehbi_shift_left(bi, num_bits);
 
 
 Division

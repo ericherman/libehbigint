@@ -112,18 +112,6 @@ int ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
 	     const struct ehbigint *bi2);
 
 /*
-   shifts the value of the ehbigint up by num_bytes number of bytes
-   returns 0 on success or error_code on error
-*/
-int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes);
-
-/*
-   shifts the value of the ehbigint down by num_bytes number of bytes
-   returns 0 on success or error_code on error
-*/
-int ehbi_bytes_shift_right(struct ehbigint *bi, size_t num_bytes);
-
-/*
    shifts the value of the ehbigint up by num_bits number of bits
    returns 0 on success or error_code on error
 */

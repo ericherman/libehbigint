@@ -20,6 +20,7 @@ int test_is_probably_prime(int verbose, const char *val, int expected)
 	unsigned char bytes_buf1[20];
 	char buf[60];
 	struct ehbigint bi;
+	unsigned accuracy;
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
@@ -46,7 +47,8 @@ int test_is_probably_prime(int verbose, const char *val, int expected)
 		return 1;
 	}
 
-	actual = ehbi_is_probably_prime(&bi, 0, &err);
+	accuracy = EHBI_MIN_TRIALS_FOR_IS_PROBABLY_PRIME;
+	actual = ehbi_is_probably_prime(&bi, accuracy, &err);
 	if (err) {
 		Test_log_error1("error %d from ehbi_is_probably_prime\n", err);
 		Test_log_error("Aborting test\n");

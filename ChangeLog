@@ -1,14 +1,17 @@
 2017-05-23  Eric Herman <eric@freesa.org>
 
+	Add the #defines governing ehbi_is_probably_prime up to the header
+	for greater transparency.
 	Remove ehbi_bytes_shift_left,_right public API functions since bit
 	shifting is now supported.
 
 	* README: use ehbi_shift_left in docs
-	* src/ehbigint.h: remove ehbi_bytes_shift_left,_right
-	* src/ehbigint.c: make _bytes_shift_ functions static
+	* src/ehbigint.h: remove ehbi_bytes_shift_left,_right, add defines
+	* src/ehbigint.c: make _bytes_shift_ functions static, remove defines
 	* tests/test-bytes-shift-left.c: use ehbi_shift_left
 	* tests/test-bytes-shift-right.c: use ehbi_shift_right
 	* tests/test-shift-right.c: fix comment
+	* tests/test-is-probably-prime.c: use min accuracy
 	* misc/pre-tidy.patch: respin
 
 2017-05-21  Eric Herman <eric@freesa.org>

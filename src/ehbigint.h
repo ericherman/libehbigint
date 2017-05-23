@@ -149,6 +149,26 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 		 const struct ehbigint *exponent,
 		 const struct ehbigint *modulus);
 
+/* chance of incorrectly naming a non-prime as prime is 4^(-accuracy) */
+#ifndef EHBI_DEFAULT_TRIALS_FOR_IS_PROBABLY_PRIME
+/* 4^(-25) == 8.8817842e-16 */
+#define EHBI_DEFAULT_TRIALS_FOR_IS_PROBABLY_PRIME 25U
+#endif
+
+#ifndef EHBI_MIN_TRIALS_FOR_IS_PROBABLY_PRIME
+/* 4^(-25) == 9.53674316e-7 */
+#define EHBI_MIN_TRIALS_FOR_IS_PROBABLY_PRIME 10U
+#endif
+
+#ifndef EHBI_NUM_SMALL_PRIMES_TO_TRIAL_DIVIDE
+#define EHBI_NUM_SMALL_PRIMES_TO_TRIAL_DIVIDE 20U
+#endif
+
+/* used in ehbi_is_probably_prime */
+#ifndef EHBI_MAX_TRIES_TO_GRAB_RANDOM_BYTES
+#define EHBI_MAX_TRIES_TO_GRAB_RANDOM_BYTES 10U
+#endif
+
 /*
   returns 1 if the values is prime or probably prime
   returns 0 otherwise

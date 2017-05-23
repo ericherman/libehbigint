@@ -1041,14 +1041,6 @@ static const long SMALL_PRIMES[] = {
 	0			/* ZERO terminated */
 };
 
-#ifndef EHBI_NUM_SMALL_PRIMES_TO_TRIAL_DIVIDE
-#define EHBI_NUM_SMALL_PRIMES_TO_TRIAL_DIVIDE 20U
-#endif
-
-#ifndef EHBI_MAX_TRIES_TO_GRAB_RANDOM_BYTES
-#define EHBI_MAX_TRIES_TO_GRAB_RANDOM_BYTES 100U
-#endif
-
 int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 			   int *err)
 {
@@ -1154,8 +1146,8 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	ehbi_set_l(&r, (long)i);
 	/* (bi-1) == 2^(r) * d */
 
-	if (accuracy < 100) {
-		accuracy = 100;
+	if (accuracy < EHBI_MIN_TRIALS_FOR_IS_PROBABLY_PRIME) {
+		accuracy = EHBI_DEFAULT_TRIALS_FOR_IS_PROBABLY_PRIME;
 	}
 
 	ehbi_set(&bimin1, bi);

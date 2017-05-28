@@ -20,14 +20,16 @@ extern "C" {
 #endif
 
 #include "ehbigint.h"		/* struct ehbigint */
-#include <stdio.h>		/* FILE */
 
+#ifndef SKIP_STDIO_H
+#include <stdio.h>		/* FILE */
 /* Get the FILE pointer to where fprintf messages currently target.
    Defaults to stderr. */
 FILE *ehbi_log_file(void);
 
 /* Set the FILE pointer to where fprintf messages shall target. */
 void set_ehbi_log_file(FILE *log);
+#endif /* SKIP_SDIO_H */
 
 extern int ehbi_debug_log_level;
 int ehbi_debugf(int level, const char *fmt, ...);
@@ -37,7 +39,7 @@ void ehbi_debug_to_hex(int level, const struct ehbigint *bi, const char *label);
 void ehbi_debug_to_string(int level, const struct ehbigint *bi,
 			  const char *label);
 
-#if (EHBI_DEBUG > 0)
+#if (EHBI_DEBUG > 0) && (!defined(SKIP_STDIO_H))
 extern unsigned EHBI_DBUG_i;
 extern unsigned EHBI_DBUG_depth;
 extern char EHBI_DBUG_Buf0[80];
@@ -270,8 +272,10 @@ extern char EHBI_DBUG_Buf1[80];
 		} \
 	} while(0)
 
+#ifndef SKIP_STDIO_H
 /* if _POSIX_C_SOURCE backtrace_symbols_fd is used */
 void ehbi_log_backtrace(FILE *log);
+#endif
 
 #ifndef Ehbi_log_error0
 #define Ehbi_log_error0(format) \

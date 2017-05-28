@@ -28,36 +28,35 @@
 
 #define strnlen ehstrnlen
 #define NEED_EH_STRLEN
+#define SKIP_STDIO_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-	typedef struct __file FILE;
-
-#ifdef __cplusplus
-}
-#endif
 #define LONGBITS (4 * CHAR_BIT)
+
 #include "eh-printf.h"
+
 #define Ehbi_log_error0(format) \
  eh_printf("\r\nError: %s:%d: ", __FILE__, __LINE__); \
  eh_printf(format); \
  eh_printf("\r\n")
+
 #define Ehbi_log_error1(format, arg) \
  eh_printf("\r\nError: %s:%d: ", __FILE__, __LINE__); \
  eh_printf(format, arg); \
  eh_printf("\r\n")
+
 #define Ehbi_log_error2(format, arg1, arg2) \
  eh_printf("\r\nError: %s:%d: ", __FILE__, __LINE__); \
  eh_printf(format, arg1, arg2); \
  eh_printf("\r\n")
+
 #define Ehbi_log_error3(format, arg1, arg2, arg3) \
  eh_printf("\r\nError: %s:%d: ", __FILE__, __LINE__); \
  eh_printf(format, arg1, arg2, arg3); \
  eh_printf("\r\n")
+
 #ifndef EHBI_SKIP_IS_PROBABLY_PRIME
 #define ehbi_random_bytes totally_bogus_random_bytes
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -68,5 +67,36 @@ extern "C" {
 }
 #endif
 #endif				/* EHBI_SKIP_IS_PROBABLY_PRIME */
+/*
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern int ehbi_eba_err;
+
+#ifdef __cplusplus
+}
+#endif
+
+#define Eba_log_error0 Ehbi_log_error0
+#define Eba_log_error1 Ehbi_log_error1
+#define Eba_log_error2 Ehbi_log_error2
+#define Eba_log_error3 Ehbi_log_error3
+
+#define Eba_stack_alloc ehbi_stack_alloc
+#define Eba_stack_free ehbi_stack_free
+
+#define Eba_crash() do { \
+        Ehbi_log_error0("EBA CRASH!\n"); \
+        ehbi_eba_err = EHBI_EBA_CRASH; \
+        return; \
+        } while(0)
+
+#define Eba_crash_uc() do { \
+        Ehbi_log_error0("EBA CRASH UC!\n"); \
+        ehbi_eba_err = EHBI_EBA_CRASH; \
+        return 0; \
+        } while(0)
+*/
 #include "ehbigint.h"
 #endif				/* EHBIGINT_ARDUINO_H */

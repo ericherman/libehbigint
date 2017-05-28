@@ -1,6 +1,6 @@
 --- orig/src/ehbigint-log.h
 +++ tidy/src/ehbigint-log.h
-@@ -15,9 +15,11 @@ License for more details.
+@@ -15,9 +15,11 @@
  #ifndef EHBIGINT_LOG_H
  #define EHBIGINT_LOG_H
  
@@ -11,8 +11,8 @@
 +*/
  
  #include "ehbigint.h"		/* struct ehbigint */
- #include <stdio.h>		/* FILE */
-@@ -305,8 +307,10 @@ void ehbi_log_backtrace(FILE *log);
+ 
+@@ -309,8 +311,10 @@
   ehbi_log_backtrace(ehbi_log_file())
  #endif
  

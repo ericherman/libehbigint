@@ -39,13 +39,13 @@ extern "C" {
 extern int ehbi_eba_err;
 #define Eba_crash() do { \
 	Ehbi_log_error0("EBA CRASH!\n"); \
-	ehbi_eba_err = EBA_CRASH; \
+	ehbi_eba_err = EHBI_EBA_CRASH; \
 	return; \
 	} while(0)
 
 #define Eba_crash_uc() do { \
 	Ehbi_log_error0("EBA CRASH UC!\n"); \
-	ehbi_eba_err = EBA_CRASH; \
+	ehbi_eba_err = EHBI_EBA_CRASH; \
 	return 0; \
 	} while(0)
 

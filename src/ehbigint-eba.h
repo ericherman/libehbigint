@@ -24,11 +24,12 @@ extern "C" {
 
 #define EBA_SKIP_EBA_NEW
 #define EBA_SKIP_STRUCT_NULL_CHECK
+#define EBA_SKIP_STRUCT_BITS_NULL_CHECK
+
 /*
 #define EBA_SKIP_ARRAY_INDEX_OVERRUN_SAFETY
 #define EBA_SKIP_ENDIAN
 #define EBA_SKIP_SHIFTS
-#define EBA_SKIP_STRUCT_BITS_NULL_CHECK
 #define EBA_DIY_MEMCPY
 #define Eba_memcpy
 #define Eba_alloc

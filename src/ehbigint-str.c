@@ -42,10 +42,11 @@ int ehbi_set_binary_string(struct ehbigint *bi, const char *str, size_t len)
 
 	Trace_bi_s(8, bi, str);
 
+#ifndef EBA_SKIP_ENDIAN
 	eba.endian = eba_big_endian;
+#endif
 	eba.bits = NULL;
 	eba.size_bytes = 0;
-	eba.endian = eba_big_endian;
 
 	Ehbi_struct_is_not_null(8, bi);
 	ehbi_zero(bi);
@@ -212,10 +213,11 @@ char *ehbi_to_binary_string(const struct ehbigint *bi, char *buf,
 
 	Trace_bi(8, bi);
 
+#ifndef EBA_SKIP_ENDIAN
 	eba.endian = eba_big_endian;
+#endif
 	eba.bits = NULL;
 	eba.size_bytes = 0;
-	eba.endian = eba_big_endian;
 
 	Ehbi_struct_is_not_null_e_j(bi, err, ehbi_to_binary_string_end);
 

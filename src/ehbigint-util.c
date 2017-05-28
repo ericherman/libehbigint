@@ -35,6 +35,7 @@ void ehbi_no_stack_free(void *ptr, size_t size)
 }
 #endif
 
+#ifndef EHBI_SKIP_IS_PROBABLY_PRIME
 #ifdef EHBI_RANDOM_FROM_LINUX_DEV_URANDOM
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -114,3 +115,4 @@ ehbi_dev_urandom_bytes_end:
 	return err;
 }
 #endif /* EHBI_RANDOM_FROM_DEV_URANDOM */
+#endif /* EHBI_SKIP_IS_PROBABLY_PRIME */

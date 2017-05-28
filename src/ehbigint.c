@@ -957,7 +957,9 @@ int ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits)
 
 	Trace_bi_l(2, bi, ((long)num_bits));
 
+#ifndef EBA_SKIP_ENDIAN
 	eba.endian = eba_big_endian;
+#endif
 	eba.bits = NULL;
 	eba.size_bytes = 0;
 
@@ -971,7 +973,6 @@ int ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits)
 		Return_i(2, err);
 	}
 
-	eba.endian = eba_big_endian;
 	eba.bits = bi->bytes;
 	eba.size_bytes = bi->bytes_len;
 
@@ -1006,8 +1007,9 @@ int ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits)
 		Trace_msg_s_bi(2, "end", bi);
 		Return_i(2, err);
 	}
-
+#ifndef EBA_SKIP_ENDIAN
 	eba.endian = eba_big_endian;
+#endif
 	eba.bits = bi->bytes;
 	eba.size_bytes = bi->bytes_len;
 
@@ -1024,6 +1026,8 @@ int ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits)
 	Trace_msg_s_bi(2, "end", bi);
 	Return_i(2, err);
 }
+
+#ifndef EHBI_SKIP_IS_PROBABLY_PRIME
 
 static const long SMALL_PRIMES[] = {
 	2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67,
@@ -1065,6 +1069,7 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	Ehbi_struct_is_not_null(2, bi);
 
 	*err = EHBI_SUCCESS;
+	is_probably_prime = 0;
 
 	if (ehbi_is_negative(bi, err)) {
 		Return_i(2, 0);
@@ -1276,6 +1281,8 @@ ehbi_is_probably_prime_end:
 
 	Return_i(2, is_probably_prime);
 }
+
+#endif /* EHBI_SKIP_IS_PROBABLY_PRIME */
 
 int ehbi_negate(struct ehbigint *bi)
 {

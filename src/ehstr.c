@@ -17,7 +17,10 @@ You should have received a copy of the GNU Lesser General Public License
 <http://www.gnu.org/licenses/>.
 */
 
+#ifndef LONGBITS
 #include <values.h>		/* LONGBITS */
+#endif
+
 #include <ctype.h>		/* isspace */
 
 #include "ehstr.h"

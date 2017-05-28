@@ -149,6 +149,8 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 		 const struct ehbigint *exponent,
 		 const struct ehbigint *modulus);
 
+#ifndef EHBI_SKIP_IS_PROBABLY_PRIME
+
 /* chance of incorrectly naming a non-prime as prime is 4^(-accuracy) */
 #ifndef EHBI_DEFAULT_TRIALS_FOR_IS_PROBABLY_PRIME
 /* 4^(-25) == 8.8817842e-16 */
@@ -177,6 +179,8 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 */
 int ehbi_is_probably_prime(const struct ehbigint *bi,
 			   unsigned int accuracy, int *err);
+
+#endif /* EHBI_SKIP_IS_PROBABLY_PRIME */
 
 /* sign inversion
    returns 0 on success or error_code on error

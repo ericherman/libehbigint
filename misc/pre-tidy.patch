@@ -61,9 +61,9 @@
  
  #ifdef EHBI_NO_ALLOCA
  #include <stdlib.h>
-@@ -39,8 +41,10 @@
- #define ehbi_random_bytes ehbi_dev_urandom_bytes
- #endif
+@@ -41,8 +43,10 @@
+ #endif /* ehbi_random_bytes */
+ #endif /* EHBI_SKIP_IS_PROBABLY_PRIME */
  
 +/*
  #ifdef __cplusplus
@@ -86,7 +86,7 @@
  
  #include <stddef.h>		/* size_t */
  
-@@ -286,8 +288,10 @@ enum {
+@@ -290,8 +292,10 @@ enum {
  	EHBI_LAST
  };
  

@@ -24,7 +24,7 @@ extern "C" {
 
 /* Get the FILE pointer to where fprintf messages currently target.
    Defaults to stderr. */
-FILE *ehbi_log_file();
+FILE *ehbi_log_file(void);
 
 /* Set the FILE pointer to where fprintf messages shall target. */
 void set_ehbi_log_file(FILE *log);

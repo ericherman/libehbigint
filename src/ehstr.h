@@ -20,6 +20,10 @@ You should have received a copy of the GNU Lesser General Public License
 #ifndef EHSTR_H
 #define EHSTR_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>		/* size_t */
 
 /*
@@ -57,6 +61,10 @@ size_t ehstrnlen(const char *str, size_t buf_size);
 #define strnlen ehstrnlen
 #else
 #include <string.h>
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* EHSTR_H */

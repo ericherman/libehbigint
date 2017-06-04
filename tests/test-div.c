@@ -81,19 +81,6 @@ int test_div(int verbose, char *snumerator, char *sdenominator, char *squotient,
 	return failures;
 }
 
-int log_contains(FILE *log, const char *expected)
-{
-	char buffer[4096];
-	rewind(log);
-	while (fgets(buffer, 4096, log)) {
-		if (strstr(buffer, expected)) {
-			return 0;
-		}
-	}
-	fprintf(stderr, "'%s' not found in log\n", expected);
-	return 1;
-}
-
 int test_div_by_zero(int verbose)
 {
 	int err, failures;

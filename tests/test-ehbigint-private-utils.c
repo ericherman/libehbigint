@@ -75,3 +75,22 @@ unsigned long ehbigint_to_unsigned_long(struct ehbigint *val, int *err)
 	}
 	return result;
 }
+
+int log_contains(FILE *log, const char *expected)
+{
+	char buffer[4096];
+	rewind(log);
+	while (fgets(buffer, 4096, log)) {
+		if (strstr(buffer, expected)) {
+			return 0;
+		}
+	}
+	fprintf(stderr, "'%s' not found in log:\n", expected);
+	rewind(log);
+	while (fgets(buffer, 4096, log)) {
+		fprintf(stderr, "%s", buffer);
+	}
+	fprintf(stderr, "\n(end of log)\n");
+
+	return 1;
+}

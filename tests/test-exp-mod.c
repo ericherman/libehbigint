@@ -89,25 +89,6 @@ int test_exp_mod(int verbose, char *sbase, char *sexponent, char *smodulus,
 	return failures;
 }
 
-static int log_contains(FILE *log, const char *expected)
-{
-	char buffer[4096];
-	rewind(log);
-	while (fgets(buffer, 4096, log)) {
-		if (strstr(buffer, expected)) {
-			return 0;
-		}
-	}
-	fprintf(stderr, "'%s' not found in log:\n", expected);
-	rewind(log);
-	while (fgets(buffer, 4096, log)) {
-		fprintf(stderr, "%s", buffer);
-	}
-	fprintf(stderr, "\n(end of log)\n");
-
-	return 1;
-}
-
 int test_exp_mod_by_zero(int verbose)
 {
 	int err, failures;

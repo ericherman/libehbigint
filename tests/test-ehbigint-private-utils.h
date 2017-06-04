@@ -65,4 +65,6 @@ int check_ehbigint_hex(struct ehbigint *val, const char *expected, int line,
 
 unsigned long ehbigint_to_unsigned_long(struct ehbigint *val, int *err);
 
+int log_contains(FILE *log, const char *expected);
+
 #endif /* TEST_EHBIGINT_PRIVATE_UTILS_H */

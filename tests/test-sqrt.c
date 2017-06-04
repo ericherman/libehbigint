@@ -114,6 +114,7 @@ int main(int argc, char **argv)
 		      "151443012912120561509118328",
 		      "111863686247280161986167227");
 
+	failures += test_sqrt(v, "0", "0", "0");
 	failures += test_sqrt_negative(v);
 
 	if (failures) {

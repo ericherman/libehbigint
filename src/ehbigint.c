@@ -483,6 +483,10 @@ int ehbi_sqrt(struct ehbigint *result, struct ehbigint *remainder,
 		Return_i(2, err);
 	}
 
+	if (ehbi_equals(val, &zero, &err)) {
+		Return_i(2, err);
+	}
+
 	size = 1 + val->bytes_used;
 	Ehbi_stack_alloc_struct_j(guess, size, err, ehbi_sqrt_end);
 

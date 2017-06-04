@@ -22,6 +22,7 @@ test-set
 test-set-l
 test-shift-right
 test-subtract
+test-sqrt
 test-bytes-shift-left
 test-bytes-shift-right
 test-to-string

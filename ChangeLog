@@ -1,3 +1,14 @@
+2017-06-04  Eric Herman <eric@freesa.org>
+
+	Add a really stupid imple of sqrt
+
+	* src/ehbigint.h: ehbi_sqrt declaration
+	* src/ehbigint.c: really bad impl of ehbi_sqrt
+	* tests/test-sqrt.c: really simple test of
+	* Makefile.am: test-sqrt
+	* misc/pre-tidy.patch: respin for new header
+	* .gitignore: test-sqrt
+
 2017-05-23  Eric Herman <eric@freesa.org>
 
 	Add the #defines governing ehbi_is_probably_prime up to the header

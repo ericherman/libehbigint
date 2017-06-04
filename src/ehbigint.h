@@ -133,6 +133,15 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	     const struct ehbigint *denominator);
 
 /*
+   populates the first ehbigint with the largest integer not greater
+   than the square root of the thrid ehbigint; the second ehbigint
+   is populated with the remainder
+   returns 0 on success or error_code on error
+*/
+int ehbi_sqrt(struct ehbigint *intsqrt, struct ehbigint *remainder,
+	      const struct ehbigint *val);
+
+/*
    populates the first ehbigint result with the value of the base
    raised to the power of the exponent
    returns 0 on success or error_code on error
@@ -287,6 +296,7 @@ enum {
 	EHBI_DIVIDE_BY_ZERO,
 	EHBI_EBA_CRASH,
 	EHBI_FILE_ERROR,
+	EHBI_SQRT_NEGATIVE,
 	EHBI_LAST
 };
 

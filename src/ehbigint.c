@@ -433,6 +433,111 @@ ehbi_div_end:
 	Return_i(2, err);
 }
 
+int ehbi_sqrt(struct ehbigint *result, struct ehbigint *remainder,
+	      const struct ehbigint *val)
+{
+	int err;
+	struct ehbigint zero, one, two;
+	struct ehbigint guess, temp, junk;
+	unsigned char zbytes[2];
+	unsigned char obytes[2];
+	unsigned char tbytes[2];
+	size_t size;
+
+	Trace_bi_bi_bi(2, result, remainder, val);
+
+	ehbi_unsafe_clear_null_struct(&zero);
+	ehbi_unsafe_clear_null_struct(&one);
+	ehbi_unsafe_clear_null_struct(&two);
+
+	ehbi_unsafe_clear_null_struct(&guess);
+	ehbi_unsafe_clear_null_struct(&temp);
+	ehbi_unsafe_clear_null_struct(&junk);
+
+	zero.bytes = zbytes;
+	zero.bytes_len = 2;
+	ehbi_unsafe_zero(&zero);
+
+	one.bytes = obytes;
+	one.bytes_len = 2;
+	ehbi_unsafe_zero(&one);
+	ehbi_inc_l(&one, 1);
+
+	two.bytes = tbytes;
+	two.bytes_len = 2;
+	ehbi_unsafe_zero(&two);
+	ehbi_inc_l(&two, 2);
+
+	Ehbi_struct_is_not_null(2, result);
+	Ehbi_struct_is_not_null(2, remainder);
+	Ehbi_struct_is_not_null(2, val);
+
+	ehbi_unsafe_zero(result);
+	ehbi_unsafe_zero(remainder);
+
+	err = EHBI_SUCCESS;
+
+	if (ehbi_less_than(val, &zero, &err)) {
+		err = EHBI_SQRT_NEGATIVE;
+		Ehbi_log_error0("square root of a negative would be complex");
+		Return_i(2, err);
+	}
+
+	size = 1 + val->bytes_used;
+	Ehbi_stack_alloc_struct_j(guess, size, err, ehbi_sqrt_end);
+
+	size = 1 + (val->bytes_used * 2);
+	Ehbi_stack_alloc_struct_j(temp, size, err, ehbi_sqrt_end);
+	Ehbi_stack_alloc_struct_j(junk, size, err, ehbi_sqrt_end);
+
+	/* odd cases below square root of 4 */
+	err = err || ehbi_set_l(&temp, 4);
+	if (ehbi_less_than(val, &temp, &err)) {
+		err = err || ehbi_set_l(result, 1);
+		err = err || ehbi_subtract(remainder, val, result);
+		goto ehbi_sqrt_end;
+	}
+
+	/* Initial estimate, never low */
+	/* result = (val / 2) + 1; */
+	err = err || ehbi_div(result, &junk, val, &two);
+	err = err || ehbi_inc(result, &one);
+
+	/* guess = (result + (val / result)) / 2; */
+	err = err || ehbi_div(&temp, &junk, val, result);
+	err = err || ehbi_inc(&temp, result);
+	err = err || ehbi_div(&guess, &junk, &temp, &two);
+
+	while (ehbi_less_than(&guess, result, &err)) {
+		/* result = guess; */
+		err = err || ehbi_set(result, &guess);
+		/* guess = (result + (val / result)) / 2; */
+		err = err || ehbi_div(&temp, &junk, val, result);
+		err = err || ehbi_inc(&temp, result);
+		err = err || ehbi_div(&guess, &junk, &temp, &two);
+	}
+	err = err || ehbi_mul(&temp, result, result);
+	err = err || ehbi_subtract(remainder, val, &temp);
+
+ehbi_sqrt_end:
+	if (guess.bytes) {
+		ehbi_stack_free(guess.bytes, guess.bytes_len);
+	}
+	if (temp.bytes) {
+		ehbi_stack_free(temp.bytes, temp.bytes_len);
+	}
+	if (junk.bytes) {
+		ehbi_stack_free(junk.bytes, junk.bytes_len);
+	}
+
+	if (err) {
+		ehbi_zero(result);
+		ehbi_zero(remainder);
+	}
+
+	Return_i(2, err);
+}
+
 int ehbi_exp(struct ehbigint *result, const struct ehbigint *base,
 	     const struct ehbigint *exponent)
 {

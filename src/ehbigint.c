@@ -1479,6 +1479,33 @@ int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 	Return_i(8, rv);
 }
 
+int ehbi_compare_l(const struct ehbigint *bi1, long i2, int *err)
+{
+	int rv;
+	struct ehbigint bi2;
+	unsigned char bytes[sizeof(long)];
+
+	Trace_bi_l(8, bi1, i2);
+
+	ehbi_unsafe_clear_null_struct(&bi2);
+
+	Ehbi_struct_is_not_null(8, bi1);
+
+	*err = ehbi_init(&bi2, bytes, sizeof(long));
+	if (*err) {
+		rv = 0;
+		Return_i(8, rv);
+	}
+	*err = ehbi_inc_l(&bi2, i2);
+	if (*err) {
+		rv = 0;
+		Return_i(8, rv);
+	}
+
+	rv = ehbi_compare(bi1, &bi2, err);
+	Return_i(8, rv);
+}
+
 int ehbi_equals(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		int *err)
 {
@@ -1492,6 +1519,33 @@ int ehbi_equals(const struct ehbigint *bi1, const struct ehbigint *bi2,
 	err = (err != NULL) ? err : &terr;
 	rv = ((ehbi_compare(bi1, bi2, err) == 0) && (*err == EHBI_SUCCESS));
 
+	Return_i(8, rv);
+}
+
+int ehbi_equals_l(const struct ehbigint *bi1, long i2, int *err)
+{
+	int rv;
+	struct ehbigint bi2;
+	unsigned char bytes[sizeof(long)];
+
+	Trace_bi_l(8, bi1, i2);
+
+	ehbi_unsafe_clear_null_struct(&bi2);
+
+	Ehbi_struct_is_not_null(8, bi1);
+
+	*err = ehbi_init(&bi2, bytes, sizeof(long));
+	if (*err) {
+		rv = 0;
+		Return_i(8, rv);
+	}
+	*err = ehbi_inc_l(&bi2, i2);
+	if (*err) {
+		rv = 0;
+		Return_i(8, rv);
+	}
+
+	rv = ehbi_equals(bi1, &bi2, err);
 	Return_i(8, rv);
 }
 
@@ -1511,6 +1565,33 @@ int ehbi_less_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 	Return_i(8, rv);
 }
 
+int ehbi_less_than_l(const struct ehbigint *bi1, long i2, int *err)
+{
+	int rv;
+	struct ehbigint bi2;
+	unsigned char bytes[sizeof(long)];
+
+	Trace_bi_l(8, bi1, i2);
+
+	ehbi_unsafe_clear_null_struct(&bi2);
+
+	Ehbi_struct_is_not_null(8, bi1);
+
+	*err = ehbi_init(&bi2, bytes, sizeof(long));
+	if (*err) {
+		rv = 0;
+		Return_i(8, rv);
+	}
+	*err = ehbi_inc_l(&bi2, i2);
+	if (*err) {
+		rv = 0;
+		Return_i(8, rv);
+	}
+
+	rv = ehbi_less_than(bi1, &bi2, err);
+	Return_i(8, rv);
+}
+
 int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		      int *err)
 {
@@ -1524,6 +1605,33 @@ int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 	err = (err != NULL) ? err : &terr;
 	rv = ((ehbi_compare(bi1, bi2, err) > 0) && (*err == EHBI_SUCCESS));
 
+	Return_i(8, rv);
+}
+
+int ehbi_greater_than_l(const struct ehbigint *bi1, long i2, int *err)
+{
+	int rv;
+	struct ehbigint bi2;
+	unsigned char bytes[sizeof(long)];
+
+	Trace_bi_l(8, bi1, i2);
+
+	ehbi_unsafe_clear_null_struct(&bi2);
+
+	Ehbi_struct_is_not_null(8, bi1);
+
+	*err = ehbi_init(&bi2, bytes, sizeof(long));
+	if (*err) {
+		rv = 0;
+		Return_i(8, rv);
+	}
+	*err = ehbi_inc_l(&bi2, i2);
+	if (*err) {
+		rv = 0;
+		Return_i(8, rv);
+	}
+
+	rv = ehbi_greater_than(bi1, &bi2, err);
 	Return_i(8, rv);
 }
 

@@ -1,3 +1,17 @@
+2017-06-05  Eric Herman <eric@freesa.org>
+
+	Add new compare to long functions for easy of use.
+
+	This allows easy comparing to constants like 0 or -1
+	without having to instantiate a "struct ehbigint zero" or whatever.
+
+	* src/ehbigint.h: add new foo_l function headers
+	* src/ehbigint.c: impl new foo_l functions
+	* tests/test-compare3.c: test various compares
+	* Makefile.am: test-compare3
+	* .gitignore: test-compare3
+	* misc/pre-tidy.patch: respin for ehbigint.h
+
 2017-06-04  Eric Herman <eric@freesa.org>
 
 	Add a really stupid imple of sqrt

@@ -66,6 +66,7 @@ check_PROGRAMS=\
  test-comp-exp-mod-with-gmp \
  test-comp-mul-with-gmp \
  test-compare2 \
+ test-compare3 \
  test-dec \
  test-dec-corner-case \
  test-div \
@@ -115,6 +116,9 @@ test_comp_mul_with_gmp_LDADD=$(TEST_LDADDS) -lgmp
 
 test_compare2_SOURCES=tests/test-compare2.c $(COMMON_TEST_SOURCES)
 test_compare2_LDADD=$(TEST_LDADDS)
+
+test_compare3_SOURCES=tests/test-compare3.c $(COMMON_TEST_SOURCES)
+test_compare3_LDADD=$(TEST_LDADDS)
 
 test_dec_SOURCES=tests/test-dec.c $(COMMON_TEST_SOURCES)
 test_dec_LDADD=$(TEST_LDADDS)
@@ -238,6 +242,7 @@ valgrind: $(check_PROGRAMS)
 	./libtool --mode=execute valgrind -q ./test-comp-exp-mod-with-gmp
 	./libtool --mode=execute valgrind -q ./test-comp-mul-with-gmp
 	./libtool --mode=execute valgrind -q ./test-compare2
+	./libtool --mode=execute valgrind -q ./test-compare3
 	./libtool --mode=execute valgrind -q ./test-dec
 	./libtool --mode=execute valgrind -q ./test-dec-corner-case
 	./libtool --mode=execute valgrind -q ./test-div

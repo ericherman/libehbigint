@@ -4,6 +4,7 @@ test-compare
 test-comp-exp-mod-with-gmp
 test-comp-mul-with-gmp
 test-compare2
+test-compare3
 test-dec
 test-dec-corner-case
 test-div

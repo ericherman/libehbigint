@@ -205,12 +205,26 @@ int ehbi_equals(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		int *err);
 
 /*
+   returns 1 if the values represented by the first two arguments are equal
+   returns 0 otherwise
+   populates the contents of err with 0 on success or error_code on error
+*/
+int ehbi_equals_l(const struct ehbigint *bi1, long i2, int *err);
+
+/*
    returns 1 if the first parameter is less than the second
    returns 0 otherwise
    populates the contents of err with 0 on success or error_code on error
 */
 int ehbi_less_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		   int *err);
+
+/*
+   returns 1 if the first parameter is less than the second
+   returns 0 otherwise
+   populates the contents of err with 0 on success or error_code on error
+*/
+int ehbi_less_than_l(const struct ehbigint *bi1, long i2, int *err);
 
 /*
    returns 1 if the first parameter is greater than the second
@@ -221,6 +235,13 @@ int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		      int *err);
 
 /*
+   returns 1 if the first parameter is greater than the second
+   returns 0 otherwise
+   populates the contents of err with 0 on success or error_code on error
+*/
+int ehbi_greater_than_l(const struct ehbigint *bi1, long i2, int *err);
+
+/*
    returns 0 if the values represented by the ehbigint arguments are equal
    returns <0 if the first ehbigint is less than the second
    returns >0 if the first ehbigint is greater than the second
@@ -228,6 +249,15 @@ int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 */
 int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		 int *err);
+
+/*
+   returns 0 if the values represented by the arguments are equal
+   returns <0 if the first ehbigint is less than the second
+   returns >0 if the first ehbigint is greater than the second
+   populates the contents of err with 0 on success or error_code on error
+*/
+
+int ehbi_compare_l(const struct ehbigint *bi1, long i2, int *err);
 
 /*
    returns 1 if negative

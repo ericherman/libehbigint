@@ -19,7 +19,7 @@ ALLOCA_CFLAGS=
 
 # typical builds:
 CSTD_CFLAGS=-std=c89
-DEBUG_CFLAGS=-ggdb -O2
+DEBUG_CFLAGS=-ggdb -O2 -fomit-frame-pointer
 NOISY_CFLAGS=-Wall -Wextra -pedantic -Werror
 # if debugging, these flags may be better:
 # CSTD_CFLAGS=-std=gnu11
@@ -208,7 +208,8 @@ AM_CFLAGS=$(CSTD_CFLAGS) \
  $(DEBUG_CFLAGS) \
  $(NOISY_CFLAGS) \
  $(ALLOCA_CFLAGS) \
- $(BACKTRACE_CFLAGS)
+ $(BACKTRACE_CFLAGS) \
+ -pipe
 
 # extracted from https://github.com/torvalds/linux/blob/master/scripts/Lindent
 LINDENT=indent -npro -kr -i8 -ts8 -sob -l80 -ss -ncs -cp1 -il0

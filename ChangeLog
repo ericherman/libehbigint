@@ -1,3 +1,12 @@
+2017-06-28  Eric Herman <eric@freesa.org>
+
+	convience function for construction/destruction
+
+	* src/ehbigint-malloc.h:
+	* src/ehbigint-malloc.c:
+	* misc/pre-tidy.patch: add ehbigint.h
+
+
 2017-06-05  Eric Herman <eric@freesa.org>
 
 	Add new compare to long functions for easy of use.

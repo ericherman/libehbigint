@@ -222,3 +222,28 @@
 +*/
  
  #endif /* EHSTR_H */
+--- orig/src/ehbigint-malloc.h
++++ tidy/src/ehbigint-malloc.h
+@@ -17,9 +17,11 @@
+ #ifndef EHBIGINT_MALLOC_H
+ #define EHBIGINT_MALLOC_H
+ 
++/*
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
++*/
+ 
+ #include "ehbigint.h"
+ 
+@@ -30,8 +32,10 @@
+ struct ehbigint *ehbi_alloc_l(size_t bytes, long val);
+ void ehbi_free(struct ehbigint *bi);
+ 
++/*
+ #ifdef __cplusplus
+ }
+ #endif
++*/
+ 
+ #endif /* EHBIGINT_MALLOC_H */

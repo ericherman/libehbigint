@@ -181,7 +181,7 @@ int ehbi_n_choose_k(struct ehbigint *result, const struct ehbigint *n,
 #endif
 
 #ifndef EHBI_MIN_TRIALS_FOR_IS_PROBABLY_PRIME
-/* 4^(-25) == 9.53674316e-7 */
+/* 4^(-10) == 9.53674316e-7 */
 #define EHBI_MIN_TRIALS_FOR_IS_PROBABLY_PRIME 10U
 #endif
 

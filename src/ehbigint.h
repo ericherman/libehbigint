@@ -35,6 +35,13 @@ struct ehbigint {
 int ehbi_init(struct ehbigint *bi, unsigned char *bytes, size_t len);
 
 /*
+   assignes the byte[] to the struct, sets to val
+   returns 0 on success or error_code on error
+*/
+int ehbi_init_l(struct ehbigint *bi, unsigned char *bytes, size_t len,
+		long val);
+
+/*
    populates an ehbigint with a value of zero
    returns 0 on success or error_code on error
 */
@@ -79,6 +86,12 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 	     const struct ehbigint *bi2);
 
 /*
+   populates the first ehbigint with the sum of the second and third
+   returns 0 on success or error_code on error
+*/
+int ehbi_add_l(struct ehbigint *res, const struct ehbigint *bi1, long v2);
+
+/*
    increments the first ehbigint by the value in the second parameter
    returns 0 on success or error_code on error
 */
@@ -97,6 +110,12 @@ int ehbi_inc_l(struct ehbigint *bi, long val);
 int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val);
 
 /*
+   decrements the first ehbigint by the value in the second parameter
+   returns 0 on success or error_code on error
+*/
+int ehbi_dec_l(struct ehbigint *bi, long val);
+
+/*
    populates the first ehbigint with the value of the second perameter minus
    the third
    returns 0 on success or error_code on error
@@ -105,11 +124,24 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 		  const struct ehbigint *bi2);
 
 /*
+   populates the first ehbigint with the value of the second perameter minus
+   the third
+   returns 0 on success or error_code on error
+*/
+int ehbi_subtract_l(struct ehbigint *res, const struct ehbigint *bi1, long v2);
+
+/*
    populates the first ehbigint with the sum of the second and third
    returns 0 on success or error_code on error
 */
 int ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
 	     const struct ehbigint *bi2);
+
+/*
+   populates the first ehbigint with the sum of the second and third
+   returns 0 on success or error_code on error
+*/
+int ehbi_mul_l(struct ehbigint *res, const struct ehbigint *bi1, long v2);
 
 /*
    shifts the value of the ehbigint up by num_bits number of bits
@@ -133,6 +165,14 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	     const struct ehbigint *denominator);
 
 /*
+   populates the first ehbigint quotient and remainder with the results
+   of the numerator divided by the denominator
+   returns 0 on success or error_code on error
+*/
+int ehbi_div_l(struct ehbigint *quotient, struct ehbigint *remainder,
+	       const struct ehbigint *numerator, long denominator);
+
+/*
    populates the first ehbigint with the largest integer not greater
    than the square root of the thrid ehbigint; the second ehbigint
    is populated with the remainder
@@ -151,6 +191,14 @@ int ehbi_exp(struct ehbigint *result, const struct ehbigint *base,
 
 /*
    populates the first ehbigint result with the value of the base
+   raised to the power of the exponent
+   returns 0 on success or error_code on error
+*/
+int ehbi_exp_l(struct ehbigint *result, const struct ehbigint *base,
+	       long exponent);
+
+/*
+   populates the first ehbigint result with the value of the base
    raised to the power of the exponent mod the modulus
    returns 0 on success or error_code on error
 */
@@ -159,18 +207,61 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 		 const struct ehbigint *modulus);
 
 /*
+   populates the first ehbigint result with the value of the base
+   raised to the power of the exponent mod the modulus
+   returns 0 on success or error_code on error
+*/
+int ehbi_exp_mod_l(struct ehbigint *result, const struct ehbigint *base,
+		   const struct ehbigint *exponent, long modulus);
+
+/*
+   populates the first ehbigint result with the value of the base
+   raised to the power of the exponent mod the modulus
+   returns 0 on success or error_code on error
+*/
+int ehbi_exp_mod_ll(struct ehbigint *result, const struct ehbigint *base,
+		    long exponent, long modulus);
+
+/*
    populates the first ehbigint result with the number of combinations
    of n objects taken k at a time, disregarding order.
    returns 0 on success or error_code on error
 
    Knuth TAoCP vol 1
    1.2.6 Binomial Coefficients
-      /n\    n(n-1)...(n-k+1)
-     |   | = ----------------
-      \k/       k(k-1)...1
+     / n \    n(n-1)...(n-k+1)
+    (     ) = ----------------
+     \ k /       k(k-1)...1
 */
 int ehbi_n_choose_k(struct ehbigint *result, const struct ehbigint *n,
 		    const struct ehbigint *k);
+
+/*
+   populates the first ehbigint result with the number of combinations
+   of n objects taken k at a time, disregarding order.
+   returns 0 on success or error_code on error
+
+   Knuth TAoCP vol 1
+   1.2.6 Binomial Coefficients
+     / n \    n(n-1)...(n-k+1)
+    (     ) = ----------------
+     \ k /       k(k-1)...1
+*/
+int ehbi_n_choose_k_l(struct ehbigint *result, const struct ehbigint *n,
+		      long k);
+
+/*
+   populates the first ehbigint result with the number of combinations
+   of n objects taken k at a time, disregarding order.
+   returns 0 on success or error_code on error
+
+   Knuth TAoCP vol 1
+   1.2.6 Binomial Coefficients
+     / n \    n(n-1)...(n-k+1)
+    (     ) = ----------------
+     \ k /       k(k-1)...1
+*/
+int ehbi_n_choose_k_ll(struct ehbigint *result, long n, long k);
 
 #ifndef EHBI_SKIP_IS_PROBABLY_PRIME
 

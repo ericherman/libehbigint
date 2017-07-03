@@ -1,9 +1,12 @@
 2017-07-03  Eric Herman <eric@freesa.org>
 
 	Add ehbi_n_choose_k Binomial Coefficients function
+	Also implment various functions such that a long may
+	be passed in, rather than a bigint object.
 
-	* src/ehbigint.h: declare ehbi_n_choose_k
-	* src/ehbigint.c: ehbi_n_choose_k
+	* src/ehbigint.h: ehbi_n_choose_k, & misc _l versions
+	* src/ehbigint.c: ehbi_n_choose_k, & misc _l versions
+	* src/ehbigint-log.h: #define NOOP to be ((void)(0))
 	* tests/test-n-choose-k.c: two simple tests
 	* Makefile.am: test-n-choose-k
 	* .gitignore: test-n-choose-k

@@ -12,7 +12,7 @@
  
  #include "ehbigint.h"		/* struct ehbigint */
  
-@@ -309,8 +311,10 @@
+@@ -377,8 +379,10 @@
   ehbi_log_backtrace(ehbi_log_file())
  #endif
  
@@ -86,7 +86,7 @@
  
  #include <stddef.h>		/* size_t */
  
-@@ -344,8 +346,10 @@ enum {
+@@ -435,8 +437,10 @@ enum {
  	EHBI_LAST
  };
  

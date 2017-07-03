@@ -81,6 +81,7 @@ check_PROGRAMS=\
  test-inc-l \
  test-is-probably-prime \
  test-mul \
+ test-n-choose-k \
  test-scenario-mul-mod \
  test-set \
  test-set-l \
@@ -166,6 +167,9 @@ test_is_probably_prime_LDADD=$(TEST_LDADDS)
 
 test_mul_SOURCES=tests/test-mul.c $(COMMON_TEST_SOURCES)
 test_mul_LDADD=$(TEST_LDADDS)
+
+test_n_choose_k_SOURCES=tests/test-n-choose-k.c $(COMMON_TEST_SOURCES)
+test_n_choose_k_LDADD=$(TEST_LDADDS)
 
 test_scenario_mul_mod_SOURCES=tests/test-scenario-mul-mod.c \
  $(COMMON_TEST_SOURCES)
@@ -259,6 +263,7 @@ valgrind: $(check_PROGRAMS)
 	./libtool --mode=execute valgrind -q ./test-inc
 	./libtool --mode=execute valgrind -q ./test-inc-l
 	./libtool --mode=execute valgrind -q ./test-is-probably-prime
+	./libtool --mode=execute valgrind -q ./test-n-choose-k
 	./libtool --mode=execute valgrind -q ./test-mul
 	./libtool --mode=execute valgrind -q ./test-scenario-mul-mod
 	./libtool --mode=execute valgrind -q ./test-set

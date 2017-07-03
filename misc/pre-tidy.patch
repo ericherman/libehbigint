@@ -86,7 +86,7 @@
  
  #include <stddef.h>		/* size_t */
  
-@@ -330,8 +332,10 @@ enum {
+@@ -344,8 +346,10 @@ enum {
  	EHBI_LAST
  };
  
@@ -224,7 +224,7 @@
  #endif /* EHSTR_H */
 --- orig/src/ehbigint-malloc.h
 +++ tidy/src/ehbigint-malloc.h
-@@ -17,9 +17,11 @@
+@@ -16,9 +16,11 @@
  #ifndef EHBIGINT_MALLOC_H
  #define EHBIGINT_MALLOC_H
  
@@ -236,7 +236,7 @@
  
  #include "ehbigint.h"
  
-@@ -30,8 +32,10 @@
+@@ -29,8 +31,10 @@
  struct ehbigint *ehbi_alloc_l(size_t bytes, long val);
  void ehbi_free(struct ehbigint *bi);
  

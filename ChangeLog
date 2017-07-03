@@ -1,3 +1,14 @@
+2017-07-03  Eric Herman <eric@freesa.org>
+
+	Add ehbi_n_choose_k Binomial Coefficients function
+
+	* src/ehbigint.h: declare ehbi_n_choose_k
+	* src/ehbigint.c: ehbi_n_choose_k
+	* tests/test-n-choose-k.c: two simple tests
+	* Makefile.am: test-n-choose-k
+	* .gitignore: test-n-choose-k
+	* misc/pre-tidy.patch: respin
+
 2017-06-28  Eric Herman <eric@freesa.org>
 
 	convience function for construction/destruction

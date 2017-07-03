@@ -18,6 +18,7 @@ test-inc
 test-inc-l
 test-is-probably-prime
 test-mul
+test-n-choose-k
 test-scenario-mul-mod
 test-set
 test-set-l

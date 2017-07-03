@@ -158,6 +158,20 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 		 const struct ehbigint *exponent,
 		 const struct ehbigint *modulus);
 
+/*
+   populates the first ehbigint result with the number of combinations
+   of n objects taken k at a time, disregarding order.
+   returns 0 on success or error_code on error
+
+   Knuth TAoCP vol 1
+   1.2.6 Binomial Coefficients
+      /n\    n(n-1)...(n-k+1)
+     |   | = ----------------
+      \k/       k(k-1)...1
+*/
+int ehbi_n_choose_k(struct ehbigint *result, const struct ehbigint *n,
+		    const struct ehbigint *k);
+
 #ifndef EHBI_SKIP_IS_PROBABLY_PRIME
 
 /* chance of incorrectly naming a non-prime as prime is 4^(-accuracy) */

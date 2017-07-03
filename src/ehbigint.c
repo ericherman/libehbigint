@@ -1136,6 +1136,99 @@ int ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits)
 	Return_i(2, err);
 }
 
+int ehbi_n_choose_k(struct ehbigint *result, const struct ehbigint *n,
+		    const struct ehbigint *k)
+{
+	int err;
+	size_t i, size;
+	struct ehbigint sum_n, sum_k, tmp;
+
+	Trace_bi_bi_bi(2, result, n, k);
+
+	Ehbi_struct_is_not_null(2, result);
+	Ehbi_struct_is_not_null(2, n);
+	Ehbi_struct_is_not_null(2, k);
+
+	err = 0;
+
+	if ((!err && ehbi_greater_than(k, n, &err))
+	    || (!err && ehbi_less_than_l(k, 0, &err))) {
+		err = err || ehbi_set_l(result, 0);
+		goto ehbi_n_choose_k_end;
+	}
+	if ((!err && ehbi_equals_l(k, 0, &err))
+	    || (!err && ehbi_equals(k, n, &err))) {
+		err = err || ehbi_set_l(result, 1);
+		goto ehbi_n_choose_k_end;
+	}
+	if (!err && ehbi_equals_l(k, 1, &err)) {
+		err = err || ehbi_set(result, n);
+		goto ehbi_n_choose_k_end;
+	}
+	if (!err && ehbi_greater_than_l(k, LONG_MAX, &err)) {
+		Ehbi_log_error1("k larger than %ld", LONG_MAX);
+		err = EHBI_BAD_DATA;
+		goto ehbi_n_choose_k_end;
+	}
+
+	size = result->bytes_len;
+	if (size < n->bytes_len) {
+		size = n->bytes_len;
+	}
+	if (size < k->bytes_len) {
+		size = k->bytes_len;
+	}
+
+	Ehbi_stack_alloc_struct(tmp, size, err);
+	if (err) {
+		Return_i(2, err);
+	}
+	Ehbi_stack_alloc_struct(sum_n, size, err);
+	if (err) {
+		Return_i(2, err);
+	}
+	Ehbi_stack_alloc_struct(sum_k, size, err);
+	if (err) {
+		Return_i(2, err);
+	}
+
+	err = err || ehbi_inc(&sum_n, n);
+	err = err || ehbi_inc(&sum_k, k);
+	for (i = 1; ((!err) && (ehbi_greater_than_l(k, i, &err))); ++i) {
+		/* sum_n *= (n - i); */
+		err = err || ehbi_set_l(&tmp, -((long)i));
+		err = err || ehbi_inc(&tmp, n);
+		err = err || ehbi_mul(result, &sum_n, &tmp);
+		err = err || ehbi_set(&sum_n, result);
+
+		/* sum_k *= (k - i) */ ;
+		err = err || ehbi_set_l(&tmp, -((long)i));
+		err = err || ehbi_inc(&tmp, k);
+		err = err || ehbi_mul(result, &sum_k, &tmp);
+		err = err || ehbi_set(&sum_k, result);
+	}
+	/* result = (sum_n / sum_k); */
+	err = err || ehbi_div(result, &tmp, &sum_n, &sum_k);
+
+ehbi_n_choose_k_end:
+	if (err) {
+		Ehbi_log_error1("error %d, setting result = 0", err);
+		ehbi_unsafe_zero(result);
+	}
+	if (tmp.bytes) {
+		ehbi_stack_free(tmp.bytes, tmp.bytes_len);
+	}
+	if (sum_n.bytes) {
+		ehbi_stack_free(sum_n.bytes, sum_n.bytes_len);
+	}
+	if (sum_k.bytes) {
+		ehbi_stack_free(sum_k.bytes, sum_k.bytes_len);
+	}
+
+	Trace_msg_s_bi(2, "end", result);
+	Return_i(2, err);
+}
+
 #ifndef EHBI_SKIP_IS_PROBABLY_PRIME
 
 static const long SMALL_PRIMES[] = {

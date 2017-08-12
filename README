@@ -18,11 +18,17 @@ Prior to use, it is the caller's responsibility to construct the structure,
 and initialize it, for example:
 
 	struct ehbigint *bi;
+	unsigned char *bytes;
+	size_t bytes_len;
+	int err;
+
 	bi = (struct ehbigint *) malloc(sizeof(struct ehbigint));
-	bi->bytes = (unsigned char *) malloc(20);
-	bi->bytes_len = 20;
-	bi->bytes_used = 0;
-	bi->sign = 0;
+	bytes_len = 20;
+	bytes = malloc(bytes_len);
+	err = ehbi_init(bi, bytes, bytes_len);
+
+If you would rather initialize it with a non-zero, but "long" value:
+	err = ehbi_init(bi, bytes, bytes_len, 42);
 
 Most ehbigint functions return an error code. The "ehbigint.h" header
 defines the meaning of the error codes. Like posix return codes, a value
@@ -34,6 +40,10 @@ denotes that an overflow would have occured.
 Initial value
 -------------
 The structure can be set to a value in a number of ways.
+
+It can be reset to zero:
+	err = ehbi_zero(bi);
+
 It can be set by a decimal string:
 	const char *dstr = "1949183158370983519073011571092751";
 	err = ehbi_set_decimal_string(bi, dstr, strlen(dstr));
@@ -42,6 +52,10 @@ or a hexidecimal string:
 	const char *hex = "0x23052AC258940FF12342FFFFFFFFA1231";
 	err = ehbi_set_hex_string(bi, hex, strlen(hex));
 
+or a binary string:
+	const char *binstr = "0b01110101110101010000001111100010";
+	err = ehbi_set_binary_string(bi, binstr, strlen(binstr));
+
 or an long:
 	long val = 123412L;
 	err = ehbi_set_l(bi, val);
@@ -49,11 +63,17 @@ or an long:
 or another instance of struct ehbigint:
 	err = ehbi_set_l(bi, bi_other);
 
+or negate the current value:
+	err = ehbi_negate(bi);
+
 
 Addition
 --------
 Populate a result from adding two passed in:
 	err = ehbi_add(result, bi1, bi2);
+
+or add a long:
+	err = ehbi_add_l(result, bi, 23);
 
 Adding to an existing value, modifying in place:
 	err = ehbi_inc(bi, bi_amount);
@@ -67,8 +87,14 @@ Subtraction
 Populate a result with the value of the second param minus the third:
 	err = ehbi_subtract(result, bi1, bi2);
 
+Or subtract a long:
+	err = ehbi_subtract_l(result, bi1, 7);
+
 Decrement the value in place:
 	err = ehbi_dec(bi, bi_amount);
+
+Decrement values in place with a long:
+	err = ehbi_dec_l(bi, 2);
 
 
 Multiplication
@@ -77,15 +103,69 @@ Populate the first ehbigint with the sum of the second multiplied by the
 third:
 	err = ehbi_mul(result, bi1, bi2);
 
+or with a long:
+
+	err = ehbi_mul_l(result, bi1, 3L);
+
 Shift the value of the ehbigint up by num_bits number of bits:
+
 	err = ehbi_shift_left(bi, num_bits);
+or:
+	err = ehbi_shift_right(bi, num_bits);
 
 
 Division
 --------
 Populate the quotient and remainder with the results of the numerator
 divided by the denominator:
-	err = ehbi_div(*quotient, *remainder, *numerator, *denominator);
+
+	err = ehbi_div(quotient, remainder, numerator, denominator);
+or:
+	err = ehbi_div_l(quotient, remainder, numerator, 10);
+
+
+Square Root
+-----------
+Or get the closest integer to the sqare root, and the remainder:
+
+	err = ehbi_sqrt(sqrt, remainder, bi);
+
+
+Exponents
+---------
+Populate the first ehbigint result with the value of the base
+raised to the power of the exponent:
+
+	err = ehbi_exp(result, base, exponent);
+or:
+	err = ehbi_exp_l(result, base, 11);
+
+Populate the first ehbigint result with the value of the base
+   raised to the power of the exponent mod the modulus
+
+	err = ehbi_exp_mod(result, base, exponent, modulus);
+or:
+	err = ehbi_exp_mod_l(result, base, bi_exponent, 4);
+or:
+	err = ehbi_exp_mod_ll(result, base, 4096L, 31L);
+
+
+Binomial Coefficients
+---------------------
+   Knuth TAoCP vol 1
+   1.2.6 Binomial Coefficients
+     / n \    n(n-1)...(n-k+1)
+    (     ) = ----------------
+     \ k /       k(k-1)...1
+
+Populates the first ehbigint result with the number of combinations
+of n objects taken k at a time, disregarding order
+
+	err = ehbi_n_choose_k(result, n, k);
+or:
+	err = ehbi_n_choose_k_l(result, n, 5L);
+or:
+	err = ehbi_n_choose_k_ll(result, 52L, 26L);
 
 
 Comparison
@@ -94,10 +174,15 @@ The comparison functions return a result, and pass the return code to
 the functions as an "out" paramter:
 
 	result = ehbi_equals(bi1, bi2, &err);
+	result = ehbi_equals_l(bi1, 31L, &err);
 	result = ehbi_less_than(bi1, bi2, &err);
+	result = ehbi_less_than_l(bi1, 73L, &err);
 	result = ehbi_greater_than(bi1, bi2, &err);
+	result = ehbi_greater_than_l(bi1, 321L, &err);
 	result = ehbi_compare(bi1, bi2, &err);
-	result = ehbi_is_negative(bi);
+	result = ehbi_compare_l(bi1, 69L, &err);
+	result = ehbi_is_negative(bi, &err);
+	result = ehbi_is_odd(bi, &err);
 
 With the result, standard if statements can be made:
 	if (ehbi_equals(bi1, bi2, &err)) {
@@ -106,6 +191,15 @@ With the result, standard if statements can be made:
 
 The result is always false if an error condition occurs, for exmaple if
 a NULL pointer is passed to the function.
+
+
+Primality
+---------
+Find out if a number is probably prime, uses the second parameter
+(accuracy) to determine strength of the test:
+
+	accuracy = 15;
+	is_prime = ehbi_is_probably_prime(bi, accuracy, &err);
 
 
 Output
@@ -119,6 +213,11 @@ Populates the passed in buffer with a decimal string representation of
 the ehbigint:
 	int err;
 	printf("%s\n", ehbi_to_decimal_string(bi, buf, buf_len, &err));
+
+Populates the passed in buffer with a binary string representation of
+the ehbigint:
+	int err;
+	printf("%s\n", ehbi_to_binary_string(bi, buf, buf_len, &err));
 
 
 Dependencies

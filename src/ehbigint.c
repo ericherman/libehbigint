@@ -188,8 +188,12 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 			Return_i(2, err);
 		}
 		err = ehbi_set(&tmp, bi2);
-		err = err || ehbi_negate(&tmp);
-		err = err || ehbi_subtract(res, bi1, &tmp);
+		if (!err) {
+			err = ehbi_negate(&tmp);
+		}
+		if (!err) {
+			err = ehbi_subtract(res, bi1, &tmp);
+		}
 		ehbi_stack_free(tmp.bytes, size);
 		if (err) {
 			ehbi_unsafe_zero(res);
@@ -303,10 +307,18 @@ int ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
 			a = bi2->bytes[(bi2->bytes_len - 1) - i];
 			b = bi1->bytes[(bi1->bytes_len - 1) - j];
 			r = (a * b);
-			err = err || ehbi_set_l(&tmp, r);
-			err = err || ehbi_bytes_shift_left(&tmp, i);
-			err = err || ehbi_bytes_shift_left(&tmp, j);
-			err = err || ehbi_inc(res, &tmp);
+			if (!err) {
+				err = ehbi_set_l(&tmp, r);
+			}
+			if (!err) {
+				err = ehbi_bytes_shift_left(&tmp, i);
+			}
+			if (!err) {
+				err = ehbi_bytes_shift_left(&tmp, j);
+			}
+			if (!err) {
+				err = ehbi_inc(res, &tmp);
+			}
 			if (err) {
 				goto ehbi_mul_end;
 			}
@@ -394,7 +406,9 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		size = numerator->bytes_used;
 		Ehbi_stack_alloc_struct_j(s_abs_numer, size, err, ehbi_div_end);
 		err = ehbi_set(&s_abs_numer, numerator);
-		err = err || ehbi_negate(&s_abs_numer);
+		if (!err) {
+			err = ehbi_negate(&s_abs_numer);
+		}
 		if (err) {
 			goto ehbi_div_end;
 		}
@@ -410,7 +424,9 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		size = numerator->bytes_used;
 		Ehbi_stack_alloc_struct_j(s_abs_denom, size, err, ehbi_div_end);
 		err = ehbi_set(&s_abs_denom, denominator);
-		err = err || ehbi_negate(&s_abs_denom);
+		if (!err) {
+			err = ehbi_negate(&s_abs_denom);
+		}
 		if (err) {
 			goto ehbi_div_end;
 		}
@@ -463,8 +479,8 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	}
 
 	i = 0;
-	while (ehbi_greater_than(remainder, abs_denom, &err)
-	       || ehbi_equals(remainder, abs_denom, &err)) {
+	while (!err && (ehbi_greater_than(remainder, abs_denom, &err)
+			|| ehbi_equals(remainder, abs_denom, &err))) {
 		if (err) {
 			goto ehbi_div_end;
 		}
@@ -476,7 +492,7 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		if (err) {
 			goto ehbi_div_end;
 		}
-		while (ehbi_less_than(remainder, abs_denom, &err)
+		while (!err && ehbi_less_than(remainder, abs_denom, &err)
 		       && (num_idx < abs_numer->bytes_len)) {
 			err = ehbi_bytes_shift_left(quotient, 1);
 			if (err) {
@@ -604,33 +620,61 @@ int ehbi_sqrt(struct ehbigint *result, struct ehbigint *remainder,
 	Ehbi_stack_alloc_struct_j(junk, size, err, ehbi_sqrt_end);
 
 	/* odd cases below square root of 4 */
-	err = err || ehbi_set_l(&temp, 4);
+	if (!err) {
+		err = ehbi_set_l(&temp, 4);
+	}
 	if (ehbi_less_than(val, &temp, &err)) {
-		err = err || ehbi_set_l(result, 1);
-		err = err || ehbi_subtract(remainder, val, result);
+		if (!err) {
+			err = ehbi_set_l(result, 1);
+		}
+		if (!err) {
+			err = ehbi_subtract(remainder, val, result);
+		}
 		goto ehbi_sqrt_end;
 	}
 
 	/* Initial estimate, never low */
 	/* result = (val / 2) + 1; */
-	err = err || ehbi_div(result, &junk, val, &two);
-	err = err || ehbi_inc(result, &one);
+	if (!err) {
+		err = ehbi_div(result, &junk, val, &two);
+	}
+	if (!err) {
+		err = ehbi_inc(result, &one);
+	}
 
 	/* guess = (result + (val / result)) / 2; */
-	err = err || ehbi_div(&temp, &junk, val, result);
-	err = err || ehbi_inc(&temp, result);
-	err = err || ehbi_div(&guess, &junk, &temp, &two);
-
-	while (ehbi_less_than(&guess, result, &err)) {
-		/* result = guess; */
-		err = err || ehbi_set(result, &guess);
-		/* guess = (result + (val / result)) / 2; */
-		err = err || ehbi_div(&temp, &junk, val, result);
-		err = err || ehbi_inc(&temp, result);
-		err = err || ehbi_div(&guess, &junk, &temp, &two);
+	if (!err) {
+		err = ehbi_div(&temp, &junk, val, result);
 	}
-	err = err || ehbi_mul(&temp, result, result);
-	err = err || ehbi_subtract(remainder, val, &temp);
+	if (!err) {
+		err = ehbi_inc(&temp, result);
+	}
+	if (!err) {
+		err = ehbi_div(&guess, &junk, &temp, &two);
+	}
+
+	while (!err && ehbi_less_than(&guess, result, &err)) {
+		/* result = guess; */
+		if (!err) {
+			err = ehbi_set(result, &guess);
+		}
+		/* guess = (result + (val / result)) / 2; */
+		if (!err) {
+			err = ehbi_div(&temp, &junk, val, result);
+		}
+		if (!err) {
+			err = ehbi_inc(&temp, result);
+		}
+		if (!err) {
+			err = ehbi_div(&guess, &junk, &temp, &two);
+		}
+	}
+	if (!err) {
+		err = ehbi_mul(&temp, result, result);
+	}
+	if (!err) {
+		err = ehbi_subtract(remainder, val, &temp);
+	}
 
 ehbi_sqrt_end:
 	if (guess.bytes) {
@@ -668,12 +712,20 @@ int ehbi_exp(struct ehbigint *result, const struct ehbigint *base,
 	Ehbi_stack_alloc_struct_j(tmp, result->bytes_len, err, ehbi_exp_end);
 
 	err = ehbi_zero(&loop);
-	err = err || ehbi_set_l(result, 1);
+	if (!err) {
+		err = ehbi_set_l(result, 1);
+	}
 
-	while (ehbi_less_than(&loop, exponent, &err)) {
-		err = err || ehbi_mul(&tmp, result, base);
-		err = err || ehbi_set(result, &tmp);
-		ehbi_inc_l(&loop, 1);
+	while (!err && ehbi_less_than(&loop, exponent, &err)) {
+		if (!err) {
+			err = ehbi_mul(&tmp, result, base);
+		}
+		if (!err) {
+			err = ehbi_set(result, &tmp);
+		}
+		if (!err) {
+			err = ehbi_inc_l(&loop, 1);
+		}
 	}
 
 ehbi_exp_end:
@@ -791,20 +843,28 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 		goto ehbi_mod_exp_end;
 	}
 
-	err = err || ehbi_set(&tbase, base);
-	err = err || ehbi_set(&texp, exponent);
+	if (!err) {
+		err = ehbi_set(&tbase, base);
+	}
+	if (!err) {
+		err = ehbi_set(&texp, exponent);
+	}
 
 	/* result := 1 */
-	err = err || ehbi_set_l(result, 1);
+	if (!err) {
+		err = ehbi_set_l(result, 1);
+	}
 	if (err) {
 		goto ehbi_mod_exp_end;
 	}
 
 	/* base := base mod modulus */
-	err = err || ehbi_div(&tjunk, &tbase, base, modulus);
+	if (!err) {
+		err = ehbi_div(&tjunk, &tbase, base, modulus);
+	}
 
 	/* while exponent > 0 */
-	while (ehbi_greater_than(&texp, &zero, &err)) {
+	while (!err && ehbi_greater_than(&texp, &zero, &err)) {
 		if (err) {
 			goto ehbi_mod_exp_end;
 		}
@@ -812,16 +872,26 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 		/* if (exponent mod 2 == 1): */
 		if (ehbi_is_odd(&texp, &err)) {
 			/* result := (result * base) mod modulus */
-			err = err || ehbi_mul(&tmp1, result, &tbase);
-			err = err || ehbi_div(&tjunk, result, &tmp1, modulus);
+			if (!err) {
+				err = ehbi_mul(&tmp1, result, &tbase);
+			}
+			if (!err) {
+				err = ehbi_div(&tjunk, result, &tmp1, modulus);
+			}
 		}
 
 		/* exponent := exponent >> 1 */
-		err = err || ehbi_shift_right(&texp, 1);
+		if (!err) {
+			err = ehbi_shift_right(&texp, 1);
+		}
 
 		/* base := (base * base) mod modulus */
-		err = err || ehbi_mul(&tmp1, &tbase, &tbase);
-		err = err || ehbi_div(&tjunk, &tbase, &tmp1, modulus);
+		if (!err) {
+			err = ehbi_mul(&tmp1, &tbase, &tbase);
+		}
+		if (!err) {
+			err = ehbi_div(&tjunk, &tbase, &tmp1, modulus);
+		}
 
 		if (err) {
 			goto ehbi_mod_exp_end;
@@ -936,7 +1006,9 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 		Return_i(4, err);
 	}
 	err = ehbi_set(&temp, bi);
-	err = err || ehbi_add(bi, &temp, val);
+	if (!err) {
+		err = ehbi_add(bi, &temp, val);
+	}
 	ehbi_stack_free(temp.bytes, temp.bytes_len);
 
 	Trace_msg_s_bi(4, "end", bi);
@@ -989,8 +1061,12 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 	}
 	ehbi_unsafe_zero(&temp);
 
-	err = err || ehbi_subtract(&temp, bi, val);
-	err = err || ehbi_set(bi, &temp);
+	if (!err) {
+		err = ehbi_subtract(&temp, bi, val);
+	}
+	if (!err) {
+		err = ehbi_set(bi, &temp);
+	}
 
 	ehbi_stack_free(temp.bytes, temp.bytes_len);
 
@@ -1051,7 +1127,9 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 	/* subtract from 0 */
 	if (bi1->bytes_used == 1 && bi1->bytes[bi1->bytes_len - 1] == 0x00) {
 		err = ehbi_set(res, bi2);
-		err = err || ehbi_negate(res);
+		if (!err) {
+			err = ehbi_negate(res);
+		}
 		goto ehbi_subtract_end;
 	}
 
@@ -1060,8 +1138,12 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 		size = bi2->bytes_len;
 		Ehbi_stack_alloc_struct_j(tmp, size, err, ehbi_subtract_end);
 		err = ehbi_set(&tmp, bi2);
-		err = err || ehbi_negate(&tmp);
-		err = err || ehbi_add(res, bi1, &tmp);
+		if (!err) {
+			err = ehbi_negate(&tmp);
+		}
+		if (!err) {
+			err = ehbi_add(res, bi1, &tmp);
+		}
 		goto ehbi_subtract_end;
 	}
 
@@ -1070,9 +1152,15 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 		size = bi1->bytes_len;
 		Ehbi_stack_alloc_struct_j(tmp, size, err, ehbi_subtract_end);
 		err = ehbi_set(&tmp, bi1);
-		err = err || ehbi_negate(&tmp);
-		err = err || ehbi_add(res, &tmp, bi2);
-		err = err || ehbi_negate(res);
+		if (!err) {
+			err = ehbi_negate(&tmp);
+		}
+		if (!err) {
+			err = ehbi_add(res, &tmp, bi2);
+		}
+		if (!err) {
+			err = ehbi_negate(res);
+		}
 		goto ehbi_subtract_end;
 	}
 
@@ -1366,16 +1454,22 @@ int ehbi_n_choose_k(struct ehbigint *result, const struct ehbigint *n,
 
 	if ((!err && ehbi_greater_than(k, n, &err))
 	    || (!err && ehbi_less_than_l(k, 0, &err))) {
-		err = err || ehbi_set_l(result, 0);
+		if (!err) {
+			err = ehbi_set_l(result, 0);
+		}
 		goto ehbi_n_choose_k_end;
 	}
 	if ((!err && ehbi_equals_l(k, 0, &err))
 	    || (!err && ehbi_equals(k, n, &err))) {
-		err = err || ehbi_set_l(result, 1);
+		if (!err) {
+			err = ehbi_set_l(result, 1);
+		}
 		goto ehbi_n_choose_k_end;
 	}
 	if (!err && ehbi_equals_l(k, 1, &err)) {
-		err = err || ehbi_set(result, n);
+		if (!err) {
+			err = ehbi_set(result, n);
+		}
 		goto ehbi_n_choose_k_end;
 	}
 	if (!err && ehbi_greater_than_l(k, LONG_MAX, &err)) {
@@ -1405,23 +1499,45 @@ int ehbi_n_choose_k(struct ehbigint *result, const struct ehbigint *n,
 		Return_i(2, err);
 	}
 
-	err = err || ehbi_inc(&sum_n, n);
-	err = err || ehbi_inc(&sum_k, k);
+	if (!err) {
+		err = ehbi_inc(&sum_n, n);
+	}
+	if (!err) {
+		err = ehbi_inc(&sum_k, k);
+	}
 	for (i = 1; ((!err) && (ehbi_greater_than_l(k, i, &err))); ++i) {
 		/* sum_n *= (n - i); */
-		err = err || ehbi_set_l(&tmp, -((long)i));
-		err = err || ehbi_inc(&tmp, n);
-		err = err || ehbi_mul(result, &sum_n, &tmp);
-		err = err || ehbi_set(&sum_n, result);
+		if (!err) {
+			err = ehbi_set_l(&tmp, -((long)i));
+		}
+		if (!err) {
+			err = ehbi_inc(&tmp, n);
+		}
+		if (!err) {
+			err = ehbi_mul(result, &sum_n, &tmp);
+		}
+		if (!err) {
+			err = ehbi_set(&sum_n, result);
+		}
 
 		/* sum_k *= (k - i) */ ;
-		err = err || ehbi_set_l(&tmp, -((long)i));
-		err = err || ehbi_inc(&tmp, k);
-		err = err || ehbi_mul(result, &sum_k, &tmp);
-		err = err || ehbi_set(&sum_k, result);
+		if (!err) {
+			err = ehbi_set_l(&tmp, -((long)i));
+		}
+		if (!err) {
+			err = ehbi_inc(&tmp, k);
+		}
+		if (!err) {
+			err = ehbi_mul(result, &sum_k, &tmp);
+		}
+		if (!err) {
+			err = ehbi_set(&sum_k, result);
+		}
 	}
 	/* result = (sum_n / sum_k); */
-	err = err || ehbi_div(result, &tmp, &sum_n, &sum_k);
+	if (!err) {
+		err = ehbi_div(result, &tmp, &sum_n, &sum_k);
+	}
 
 ehbi_n_choose_k_end:
 	if (err) {

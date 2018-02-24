@@ -78,7 +78,9 @@ int ehbi_set_binary_string(struct ehbigint *bi, const char *str, size_t len)
 	for (i = 0, j = len - 1; i < len; ++i, --j) {
 		ehbi_eba_err = EHBI_SUCCESS;
 		eba_set(&eba, i, str[j] == '1' ? 1 : 0);
-		err = err || ehbi_eba_err;
+		if (!err) {
+			err = ehbi_eba_err;
+		}
 	}
 
 	ehbi_unsafe_reset_bytes_used(bi);

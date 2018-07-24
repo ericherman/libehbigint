@@ -2149,6 +2149,3 @@ int ehbi_is_odd(const struct ehbigint *bi, int *err)
 
 	Return_i(8, rv);
 }
-
-#undef Ehbi_stack_alloc_struct_j
-#undef Ehbi_stack_alloc_struct

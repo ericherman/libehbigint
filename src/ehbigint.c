@@ -1629,6 +1629,31 @@ static const long SMALL_PRIMES[] = {
 	0			/* ZERO terminated */
 };
 
+/*
+   From:
+   https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test
+
+   The algorithm can be written in pseudocode as follows:
+
+	Input #1: n > 3, an odd integer to be tested for primality;
+	Input #2: k, a parameter that determines the accuracy of the test
+	Output: composite if n is composite, otherwise probably prime
+
+	write n-1 as (2^r)*d with d odd by factoring powers of 2 from n-1
+	WitnessLoop: repeat k times:
+		pick a random integer a in the range [2, n-2]
+		x := (a^d) mod n
+		if x = 1 or x = n-1 then
+			continue WitnessLoop
+		repeat r-1 times:
+			x := (x^2) mod n
+			if x = 1 then
+				return composite
+			if x = n-1 then
+				continue WitnessLoop
+		return composite
+	return probably prime
+*/
 int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 			   int *err)
 {

@@ -1,3 +1,8 @@
+2018-07-25  Eric Herman <eric@freesa.org>
+
+	* src/ehbigint.c: replace trial div with prime witnesses
+	* src/ehbigint.h: rename and tune default constants a bit
+
 2017-07-03  Eric Herman <eric@freesa.org>
 
 	Add ehbi_n_choose_k Binomial Coefficients function

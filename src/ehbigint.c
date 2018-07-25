@@ -1,6 +1,6 @@
 /*
 ehbigint.c: slow Big Int library hopefully somewhat suitable for 8bit CPUs
-Copyright (C) 2016 Eric Herman <eric@freesa.org>
+Copyright (C) 2016, 2018 Eric Herman <eric@freesa.org>
 
 This work is free software: you can redistribute it and/or modify it
 under the terms of the GNU Lesser General Public License as published by
@@ -84,7 +84,10 @@ int ehbi_init_l(struct ehbigint *bi, unsigned char *bytes, size_t len, long val)
 {
 	int err;
 	err = ehbi_init(bi, bytes, len);
-	return err || ehbi_set_l(bi, val);
+	if (!err) {
+		err = ehbi_set_l(bi, val);
+	}
+	return err;
 }
 
 int ehbi_zero(struct ehbigint *bi)
@@ -1629,6 +1632,37 @@ static const long SMALL_PRIMES[] = {
 	0			/* ZERO terminated */
 };
 
+size_t SMALL_PRIMES_LEN = (sizeof(SMALL_PRIMES) / sizeof(long)) - 1;
+
+static void ehbi_get_witness(size_t i, struct ehbigint *a,
+			     struct ehbigint *max_witness, struct ehbigint *two,
+			     int *err)
+{
+	size_t j, max_rnd, shift;
+	if (i < EHBI_NUM_SMALL_PRIME_WITNESSES && i < SMALL_PRIMES_LEN) {
+		*err = ehbi_set_l(a, SMALL_PRIMES[i]);
+	} else {
+		j = 0;
+		max_rnd = EHBI_MAX_TRIES_TO_GRAB_RANDOM_BYTES;
+		/* pick a random integer a in the range [2, n-2] */
+		do {
+			*err = ehbi_random_bytes(a->bytes, a->bytes_len);
+			a->bytes_used = a->bytes_len;
+			shift = a->bytes_len - max_witness->bytes_used;
+			*err = ehbi_bytes_shift_right(a, shift);
+			ehbi_unsafe_reset_bytes_used(a);
+		} while ((ehbi_greater_than(a, max_witness, err)
+			  || ehbi_less_than(a, two, err)) && (j++ < max_rnd));
+	}
+	if (ehbi_greater_than(a, max_witness, err)
+	    || ehbi_less_than(a, two, err)) {
+		if (!*err) {
+			/* but, too big, so do something totally bogus: */
+			*err = ehbi_set_l(a, 2 + i);
+		}
+	}
+}
+
 /*
    From:
    https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test
@@ -1657,8 +1691,8 @@ static const long SMALL_PRIMES[] = {
 int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 			   int *err)
 {
-	size_t i, j, trial_divs, max_rnd, shift, size;
-	int is_probably_prime, stop;
+	size_t i, k, size;
+	int is_probably_prime, stop, local_err;
 	struct ehbigint zero, one, two;
 	unsigned char z_bytes[4], o_bytes[4], t_bytes[4];
 	struct ehbigint bimin1, a, r, d, x, y, c, max_witness;
@@ -1676,6 +1710,10 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	ehbi_unsafe_clear_null_struct(&max_witness);
 
 	Ehbi_struct_is_not_null(2, bi);
+
+	if (!err) {
+		err = &local_err;
+	}
 
 	*err = EHBI_SUCCESS;
 	is_probably_prime = 0;
@@ -1711,8 +1749,13 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	Ehbi_stack_alloc_struct_j(c, size, *err, ehbi_is_probably_prime_end);
 
 	/* set d to 2, the first prime */
-	*err = *err || ehbi_set_l(&d, SMALL_PRIMES[0]);
-	if (*err || ehbi_less_than(bi, &d, err)) {
+	if (!*err) {
+		*err = ehbi_set_l(&d, SMALL_PRIMES[0]);
+	}
+	if (*err) {
+		goto ehbi_is_probably_prime_end;
+	}
+	if (ehbi_less_than(bi, &d, err)) {
 		is_probably_prime = 0;
 		goto ehbi_is_probably_prime_end;
 	}
@@ -1721,22 +1764,6 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	if (!ehbi_is_odd(bi, err)) {
 		is_probably_prime = ehbi_equals(bi, &d, err);
 		goto ehbi_is_probably_prime_end;
-	}
-
-	/* first some trial divsion */
-	trial_divs = EHBI_NUM_SMALL_PRIMES_TO_TRIAL_DIVIDE;
-	for (i = 1; SMALL_PRIMES[i] != 0 && i <= trial_divs; ++i) {
-		*err = *err || ehbi_set_l(&d, SMALL_PRIMES[i]);
-		if (ehbi_equals(bi, &d, err)) {
-			is_probably_prime = 1;
-			goto ehbi_is_probably_prime_end;
-		}
-
-		*err = *err || ehbi_div(&a, &r, bi, &d);
-		if (*err || ehbi_equals(&r, &zero, err)) {
-			is_probably_prime = 0;
-			goto ehbi_is_probably_prime_end;
-		}
 	}
 
 	is_probably_prime = 1;
@@ -1752,17 +1779,15 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 		if (ehbi_is_odd(&d, err)) {
 			break;
 		}
-		*err = *err || ehbi_shift_right(&d, 1);
+		if (!*err) {
+			*err = ehbi_shift_right(&d, 1);
+		}
 	}
 	if (*err) {
 		goto ehbi_is_probably_prime_end;
 	}
 	ehbi_set_l(&r, (long)i);
 	/* (bi-1) == 2^(r) * d */
-
-	if (accuracy < EHBI_MIN_TRIALS_FOR_IS_PROBABLY_PRIME) {
-		accuracy = EHBI_DEFAULT_TRIALS_FOR_IS_PROBABLY_PRIME;
-	}
 
 	ehbi_set(&bimin1, bi);
 	ehbi_dec(&bimin1, &one);
@@ -1771,30 +1796,23 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	ehbi_set(&max_witness, bi);
 	ehbi_dec(&max_witness, &two);
 
+	if (accuracy == 0) {
+		k = EHBI_DEFAULT_TRIALS_FOR_IS_PROBABLY_PRIME;
+	} else if (accuracy < EHBI_MIN_TRIALS_FOR_IS_PROBABLY_PRIME) {
+		k = EHBI_MIN_TRIALS_FOR_IS_PROBABLY_PRIME;
+	} else {
+		k = accuracy;
+	}
 	/*
 	   WitnessLoop: repeat k times:
 	 */
-	for (i = 0; i < accuracy; ++i) {
+	for (i = 0; i < k; ++i) {
 		if (*err) {
 			goto ehbi_is_probably_prime_end;
 		}
 
-		j = 0;
-		max_rnd = EHBI_MAX_TRIES_TO_GRAB_RANDOM_BYTES;
-		/* pick a random integer a in the range [2, n-2] */
-		do {
-			*err = ehbi_random_bytes(a.bytes, a.bytes_len);
-			a.bytes_used = a.bytes_len;
-			shift = a.bytes_len - max_witness.bytes_used;
-			*err = ehbi_bytes_shift_right(&a, shift);
-			ehbi_unsafe_reset_bytes_used(&a);
-		} while ((ehbi_greater_than(&a, &max_witness, err)
-			  || ehbi_less_than(&a, &two, err)) && (j++ < max_rnd));
-		if (ehbi_greater_than(&a, &max_witness, err)
-		    || ehbi_less_than(&a, &two, err)) {
-			/* but, too big, so do something totally bogus: */
-			*err = *err || ehbi_set_l(&a, 2 + i);
-		}
+		ehbi_get_witness(i, &a, &max_witness, &two, err);
+
 		/* still too big, we are done */
 		if (ehbi_greater_than(&a, &max_witness, err)) {
 			is_probably_prime = 1;
@@ -1822,18 +1840,31 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 		}
 
 		/* repeat r-1 times: */
-		*err = *err || ehbi_set(&c, &r);
-		*err = *err || ehbi_dec(&c, &one);
+		if (!*err) {
+			*err = ehbi_set(&c, &r);
+		}
+		if (!*err) {
+			*err = ehbi_dec(&c, &one);
+		}
 		if (*err) {
 			goto ehbi_is_probably_prime_end;
 		}
 		stop = 0;
 		while (!stop && ehbi_greater_than(&c, &zero, err)) {
-			*err = *err || ehbi_dec(&c, &one);
+			if (!*err) {
+				*err = ehbi_dec(&c, &one);
+			}
 
 			/* x := x^2 mod n */
-			*err = *err || ehbi_set(&y, &x);
-			*err = *err || ehbi_exp_mod(&x, &y, &two, bi);
+			if (!*err) {
+				*err = ehbi_set(&y, &x);
+			}
+			if (!*err) {
+				*err = ehbi_exp_mod(&x, &y, &two, bi);
+			}
+			if (*err) {
+				goto ehbi_is_probably_prime_end;
+			}
 
 			/* if x == 1 then return composite */
 			if (ehbi_equals(&x, &one, err)) {

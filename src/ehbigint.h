@@ -1,6 +1,6 @@
 /*
 ehbigint.h: slow Big Int library hopefully somewhat suitable for 8bit CPUs
-Copyright (C) 2016 Eric Herman <eric@freesa.org>
+Copyright (C) 2016, 2018 Eric Herman <eric@freesa.org>
 
 This work is free software: you can redistribute it and/or modify it
 under the terms of the GNU Lesser General Public License as published by
@@ -276,13 +276,13 @@ int ehbi_n_choose_k_ll(struct ehbigint *result, long n, long k);
 #define EHBI_MIN_TRIALS_FOR_IS_PROBABLY_PRIME 10U
 #endif
 
-#ifndef EHBI_NUM_SMALL_PRIMES_TO_TRIAL_DIVIDE
-#define EHBI_NUM_SMALL_PRIMES_TO_TRIAL_DIVIDE 20U
+#ifndef EHBI_NUM_SMALL_PRIME_WITNESSES
+#define EHBI_NUM_SMALL_PRIME_WITNESSES 13U
 #endif
 
 /* used in ehbi_is_probably_prime */
 #ifndef EHBI_MAX_TRIES_TO_GRAB_RANDOM_BYTES
-#define EHBI_MAX_TRIES_TO_GRAB_RANDOM_BYTES 10U
+#define EHBI_MAX_TRIES_TO_GRAB_RANDOM_BYTES 30U
 #endif
 
 /*

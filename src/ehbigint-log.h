@@ -304,21 +304,21 @@ extern char EHBI_DBUG_Buf1[80];
 		} \
 	} while(0)
 
-#define Ehbi_struct_is_not_null_e(level, bi, err) \
+#define Ehbi_struct_is_not_null_e(level, bi, err, err_rv) \
 	do { \
 		if (bi == NULL) { \
 			Ehbi_log_error0("Null argument(s)"); \
 			if (err) { \
 				*err = EHBI_NULL_ARGS; \
 			} \
-			Return_i(level, 0); \
+			Return_i(level, err_rv); \
 		} \
 		if (bi->bytes == NULL) { \
 			Ehbi_log_error0("Null bytes[]"); \
 			if (err) { \
 				*err = EHBI_NULL_BYTES; \
 			} \
-			Return_i(level, 0); \
+			Return_i(level, err_rv); \
 		} \
 	} while(0)
 

@@ -1944,11 +1944,14 @@ int ehbi_negate(struct ehbigint *bi)
 
 int ehbi_is_negative(const struct ehbigint *bi, int *err)
 {
-	int rv;
+	int rv, local_err;
 
 	Trace_bi(8, bi);
+	if (!err) {
+		err = &local_err;
+	}
 
-	Ehbi_struct_is_not_null_e(8, bi, err);
+	Ehbi_struct_is_not_null_e(8, bi, err, 0);
 
 	/* guard for negative zero? */
 	if (bi->bytes_used == 0) {
@@ -1969,12 +1972,16 @@ int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 {
 	size_t i;
 	unsigned char a, b;
-	int rv, b1_pos, b2_pos;
+	int rv, b1_pos, b2_pos, local_err;
 
 	Trace_bi_bi(8, bi1, bi2);
+	if (!err) {
+		err = &local_err;
+	}
+	rv = 0;
 
-	Ehbi_struct_is_not_null_e(8, bi1, err);
-	Ehbi_struct_is_not_null_e(8, bi2, err);
+	Ehbi_struct_is_not_null_e(8, bi1, err, rv);
+	Ehbi_struct_is_not_null_e(8, bi2, err, rv);
 
 	*err = EHBI_SUCCESS;
 
@@ -2006,13 +2013,12 @@ int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		}
 	}
 
-	rv = 0;
 	Return_i(8, rv);
 }
 
 int ehbi_compare_l(const struct ehbigint *bi1, long i2, int *err)
 {
-	int rv;
+	int rv, local_err;
 	struct ehbigint bi2;
 	unsigned char bytes[sizeof(long)];
 
@@ -2020,16 +2026,19 @@ int ehbi_compare_l(const struct ehbigint *bi1, long i2, int *err)
 
 	ehbi_unsafe_clear_null_struct(&bi2);
 
-	Ehbi_struct_is_not_null(8, bi1);
+	if (!err) {
+		err = &local_err;
+	}
+	rv = 0;
+
+	Ehbi_struct_is_not_null_e(8, bi1, err, rv);
 
 	*err = ehbi_init(&bi2, bytes, sizeof(long));
 	if (*err) {
-		rv = 0;
 		Return_i(8, rv);
 	}
 	*err = ehbi_inc_l(&bi2, i2);
 	if (*err) {
-		rv = 0;
 		Return_i(8, rv);
 	}
 
@@ -2040,14 +2049,17 @@ int ehbi_compare_l(const struct ehbigint *bi1, long i2, int *err)
 int ehbi_equals(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		int *err)
 {
-	int rv, terr;
+	int rv, local_err;
 
 	Trace_bi_bi(8, bi1, bi2);
+	if (!err) {
+		err = &local_err;
+	}
+	rv = 0;
 
-	Ehbi_struct_is_not_null_e(8, bi1, err);
-	Ehbi_struct_is_not_null_e(8, bi2, err);
+	Ehbi_struct_is_not_null_e(8, bi1, err, rv);
+	Ehbi_struct_is_not_null_e(8, bi2, err, rv);
 
-	err = (err != NULL) ? err : &terr;
 	rv = ((ehbi_compare(bi1, bi2, err) == 0) && (*err == EHBI_SUCCESS));
 
 	Return_i(8, rv);
@@ -2055,24 +2067,27 @@ int ehbi_equals(const struct ehbigint *bi1, const struct ehbigint *bi2,
 
 int ehbi_equals_l(const struct ehbigint *bi1, long i2, int *err)
 {
-	int rv;
+	int rv, local_err;
 	struct ehbigint bi2;
 	unsigned char bytes[sizeof(long)];
 
 	Trace_bi_l(8, bi1, i2);
 
+	if (!err) {
+		err = &local_err;
+	}
+	rv = 0;
+
 	ehbi_unsafe_clear_null_struct(&bi2);
 
-	Ehbi_struct_is_not_null(8, bi1);
+	Ehbi_struct_is_not_null_e(8, bi1, err, rv);
 
 	*err = ehbi_init(&bi2, bytes, sizeof(long));
 	if (*err) {
-		rv = 0;
 		Return_i(8, rv);
 	}
 	*err = ehbi_inc_l(&bi2, i2);
 	if (*err) {
-		rv = 0;
 		Return_i(8, rv);
 	}
 
@@ -2083,14 +2098,19 @@ int ehbi_equals_l(const struct ehbigint *bi1, long i2, int *err)
 int ehbi_less_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		   int *err)
 {
-	int rv, terr;
+	int rv, local_err;
 
 	Trace_bi_bi(8, bi1, bi2);
 
-	Ehbi_struct_is_not_null_e(8, bi1, err);
-	Ehbi_struct_is_not_null_e(8, bi2, err);
+	if (!err) {
+		err = &local_err;
+	}
 
-	err = (err != NULL) ? err : &terr;
+	rv = 0;
+
+	Ehbi_struct_is_not_null_e(8, bi1, err, rv);
+	Ehbi_struct_is_not_null_e(8, bi2, err, rv);
+
 	rv = ((ehbi_compare(bi1, bi2, err) < 0) && (*err == EHBI_SUCCESS));
 
 	Return_i(8, rv);
@@ -2098,24 +2118,27 @@ int ehbi_less_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 
 int ehbi_less_than_l(const struct ehbigint *bi1, long i2, int *err)
 {
-	int rv;
+	int rv, local_err;
 	struct ehbigint bi2;
 	unsigned char bytes[sizeof(long)];
 
 	Trace_bi_l(8, bi1, i2);
 
+	if (!err) {
+		err = &local_err;
+	}
+	rv = 0;
+
 	ehbi_unsafe_clear_null_struct(&bi2);
 
-	Ehbi_struct_is_not_null(8, bi1);
+	Ehbi_struct_is_not_null_e(8, bi1, err, rv);
 
 	*err = ehbi_init(&bi2, bytes, sizeof(long));
 	if (*err) {
-		rv = 0;
 		Return_i(8, rv);
 	}
 	*err = ehbi_inc_l(&bi2, i2);
 	if (*err) {
-		rv = 0;
 		Return_i(8, rv);
 	}
 
@@ -2126,14 +2149,18 @@ int ehbi_less_than_l(const struct ehbigint *bi1, long i2, int *err)
 int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		      int *err)
 {
-	int rv, terr;
+	int rv, local_err;
 
 	Trace_bi_bi(8, bi1, bi2);
 
-	Ehbi_struct_is_not_null_e(8, bi1, err);
-	Ehbi_struct_is_not_null_e(8, bi2, err);
+	if (!err) {
+		err = &local_err;
+	}
+	rv = 0;
 
-	err = (err != NULL) ? err : &terr;
+	Ehbi_struct_is_not_null_e(8, bi1, err, rv);
+	Ehbi_struct_is_not_null_e(8, bi2, err, rv);
+
 	rv = ((ehbi_compare(bi1, bi2, err) > 0) && (*err == EHBI_SUCCESS));
 
 	Return_i(8, rv);
@@ -2141,24 +2168,27 @@ int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 
 int ehbi_greater_than_l(const struct ehbigint *bi1, long i2, int *err)
 {
-	int rv;
+	int rv, local_err;
 	struct ehbigint bi2;
 	unsigned char bytes[sizeof(long)];
 
 	Trace_bi_l(8, bi1, i2);
 
+	if (!err) {
+		err = &local_err;
+	}
+	rv = 0;
+
 	ehbi_unsafe_clear_null_struct(&bi2);
 
-	Ehbi_struct_is_not_null(8, bi1);
+	Ehbi_struct_is_not_null_e(8, bi1, err, rv);
 
 	*err = ehbi_init(&bi2, bytes, sizeof(long));
 	if (*err) {
-		rv = 0;
 		Return_i(8, rv);
 	}
 	*err = ehbi_inc_l(&bi2, i2);
 	if (*err) {
-		rv = 0;
 		Return_i(8, rv);
 	}
 
@@ -2169,11 +2199,16 @@ int ehbi_greater_than_l(const struct ehbigint *bi1, long i2, int *err)
 int ehbi_is_odd(const struct ehbigint *bi, int *err)
 {
 	unsigned char bit;
-	int rv;
+	int rv, local_err;
 
 	Trace_bi(8, bi);
 
-	Ehbi_struct_is_not_null_e(8, bi, err);
+	if (!err) {
+		err = &local_err;
+	}
+	rv = 0;
+
+	Ehbi_struct_is_not_null_e(8, bi, err, rv);
 
 	bit = 0x01 & bi->bytes[bi->bytes_len - 1];
 	rv = bit ? 1 : 0;

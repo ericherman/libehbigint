@@ -20,7 +20,7 @@ int test_scenario_mul_mod(int verbose)
 	struct ehbigint bx, by, bz, bresult, bquot, brem;
 	unsigned long x, y, z, result;
 	unsigned char xb[16], yb[16], zb[16], resb[16], quotb[16], remb[16];
-	char *expect_mul;
+	const char *expect_mul;
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;

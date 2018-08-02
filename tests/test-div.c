@@ -15,8 +15,8 @@ License for more details.
 #include "test-ehbigint-private-utils.h"
 #include "../src/ehbigint-log.h"	/* set_ehbi_log_file */
 
-int test_div(int verbose, char *snumerator, char *sdenominator, char *squotient,
-	     char *sremainder)
+int test_div(int verbose, const char *snumerator, const char *sdenominator,
+	     const char *squotient, const char *sremainder)
 {
 	int err, failures;
 

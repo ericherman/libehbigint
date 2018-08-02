@@ -14,7 +14,7 @@ License for more details.
 */
 #include "test-ehbigint-private-utils.h"
 
-int test_mul(int verbose, long al, long bl, char *expected)
+int test_mul(int verbose, long al, long bl, const char *expected)
 {
 	int err, failures;
 

@@ -15,8 +15,8 @@ License for more details.
 #include "test-ehbigint-private-utils.h"
 #include "../src/ehbigint-log.h"	/* set_ehbi_log_file */
 
-int test_exp_mod(int verbose, char *sbase, char *sexponent, char *smodulus,
-		 char *sresult)
+int test_exp_mod(int verbose, const char *sbase, const char *sexponent,
+		 const char *smodulus, const char *sresult)
 {
 	int err, failures;
 

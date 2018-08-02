@@ -15,7 +15,8 @@ License for more details.
 #include "test-ehbigint-private-utils.h"
 #include "../src/ehbigint-log.h"	/* set_ehbi_log_file */
 
-int test_sqrt(int verbose, char *sval, char *ssqrt, char *sremainder)
+int test_sqrt(int verbose, const char *sval, const char *ssqrt,
+	      const char *sremainder)
 {
 	int err, failures;
 

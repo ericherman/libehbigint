@@ -25,9 +25,9 @@ int test_dec_corner_case(int verbose)
 	   $ bc <<< "50331548-33554393"
 	   16777155
 	 */
-	char *str_1 = "50331548";
-	char *str_2 = "33554393";
-	char *str_3 = "16777155";
+	const char *str_1 = "50331548";
+	const char *str_2 = "33554393";
+	const char *str_3 = "16777155";
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;

@@ -15,7 +15,8 @@ License for more details.
 #include "test-ehbigint-private-utils.h"
 #include "../src/ehbigint-log.h"	/* set_ehbi_log_file */
 
-int test_exp(int verbose, char *sbase, char *sexponent, char *sresult)
+int test_exp(int verbose, const char *sbase, const char *sexponent,
+	     const char *sresult)
 {
 	int err, failures;
 
@@ -32,7 +33,7 @@ int test_exp(int verbose, char *sbase, char *sexponent, char *sresult)
 
 	ehbi_init(&base, bytes_base, 20);
 	ehbi_init(&exponent, bytes_exponent, 20);
-	ehbi_init(&result, bytes_result, 40);
+	ehbi_init(&result, bytes_result, 30);
 
 	err = ehbi_set_decimal_string(&base, sbase, strlen(sbase));
 	if (err) {

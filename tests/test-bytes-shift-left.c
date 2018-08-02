@@ -14,7 +14,8 @@ License for more details.
 */
 #include "test-ehbigint-private-utils.h"
 
-int test_bytes_shift_left(int verbose, char *val, size_t bytes, char *expected)
+int test_bytes_shift_left(int verbose, const char *val, size_t bytes,
+			  const char *expected)
 {
 	int err, failures;
 	unsigned char bytes_buf1[20];

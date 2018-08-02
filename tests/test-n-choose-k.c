@@ -15,7 +15,7 @@ License for more details.
 #include "test-ehbigint-private-utils.h"
 
 int test_n_choose_k(int verbose, const char *nstr, const char *kstr,
-		    char *expectstr)
+		    const char *expectstr)
 {
 	int err, failures;
 

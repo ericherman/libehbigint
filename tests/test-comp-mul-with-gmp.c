@@ -20,7 +20,7 @@ int test_comp_mul_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 	int failures, i, err;
 	char ebuf[BUFLEN];
 	char gbuf[BUFLEN];
-	char *in_str;
+	const char *in_str;
 	struct ehbigint ein, emul, eres, ediv, equot, erem;
 	unsigned char in_bytes[BILEN], mul_bytes[BILEN], res_bytes[BILEN];
 	unsigned char div_bytes[BILEN], quot_bytes[BILEN], rem_bytes[BILEN];

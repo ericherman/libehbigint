@@ -56,6 +56,7 @@ extern int ehbi_eba_err;
 #define Eba_log_error3 Ehbi_log_error3
 
 #define Eba_stack_alloc ehbi_stack_alloc
+#define Eba_stack_alloc_str "ehbi_stack_alloc"
 #define Eba_stack_free ehbi_stack_free
 
 #include "eba.h"

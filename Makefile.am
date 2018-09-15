@@ -213,6 +213,7 @@ AM_CFLAGS=$(CSTD_CFLAGS) \
  $(NOISY_CFLAGS) \
  $(ALLOCA_CFLAGS) \
  $(BACKTRACE_CFLAGS) \
+ -include src/ehbigint-eba.h \
  -pipe
 
 # extracted from https://github.com/torvalds/linux/blob/master/scripts/Lindent

@@ -159,6 +159,43 @@ int test_compare(int verbose)
 	return failures;
 }
 
+int test_greater_than(int verbose, const char *a, const char *b, int expect)
+{
+	int err, failures, result;
+	unsigned char bytes_buf1[20];
+	unsigned char bytes_buf2[10];
+	struct ehbigint bi1, bi2;
+
+	VERBOSE_ANNOUNCE(verbose);
+	failures = 0;
+
+	ehbi_init(&bi1, bytes_buf1, 20);
+	ehbi_init(&bi2, bytes_buf2, 10);
+
+	err = ehbi_set_decimal_string(&bi1, a, strlen(a));
+	err += ehbi_set_decimal_string(&bi1, b, strlen(b));
+	if (err) {
+		Test_log_error1("error %d from ehbi_set_decimal_string\n", err);
+		Test_log_error("Aborting test\n");
+		return (1 + failures);
+	}
+
+	result = ehbi_greater_than(&bi1, &bi2, &err);
+	if (err) {
+		Test_log_error1("error %d from ehbi_greater_than\n", err);
+		Test_log_error("Aborting test\n");
+		return (1 + failures);
+	}
+
+	failures += check_int(result, expect);
+
+	if (failures) {
+		Test_log_error1("%d failures in test_greater_than\n", failures);
+	}
+
+	return failures;
+}
+
 int main(int argc, char **argv)
 {
 	int v, failures;
@@ -167,6 +204,8 @@ int main(int argc, char **argv)
 	failures = 0;
 
 	failures += test_compare(v);
+
+	failures += test_greater_than(v, "65521", "35813", 1);
 
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);

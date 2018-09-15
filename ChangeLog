@@ -1,3 +1,21 @@
+2018-09-15  Eric Herman <eric@freesa.org>
+
+	Previously, eba.c was not being build with the correct
+	#defines from ehbigint-eba.h
+
+	There was a bytes_used bug which took a while to track
+	down and demonstrate with tests; now fixed.
+
+	* src/ehbigint-str.c: ensure bytes_used is correct
+	* src/ehbigint.c: ensure bytes_used is correct
+	* src/ehbigint-eba.h: #define Eba_stack_alloc_str
+	* Makefile.am: ebh.c is built with -include ehbigint-eba.h
+	* tests/test-compare.c: found a bytes_used bug
+	* tests/test-div.c: found a bytes_used bug
+	* tests/test-subtract.c: found a bytes_used bug
+	* tests/test-n-choose-k.c: add test we can do in our heads
+	* misc/pre-tidy.patch: respin
+
 2018-07-25  Eric Herman <eric@freesa.org>
 
 	* src/ehbigint.c: replace trial div with prime witnesses

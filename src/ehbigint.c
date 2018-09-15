@@ -37,17 +37,8 @@ static void ehbi_unsafe_struct_l(struct ehbigint *temp, long val)
 		j = (temp->bytes_len - 1) - i;
 		temp->bytes[j] = c;
 	}
-	for (i = 0; i < temp->bytes_len; ++i) {
-		if (temp->bytes[i] != 0x00) {
-			break;
-		}
-	}
-	temp->bytes_used = temp->bytes_len - i;
-	if (temp->bytes_used == 0) {
-		++(temp->bytes_used);
-	}
-
 	temp->sign = (val < 0);
+	ehbi_unsafe_reset_bytes_used(temp);
 }
 
 int ehbi_init(struct ehbigint *bi, unsigned char *bytes, size_t len)

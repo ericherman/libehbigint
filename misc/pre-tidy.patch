@@ -136,7 +136,7 @@
  
  #include "ehbigint-log.h"
  #include "ehbigint-util.h"
-@@ -60,8 +62,10 @@
+@@ -61,8 +63,10 @@
  
  #include "eba.h"
  

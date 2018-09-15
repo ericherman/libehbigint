@@ -150,6 +150,8 @@ int ehbi_set_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 		bi->bytes[i] = 0x00;
 	}
 
+	ehbi_unsafe_reset_bytes_used(bi);
+
 	Trace_msg_s_bi(8, "end", bi);
 	Return_i(8, EHBI_SUCCESS);
 }

@@ -73,6 +73,7 @@ int main(int argc, char **argv)
 	v = (argc > 1) ? atoi(argv[1]) : 0;
 	failures = 0;
 
+	failures += test_n_choose_k(v, "4", "2", "6");
 	failures += test_n_choose_k(v, "5", "3", "10");
 	failures += test_n_choose_k(v, "40", "20", "137846528820");
 

@@ -81,6 +81,54 @@ int test_div(int verbose, const char *snumerator, const char *sdenominator,
 	return failures;
 }
 
+int test_div_l(int verbose, const char *snumerator, long ldenominator,
+	       const char *squotient, const char *sremainder)
+{
+	int err, failures;
+
+	unsigned char bytes_numerator[10];
+	unsigned char bytes_quotient[10];
+	unsigned char bytes_remainder[10];
+
+	struct ehbigint numerator;
+	struct ehbigint quotient;
+	struct ehbigint remainder;
+
+	VERBOSE_ANNOUNCE(verbose);
+	failures = 0;
+
+	ehbi_init(&numerator, bytes_numerator, 10);
+	ehbi_init(&quotient, bytes_quotient, 10);
+	ehbi_init(&remainder, bytes_remainder, 10);
+
+	err =
+	    ehbi_set_decimal_string(&numerator, snumerator, strlen(snumerator));
+	if (err) {
+		Test_log_error1("error %d from ehbi_set_hex_string\n", err);
+		Test_log_error("Aborting test\n");
+		return (1 + failures);
+	}
+	failures += Check_ehbigint_dec(&numerator, snumerator);
+	if (failures) {
+		Test_log_error1("round trip failed %s\n", snumerator);
+		Test_log_error("Aborting test\n");
+		return (1 + failures);
+	}
+
+	err = ehbi_div_l(&quotient, &remainder, &numerator, ldenominator);
+	if (err) {
+		Test_log_error1("error %d from ehbi_div\n", err);
+		Test_log_error("Aborting test\n");
+		return (1 + failures);
+	}
+
+	failures += Check_ehbigint_dec(&quotient, squotient);
+
+	failures += Check_ehbigint_dec(&remainder, sremainder);
+
+	return failures;
+}
+
 int test_div_by_zero(int verbose)
 {
 	int err, failures;
@@ -144,6 +192,9 @@ int main(int argc, char **argv)
 	    test_div(v, "5088824049625", "33554393", "151658", "31916031");
 
 	failures += test_div_by_zero(v);
+
+	failures += test_div_l(v, "-13", 6, "-2", "1");
+	failures += test_div_l(v, "600851475143", 65521, "9170364", "55499");
 
 	if (failures) {
 		Test_log_error2("%d failures in %s\n", failures, __FILE__);

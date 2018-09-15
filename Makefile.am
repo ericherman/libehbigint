@@ -35,6 +35,12 @@ BACKTRACE_CFLAGS=-D_POSIX_SOURCE -DEBHI_CAN_BACKTRACE -rdynamic
 #BACKTRACE_CFLAGS=
 #endif
 
+EBA_CLFAGS=\
+ -DEBA_SKIP_EBA_NEW \
+ -DEBA_SKIP_STRUCT_NULL_CHECK \
+ -DEBA_SKIP_STRUCT_BITS_NULL_CHECK \
+ -include src/ehbigint-eba.h
+
 lib_LTLIBRARIES=libehbigint.la
 include_HEADERS=src/ehbigint.h
 
@@ -213,7 +219,7 @@ AM_CFLAGS=$(CSTD_CFLAGS) \
  $(NOISY_CFLAGS) \
  $(ALLOCA_CFLAGS) \
  $(BACKTRACE_CFLAGS) \
- -include src/ehbigint-eba.h \
+ $(EBA_CLFAGS) \
  -pipe
 
 # extracted from https://github.com/torvalds/linux/blob/master/scripts/Lindent

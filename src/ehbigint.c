@@ -1361,9 +1361,7 @@ int ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits)
 
 	Trace_bi_l(2, bi, ((long)num_bits));
 
-#ifndef EBA_SKIP_ENDIAN
 	eba.endian = eba_big_endian;
-#endif
 	eba.bits = NULL;
 	eba.size_bytes = 0;
 
@@ -1411,9 +1409,7 @@ int ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits)
 		Trace_msg_s_bi(2, "end", bi);
 		Return_i(2, err);
 	}
-#ifndef EBA_SKIP_ENDIAN
 	eba.endian = eba_big_endian;
-#endif
 	eba.bits = bi->bytes;
 	eba.size_bytes = bi->bytes_len;
 

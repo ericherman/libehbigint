@@ -1,3 +1,17 @@
+2018-09-23  Eric Herman <eric@freesa.org>
+
+	update the EBA libs
+
+	* src/eba.h: update lib
+	* src/eba.c: update lib
+	* src/ehbigint-str.c: remove endian #ifdef
+	* src/ehbigint.c: remove endian #ifdef
+	* Makefile.am: update -DEBA_FOO
+	* src/ehbigint-arduino.h: update #defines
+	* configure.ac: bump version
+	* misc/pre-tidy.patch: respin
+
+
 2018-09-15  Eric Herman <eric@freesa.org>
 
 	Previously, eba.c was not being build with the correct

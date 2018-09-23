@@ -1,5 +1,5 @@
 #Makefile.am
-#Copyright (C) 2016 Eric Herman <eric@freesa.org>
+#Copyright (C) 2016, 2018 Eric Herman <eric@freesa.org>
 #
 #This work is free software: you can redistribute it and/or modify it
 #under the terms of the GNU Lesser General Public License as published by
@@ -13,19 +13,17 @@
 
 # for environments that do not have alloca, malloc is used
 # malloc instead of alloca can be forced: #define EHBI_NO_ALLOCA 1
-# TODO: make this plugable for non-alloca embedded environments
+# TODO: make this plugable for non-alloca, non-C11 environments
 #ALLOCA_CFLAGS=-DEHBI_NO_ALLOCA=1
 ALLOCA_CFLAGS=
 
 # typical builds:
-CSTD_CFLAGS=-std=c89
-DEBUG_CFLAGS=-ggdb -O2 -fomit-frame-pointer
-NOISY_CFLAGS=-Wall -Wextra -pedantic -Werror
-# if debugging, these flags may be better:
-# CSTD_CFLAGS=-std=gnu11
-# DEBUG_CFLAGS=-ggdb -O0 -D_GNU_SOURCE -DEHBI_DEBUG=1
-# NOISY_CFLAGS=-Wall -Wextra -Werror
+RELEASE_HOSTED_CFLAGS=\
+ -std=c89 -Wpedantic $(ALLOCA_CFLAGS) \
+ -pipe -ggdb -O2 -fomit-frame-pointer \
+ -Wall -Wextra -Werror
 
+# if debugging, these flags may be better:
 #TODO get configure/autoconf to work right with BACKTRACE
 #if HAVE_BACKTRACE
 #if HAVE_BACKTRACE_SYMBOLS_FD
@@ -34,12 +32,25 @@ BACKTRACE_CFLAGS=-D_POSIX_SOURCE -DEBHI_CAN_BACKTRACE -rdynamic
 #else
 #BACKTRACE_CFLAGS=
 #endif
+DEBUG_HOSTED_GNU_CFLAGS=\
+ -std=gnu11 -D_GNU_SOURCE $(BACKTRACE_CFLAGS) $(ALLOCA_CFLAGS) \
+ -pipe -ggdb -O0 -DEHBI_DEBUG=1 \
+ -Wall -Wextra -Werror
+
+BUILD_TYPE_CFLAGS=$(RELEASE_HOSTED_CFLAGS)
+
 
 EBA_CLFAGS=\
- -DEBA_SKIP_EBA_NEW \
- -DEBA_SKIP_STRUCT_NULL_CHECK \
- -DEBA_SKIP_STRUCT_BITS_NULL_CHECK \
+ -DEBA_SKIP_EBA_NEW=1 \
+ -DEBA_SKIP_STRUCT_NULL_CHECK=1 \
+ -DEBA_SKIP_STRUCT_BITS_NULL_CHECK=1 \
+ -DEBA_SKIP_ARRAY_INDEX_OVERRUN_SAFETY=1 \
  -include src/ehbigint-eba.h
+
+AM_CFLAGS=$(BUILD_TYPE_CFLAGS) $(EBA_CLFAGS)
+
+libehbigint_la_LIBADD=
+AM_LDFLAGS=-rdynamic
 
 lib_LTLIBRARIES=libehbigint.la
 include_HEADERS=src/ehbigint.h
@@ -62,8 +73,6 @@ libehbigint_la_SOURCES=\
  src/eba.c \
  src/ehbigint.c
 
-libehbigint_la_LIBADD=
-AM_LDFLAGS=-rdynamic
 
 TESTS=$(check_PROGRAMS)
 check_PROGRAMS=\
@@ -214,13 +223,6 @@ ACLOCAL_AMFLAGS=-I m4 --install
 EXTRA_DIST=COPYING.GPL3 misc
 
 
-AM_CFLAGS=$(CSTD_CFLAGS) \
- $(DEBUG_CFLAGS) \
- $(NOISY_CFLAGS) \
- $(ALLOCA_CFLAGS) \
- $(BACKTRACE_CFLAGS) \
- $(EBA_CLFAGS) \
- -pipe
 
 # extracted from https://github.com/torvalds/linux/blob/master/scripts/Lindent
 LINDENT=indent -npro -kr -i8 -ts8 -sob -l80 -ss -ncs -cp1 -il0

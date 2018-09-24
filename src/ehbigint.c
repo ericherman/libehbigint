@@ -43,8 +43,6 @@ static void ehbi_unsafe_struct_l(struct ehbigint *temp, long val)
 
 int ehbi_init(struct ehbigint *bi, unsigned char *bytes, size_t len)
 {
-	size_t i;
-
 	if (bi == NULL) {
 		Ehbi_log_error0("Null struct");
 		return EHBI_NULL_STRUCT;
@@ -60,9 +58,7 @@ int ehbi_init(struct ehbigint *bi, unsigned char *bytes, size_t len)
 		return EHBI_NULL_BYTES;
 	}
 
-	for (i = 0; i < len; ++i) {
-		bytes[i] = 0x00;
-	}
+	Eba_memset(bytes, 0x00, len);
 
 	bi->bytes = bytes;
 	bi->bytes_len = len;
@@ -134,9 +130,7 @@ int ehbi_set(struct ehbigint *bi, const struct ehbigint *val)
 		++bi->bytes_used;
 	}
 
-	for (i = 0; i < (bi->bytes_len - bi->bytes_used); ++i) {
-		bi->bytes[i] = 0x00;
-	}
+	Eba_memset(bi->bytes, 0x00, (bi->bytes_len - bi->bytes_used));
 
 	ehbi_unsafe_reset_bytes_used(bi);
 

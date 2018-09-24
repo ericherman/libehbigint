@@ -144,9 +144,7 @@ int ehbi_set_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 	}
 
 	/* let's just zero out the rest of the bytes, for easier debug */
-	while (i-- > 0) {
-		bi->bytes[i] = 0x00;
-	}
+	Eba_memset(bi->bytes, 0x00, i);
 
 	ehbi_unsafe_reset_bytes_used(bi);
 

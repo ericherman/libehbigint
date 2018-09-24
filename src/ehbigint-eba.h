@@ -45,6 +45,7 @@ extern int ehbi_eba_err;
 #define Eba_stack_free ehbi_stack_free
 
 #include "eba.h"
+#define Ehstr_memset Eba_memset
 
 #ifdef __cplusplus
 }

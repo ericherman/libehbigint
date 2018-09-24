@@ -1,3 +1,12 @@
+2018-09-24  Eric Herman <eric@freesa.org>
+
+	update lib ehstr
+
+	* src/ehstr.c: update from upstream
+	* src/ehbigint-eba.h: account for eba diy memset by ehstr
+	* misc/pre-tidy.patch: respin
+
+
 2018-09-23  Eric Herman <eric@freesa.org>
 
 	update the EBA libs

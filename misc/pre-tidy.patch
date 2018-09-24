@@ -111,9 +111,9 @@
  
  #include "ehbigint-log.h"
  #include "ehbigint-util.h"
-@@ -46,8 +48,10 @@
- 
+@@ -47,8 +49,10 @@
  #include "eba.h"
+ #define Ehstr_memset Eba_memset
  
 +/*
  #ifdef __cplusplus

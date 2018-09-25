@@ -107,32 +107,33 @@ int ehbi_set_l(struct ehbigint *bi, long val)
 
 int ehbi_set(struct ehbigint *bi, const struct ehbigint *val)
 {
-	size_t i;
-	unsigned char byte;
+	size_t offset, voffset;
 
 	Trace_bi_bi(6, bi, val);
 
 	Ehbi_struct_is_not_null(6, bi);
 	Ehbi_struct_is_not_null(6, val);
 
-	ehbi_unsafe_zero(bi);
-
+	if (val->bytes_used > bi->bytes_len) {
+		ehbi_unsafe_zero(bi);
+		Ehbi_log_error0("Result byte[] too small");
+		Return_i(6, EHBI_BYTES_TOO_SMALL);
+	}
 	bi->sign = val->sign;
-	bi->bytes_used = 0;
-	for (i = 0; i < val->bytes_used; ++i) {
-		if (bi->bytes_used >= bi->bytes_len) {
-			ehbi_unsafe_zero(bi);
-			Ehbi_log_error0("Result byte[] too small");
-			Return_i(6, EHBI_BYTES_TOO_SMALL);
-		}
-		byte = val->bytes[val->bytes_len - 1 - i];
-		bi->bytes[bi->bytes_len - 1 - i] = byte;
-		++bi->bytes_used;
+	bi->bytes_used = val->bytes_used;
+
+	offset = bi->bytes_len - bi->bytes_used;
+	if (offset) {
+		Eba_memset(bi->bytes, 0x00, offset);
 	}
 
-	Eba_memset(bi->bytes, 0x00, (bi->bytes_len - bi->bytes_used));
+	voffset = val->bytes_len - val->bytes_used;
+	Eba_memcpy(bi->bytes + offset, val->bytes + voffset, val->bytes_used);
 
-	ehbi_unsafe_reset_bytes_used(bi);
+	/* see also ehbi_unsafe_reset_bytes_used */
+	if (offset && (bi->bytes[offset] > 0x7F)) {
+		++(bi->bytes_used);
+	}
 
 	Trace_msg_s_bi(6, "end", bi);
 	Return_i(6, EHBI_SUCCESS);

@@ -19,6 +19,8 @@ License for more details.
 #include "ehbigint-eba.h"
 #include "ehbigint-priv.h"
 
+#include <limits.h>		/* LONG_MAX */
+
 static int ehbi_bytes_shift_right(struct ehbigint *bi, size_t num_bytes);
 static int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes);
 

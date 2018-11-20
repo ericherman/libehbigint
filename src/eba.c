@@ -31,14 +31,6 @@ static void eba_do_stack_free(void *ptr, size_t size);
 static void eba_no_stack_free(void *ptr, size_t size);
 #endif
 
-#if Eba_need_diy_memcpy
-static void *eba_diy_memcpy(void *dest, const void *src, size_t n);
-#endif
-
-#if Eba_need_diy_memset
-static void *eba_diy_memset(void *dest, int val, size_t n);
-#endif
-
 static unsigned char get_byte_and_offset(struct eba_s *eba, unsigned long index,
 					 size_t *byte, unsigned char *offset);
 
@@ -115,7 +107,7 @@ void eba_swap(struct eba_s *eba, unsigned long index1, unsigned long index2)
 
 /* since we are allocating on the stack, this can not be a function
    and thus must be a macro such that it exists in the same stack frame */
-#define Eba_copy_on_stack_inner(eba, tmp, eba_crash_func) \
+#define Eba_create_2x_eba_on_stack_inner(eba, tmp, eba_crash_func) do { \
 	tmp = (struct eba_s *)Eba_stack_alloc(sizeof(struct eba_s)); \
 	if (!tmp) { \
 		Eba_log_error2("could not %s %lu bytes?\n",\
@@ -124,32 +116,37 @@ void eba_swap(struct eba_s *eba, unsigned long index1, unsigned long index2)
 		eba_crash_func(); \
 	} \
 	tmp->size_bytes = 0;	/* not really needed, just clarity */ \
-	tmp->bits = (unsigned char *)Eba_stack_alloc(eba->size_bytes); \
+	tmp->bits = (unsigned char *)Eba_stack_alloc(2 * eba->size_bytes); \
 	if (!tmp->bits) { \
 		Eba_log_error2("could not %s %lu bytes?\n", \
 			       Eba_stack_alloc_str, \
-			       (unsigned long)eba->size_bytes); \
+			       (unsigned long)(2 * eba->size_bytes)); \
 		/* we must free before crashing. */ \
 		/* Eba_crash may be implemented something like: */ \
 		/* { GlobalErr = 1; return; } */ \
 		Eba_stack_free(tmp, sizeof(struct eba_s)); \
 		eba_crash_func(); \
 	} \
-	tmp->size_bytes = eba->size_bytes; \
-	Eba_memcpy(tmp->bits, eba->bits, eba->size_bytes)
+	tmp->size_bytes = 2 * eba->size_bytes; \
+	/* Eba_memset(tmp->bits, 0, tmp->size_bytes); */ \
+	} while (0)
 
 #if Eba_need_endian
-#define Eba_copy_on_stack(eba, tmp, eba_crash_func) \
-	Eba_copy_on_stack_inner(eba, tmp, eba_crash_func); \
-	tmp->endian = eba->endian
+#define Eba_create_2x_eba_on_stack(eba, tmp, eba_crash_func) do {\
+	Eba_create_2x_eba_on_stack_inner(eba, tmp, eba_crash_func); \
+	tmp->endian = eba->endian; \
+	} while (0)
 #else
-#define Eba_copy_on_stack(eba, tmp, eba_crash_func) \
-	Eba_copy_on_stack_inner(eba, tmp, eba_crash_func)
+#define Eba_create_2x_eba_on_stack(eba, tmp, eba_crash_func) \
+	Eba_create_2x_eba_on_stack_inner(eba, tmp, eba_crash_func)
 #endif
 
-#define Eba_free_stack_copy(tmp) \
-	if (tmp) { Eba_stack_free(tmp->bits, tmp->size_bytes); } \
-	Eba_stack_free(tmp, sizeof(struct eba_s))
+#define Eba_free_stack_copy(tmp) do { \
+	if (tmp) { \
+		Eba_stack_free(tmp->bits, tmp->size_bytes); \
+		Eba_stack_free(tmp, sizeof(struct eba_s)); \
+	} \
+	} while (0)
 
 enum eba_shift_fill_val {
 	eba_fill_zero = 0,
@@ -157,110 +154,295 @@ enum eba_shift_fill_val {
 	eba_fill_ring
 };
 
-void eba_inner_shift_right(struct eba_s *eba, unsigned long positions,
-			   enum eba_shift_fill_val fill)
+static void eba_reverse_bytes_no_null_check(unsigned char *bytes, size_t len)
 {
-	unsigned long i, j, size_bits;
-	unsigned char val;
+	size_t i, j;
+	unsigned char swap;
+
+	for (i = 0, j = len - 1; i < j; ++i, --j) {
+		swap = bytes[i];
+		bytes[i] = bytes[j];
+		bytes[j] = swap;
+	}
+}
+
+static void eba_inner_shift_right_be(struct eba_s *eba, unsigned long positions,
+				     enum eba_shift_fill_val fill)
+{
+	unsigned long i, size_bits;
+	size_t shift_bytes, byte_pos;
+	unsigned char val, hi_val, lo_val;
+	int all_vals;
+	unsigned int u16_a, u16_b;
 	struct eba_s *tmp;
-
-	if (Is_eba_null(eba)) {
-		Eba_crash();
-	}
-
-	size_bits = eba->size_bytes * EBA_CHAR_BIT;
-
-	if (positions >= size_bits) {
-		positions = positions % size_bits;
-	}
 
 	if (positions == 0) {
 		return;
 	}
 
-	Eba_copy_on_stack(eba, tmp, Eba_crash);
-
-	for (i = 0; i < size_bits; ++i) {
-		j = i + positions;
-		if (j < size_bits) {
-			val = eba_get(tmp, j);
+	size_bits = eba->size_bytes * EBA_CHAR_BIT;
+	if (positions >= size_bits) {
+		if (fill == eba_fill_ring) {
+			positions = positions % size_bits;
 		} else {
-			switch (fill) {
-			case eba_fill_zero:
-				val = 0;
-				break;
-			case eba_fill_one:
-				val = 1;
-				break;
-			case eba_fill_ring:
-				j -= size_bits;
-				val = eba_get(tmp, j);
-				break;
-			default:
-				val = 0;
-				Eba_log_error1
-				    ("impossible enum eba_shift_fill_val: %lu",
-				     (unsigned long)fill);
-				Eba_crash();
-			}
+			all_vals = (fill == eba_fill_zero) ? 0 : -1;
+			Eba_memset(eba->bits, all_vals, eba->size_bytes);
+			return;
 		}
-		eba_set(eba, i, val);
+	}
+
+	Eba_create_2x_eba_on_stack(eba, tmp, Eba_crash);
+	switch (fill) {
+	case eba_fill_zero:
+		Eba_memset(tmp->bits, 0, eba->size_bytes);
+		break;
+	case eba_fill_one:
+		Eba_memset(tmp->bits, -1, eba->size_bytes);
+		break;
+	case eba_fill_ring:
+		Eba_memcpy(tmp->bits, eba->bits, eba->size_bytes);
+		break;
+	};
+	Eba_memcpy(tmp->bits + eba->size_bytes, eba->bits, eba->size_bytes);
+
+	/* Eba_memset(eba->bits, 0, eba->size_bytes); */
+
+	shift_bytes = positions / EBA_CHAR_BIT;
+	for (i = eba->size_bytes; i; --i) {
+		byte_pos = eba->size_bytes + (i - 1) - shift_bytes;
+		lo_val = tmp->bits[byte_pos];
+		byte_pos -= 1;
+		hi_val = tmp->bits[byte_pos];
+		u16_a = ((unsigned)lo_val) | (((unsigned)hi_val) << 8);
+		u16_b = (u16_a >> (positions % 8));
+		val = 0xFF & ((unsigned char)u16_b);
+		eba->bits[i - 1] = val;
 	}
 
 	Eba_free_stack_copy(tmp);
 }
 
-void eba_inner_shift_left(struct eba_s *eba, unsigned long positions,
-			  enum eba_shift_fill_val fill)
+static void eba_inner_shift_right_el(struct eba_s *eba, unsigned long positions,
+				     enum eba_shift_fill_val fill)
 {
-	unsigned long i, j, size_bits;
-	unsigned char val;
+	unsigned long i, size_bits;
+	size_t shift_bytes, byte_pos;
+	unsigned char val, hi_val, lo_val;
+	int all_vals;
+	unsigned int u16_a, u16_b;
 	struct eba_s *tmp;
 
 	if (Is_eba_null(eba)) {
 		Eba_crash();
 	}
 
-	size_bits = eba->size_bytes * EBA_CHAR_BIT;
+	if (positions == 0) {
+		return;
+	}
 
+	size_bits = eba->size_bytes * EBA_CHAR_BIT;
 	if (positions >= size_bits) {
-		positions = positions % size_bits;
+		if (fill == eba_fill_ring) {
+			positions = positions % size_bits;
+		} else {
+			all_vals = (fill == eba_fill_zero) ? 0 : -1;
+			Eba_memset(eba->bits, all_vals, eba->size_bytes);
+			return;
+		}
+	}
+
+	Eba_create_2x_eba_on_stack(eba, tmp, Eba_crash);
+	switch (fill) {
+	case eba_fill_zero:
+		Eba_memset(tmp->bits + eba->size_bytes, 0, eba->size_bytes);
+		break;
+	case eba_fill_one:
+		Eba_memset(tmp->bits + eba->size_bytes, -1, eba->size_bytes);
+		break;
+	case eba_fill_ring:
+		Eba_memcpy(tmp->bits + eba->size_bytes, eba->bits,
+			   eba->size_bytes);
+		break;
+	};
+	Eba_memcpy(tmp->bits, eba->bits, eba->size_bytes);
+	eba_reverse_bytes_no_null_check(tmp->bits, tmp->size_bytes);
+
+	/* Eba_memset(eba->bits, 0, eba->size_bytes); */
+
+	shift_bytes = positions / EBA_CHAR_BIT;
+	for (i = eba->size_bytes; i; --i) {
+		byte_pos = eba->size_bytes + (i - 1) - shift_bytes;
+		lo_val = tmp->bits[byte_pos];
+		byte_pos -= 1;
+		hi_val = tmp->bits[byte_pos];
+		u16_a = ((unsigned)lo_val) | (((unsigned)hi_val) << 8);
+		u16_b = (u16_a >> (positions % 8));
+		val = 0xFF & ((unsigned char)u16_b);
+		eba->bits[i - 1] = val;
+	}
+
+	eba_reverse_bytes_no_null_check(eba->bits, eba->size_bytes);
+
+	Eba_free_stack_copy(tmp);
+}
+
+static void eba_inner_shift_right(struct eba_s *eba, unsigned long positions,
+				  enum eba_shift_fill_val fill)
+{
+	if (Is_eba_null(eba)) {
+		Eba_crash();
+	}
+#if Eba_need_endian
+	if (eba->endian == eba_endian_little) {
+		eba_inner_shift_right_el(eba, positions, fill);
+	} else {
+#endif
+		eba_inner_shift_right_be(eba, positions, fill);
+#if Eba_need_endian
+	}
+#endif
+}
+
+static void eba_inner_shift_left_be(struct eba_s *eba, unsigned long positions,
+				    enum eba_shift_fill_val fill)
+{
+	unsigned long i, size_bits;
+	size_t shift_bytes, byte_pos;
+	unsigned char val, hi_val, lo_val;
+	int all_vals;
+	unsigned int u16_a, u16_b;
+	struct eba_s *tmp;
+
+	if (Is_eba_null(eba)) {
+		Eba_crash();
 	}
 
 	if (positions == 0) {
 		return;
 	}
 
-	Eba_copy_on_stack(eba, tmp, Eba_crash);
-
-	for (i = 0; i < size_bits; ++i) {
-		if (i >= positions) {
-			j = i - positions;
-			val = eba_get(tmp, j);
+	size_bits = eba->size_bytes * EBA_CHAR_BIT;
+	if (positions >= size_bits) {
+		if (fill == eba_fill_ring) {
+			positions = positions % size_bits;
 		} else {
-			switch (fill) {
-			case eba_fill_zero:
-				val = 0;
-				break;
-			case eba_fill_one:
-				val = 1;
-				break;
-			case eba_fill_ring:
-				j = (size_bits - positions) + i;
-				val = eba_get(tmp, j);
-				break;
-			default:
-				val = 0;
-				Eba_log_error1
-				    ("impossible enum eba_shift_fill_val: %lu",
-				     (unsigned long)fill);
-				Eba_crash();
-			}
+			all_vals = (fill == eba_fill_zero) ? 0 : -1;
+			Eba_memset(eba->bits, all_vals, eba->size_bytes);
+			return;
 		}
-		eba_set(eba, i, val);
+	}
+
+	Eba_create_2x_eba_on_stack(eba, tmp, Eba_crash);
+	switch (fill) {
+	case eba_fill_zero:
+		Eba_memset(tmp->bits + eba->size_bytes, 0, tmp->size_bytes);
+		break;
+	case eba_fill_one:
+		Eba_memset(tmp->bits + eba->size_bytes, -1, tmp->size_bytes);
+		break;
+	case eba_fill_ring:
+		Eba_memcpy(tmp->bits + eba->size_bytes, eba->bits,
+			   eba->size_bytes);
+		break;
+	};
+	Eba_memcpy(tmp->bits, eba->bits, eba->size_bytes);
+
+	/* Eba_memset(eba->bits, 0, eba->size_bytes); */
+
+	shift_bytes = positions / EBA_CHAR_BIT;
+	for (i = 0; i < eba->size_bytes; ++i) {
+		byte_pos = i + shift_bytes;
+		hi_val = tmp->bits[byte_pos];
+		byte_pos += 1;
+		lo_val = tmp->bits[byte_pos];
+		u16_a = ((unsigned)lo_val) | (((unsigned)hi_val) << 8);
+		u16_b = (u16_a << (positions % 8));
+		val = ((unsigned char)(u16_b >> 8));
+		eba->bits[i] = val;
 	}
 
 	Eba_free_stack_copy(tmp);
+}
+
+static void eba_inner_shift_left_el(struct eba_s *eba, unsigned long positions,
+				    enum eba_shift_fill_val fill)
+{
+	unsigned long i, size_bits;
+	size_t shift_bytes, byte_pos;
+	unsigned char val, hi_val, lo_val;
+	int all_vals;
+	unsigned int u16_a, u16_b;
+	struct eba_s *tmp;
+
+	if (Is_eba_null(eba)) {
+		Eba_crash();
+	}
+
+	if (positions == 0) {
+		return;
+	}
+
+	size_bits = eba->size_bytes * EBA_CHAR_BIT;
+
+	if (positions >= size_bits) {
+		if (fill == eba_fill_ring) {
+			positions = positions % size_bits;
+		} else {
+			all_vals = (fill == eba_fill_zero) ? 0 : -1;
+			Eba_memset(eba->bits, all_vals, eba->size_bytes);
+			return;
+		}
+	}
+
+	Eba_create_2x_eba_on_stack(eba, tmp, Eba_crash);
+	switch (fill) {
+	case eba_fill_zero:
+		Eba_memset(tmp->bits, 0, eba->size_bytes);
+		break;
+	case eba_fill_one:
+		Eba_memset(tmp->bits, -1, eba->size_bytes);
+		break;
+	case eba_fill_ring:
+		Eba_memcpy(tmp->bits, eba->bits, eba->size_bytes);
+		break;
+	};
+	Eba_memcpy(tmp->bits + eba->size_bytes, eba->bits, eba->size_bytes);
+	eba_reverse_bytes_no_null_check(tmp->bits, tmp->size_bytes);
+
+	Eba_memset(eba->bits, 0, eba->size_bytes);
+
+	shift_bytes = positions / EBA_CHAR_BIT;
+	for (i = 0; i < eba->size_bytes; ++i) {
+		byte_pos = i + shift_bytes;
+		hi_val = tmp->bits[byte_pos];
+		byte_pos += 1;
+		lo_val = tmp->bits[byte_pos];
+		u16_a = ((unsigned)lo_val) | (((unsigned)hi_val) << 8);
+		u16_b = (u16_a << (positions % 8));
+		val = ((unsigned char)(u16_b >> 8));
+		eba->bits[i] = val;
+	}
+
+	eba_reverse_bytes_no_null_check(eba->bits, eba->size_bytes);
+
+	Eba_free_stack_copy(tmp);
+}
+
+static void eba_inner_shift_left(struct eba_s *eba, unsigned long positions,
+				 enum eba_shift_fill_val fill)
+{
+	if (Is_eba_null(eba)) {
+		Eba_crash();
+	}
+#if Eba_need_endian
+	if (eba->endian == eba_endian_little) {
+		eba_inner_shift_left_el(eba, positions, fill);
+	} else {
+#endif
+		eba_inner_shift_left_be(eba, positions, fill);
+#if Eba_need_endian
+	}
+#endif
 }
 
 void eba_ring_shift_right(struct eba_s *eba, unsigned long positions)
@@ -300,7 +482,12 @@ void eba_shift_right_fill(struct eba_s *eba, unsigned long positions,
 #endif /* EBA_SKIP_SHIFTS */
 
 #if Eba_need_new
+
+#if Eba_need_endian
+struct eba_s *eba_new_endian(unsigned long num_bits, enum eba_endian endian)
+#else
 struct eba_s *eba_new(unsigned long num_bits)
+#endif
 {
 	struct eba_s *eba;
 
@@ -316,7 +503,7 @@ struct eba_s *eba_new(unsigned long num_bits)
 		eba->size_bytes += 1;
 	}
 #if Eba_need_endian
-	eba->endian = eba_endian_little;
+	eba->endian = endian;
 #endif
 
 	eba->bits = (unsigned char *)Eba_alloc(eba->size_bytes);
@@ -331,16 +518,9 @@ struct eba_s *eba_new(unsigned long num_bits)
 }
 
 #if Eba_need_endian
-struct eba_s *eba_new_endian(unsigned long num_bits, enum eba_endian endian)
+struct eba_s *eba_new(unsigned long num_bits)
 {
-	struct eba_s *eba;
-
-	eba = eba_new(num_bits);
-	if (eba) {
-		eba->endian = endian;
-	}
-
-	return eba;
+	return eba_new_endian(num_bits, eba_big_endian);
 }
 #endif
 
@@ -401,7 +581,9 @@ static unsigned char get_byte_and_offset(struct eba_s *eba, unsigned long index,
 
 #if Eba_need_endian
 	if (eba->endian == eba_big_endian) {
+#endif
 		*byte = (eba->size_bytes - 1) - (*byte);
+#if Eba_need_endian
 	}
 #endif
 
@@ -434,7 +616,7 @@ static void eba_no_stack_free(void *ptr, size_t size)
 #endif
 
 #if Eba_need_diy_memcpy
-static void *eba_diy_memcpy(void *dest, const void *src, size_t n)
+void *eba_diy_memcpy(void *dest, const void *src, size_t n)
 {
 	unsigned char *d;
 	const unsigned char *s;
@@ -451,7 +633,7 @@ static void *eba_diy_memcpy(void *dest, const void *src, size_t n)
 #endif
 
 #if Eba_need_diy_memset
-static void *eba_diy_memset(void *dest, int val, size_t n)
+void *eba_diy_memset(void *dest, int val, size_t n)
 {
 	unsigned char *d;
 	unsigned char v;
@@ -466,3 +648,61 @@ static void *eba_diy_memset(void *dest, int val, size_t n)
 	return dest;
 }
 #endif
+
+char *eba_to_string(struct eba_s *eba, char *buf, size_t len)
+{
+	size_t i, pos, size_bits, done;
+
+	if (!buf) {
+		return NULL;
+	}
+	if (len < 2) {
+		return NULL;
+	}
+	buf[0] = '\0';
+
+	if (Is_eba_null(eba)) {
+		return buf;
+	}
+
+	size_bits = eba->size_bytes * EBA_CHAR_BIT;
+	pos = 0;
+	done = 0;
+
+#if Eba_need_endian
+	if (eba->endian == eba_endian_little) {
+		for (i = 0; pos < (len - 1) && i < size_bits; ++i) {
+			++done;
+			buf[pos++] = eba_get(eba, i) ? '1' : '0';
+			if ((done % 8 == 0) && (i < (size_bits - 1))
+			    && (pos < (len - 1))) {
+				buf[pos++] = ' ';
+			}
+		}
+	} else {
+#endif
+		for (i = size_bits; pos < (len - 1) && i; --i) {
+			++done;
+			buf[pos++] = eba_get(eba, (i - 1)) ? '1' : '0';
+			if ((done % 8 == 0) && (i - 1) && (pos < (len - 1))) {
+				buf[pos++] = ' ';
+			}
+		}
+#if Eba_need_endian
+	}
+#endif
+	if ((pos < len) && (done == size_bits)) {
+		buf[pos] = '\0';
+		return buf;
+	}
+
+	if (pos < (len - 1)) {
+		buf[pos++] = '!';
+		buf[pos] = '\0';
+		return buf;
+	}
+
+	buf[len - 2] = '!';
+	buf[len - 1] = '\0';
+	return buf;
+}

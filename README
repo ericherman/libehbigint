@@ -107,12 +107,6 @@ or with a long:
 
 	err = ehbi_mul_l(result, bi1, 3L);
 
-Shift the value of the ehbigint up by num_bits number of bits:
-
-	err = ehbi_shift_left(bi, num_bits);
-or:
-	err = ehbi_shift_right(bi, num_bits);
-
 
 Division
 --------
@@ -122,6 +116,15 @@ divided by the denominator:
 	err = ehbi_div(quotient, remainder, numerator, denominator);
 or:
 	err = ehbi_div_l(quotient, remainder, numerator, 10);
+
+
+Shifting
+--------
+Shift the value of the ehbigint up by num_bits number of bits:
+
+	err = ehbi_shift_left(bi, num_bits);
+or:
+	err = ehbi_shift_right(bi, num_bits);
 
 
 Square Root
@@ -140,6 +143,9 @@ raised to the power of the exponent:
 or:
 	err = ehbi_exp_l(result, base, 11);
 
+
+Modular Exponentiation
+----------------------
 Populate the first ehbigint result with the value of the base
    raised to the power of the exponent mod the modulus
 
@@ -206,17 +212,17 @@ Output
 ------
 Populate the passed in buffer with a hex string representation of the
 ehbigint:
-	int err;
+	int err = 0;
 	printf("%s\n", ehbi_to_hex_string(bi, buf, buf_len, &err));
 
 Populates the passed in buffer with a decimal string representation of
 the ehbigint:
-	int err;
+	int err = 0;
 	printf("%s\n", ehbi_to_decimal_string(bi, buf, buf_len, &err));
 
 Populates the passed in buffer with a binary string representation of
 the ehbigint:
-	int err;
+	int err = 0;
 	printf("%s\n", ehbi_to_binary_string(bi, buf, buf_len, &err));
 
 

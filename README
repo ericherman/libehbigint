@@ -2,6 +2,12 @@ A thought experiment for creating arbitrarily large integers.
 
 This is just a learning exercise, although perhaps it may be useful.
 
+Goals include:
+ * suitability for 8bit CPUs and embedded environments
+ * no use of malloc/free, everything on the stack
+ * core functionality should not even depend upon libc
+
+
 Usage
 -----
 The ehbigint structure is defined in "ehbigint.h". This structure
@@ -75,6 +81,9 @@ Populate a result from adding two passed in:
 or add a long:
 	err = ehbi_add_l(result, bi, 23);
 
+
+Increment
+---------
 Adding to an existing value, modifying in place:
 	err = ehbi_inc(bi, bi_amount);
 
@@ -90,6 +99,9 @@ Populate a result with the value of the second param minus the third:
 Or subtract a long:
 	err = ehbi_subtract_l(result, bi1, 7);
 
+
+Decrement
+---------
 Decrement the value in place:
 	err = ehbi_dec(bi, bi_amount);
 
@@ -129,7 +141,7 @@ or:
 
 Square Root
 -----------
-Or get the closest integer to the sqare root, and the remainder:
+Obtain the closest integer less than the sqare root, and the remainder:
 
 	err = ehbi_sqrt(sqrt, remainder, bi);
 

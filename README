@@ -43,12 +43,9 @@ programmer error, although EHBI_BYTES_TOO_SMALL_FOR_CARRY for example
 denotes that an overflow would have occured.
 
 
-Initial value
--------------
+Set value
+---------
 The structure can be set to a value in a number of ways.
-
-It can be reset to zero:
-	err = ehbi_zero(bi);
 
 It can be set by a decimal string:
 	const char *dstr = "1949183158370983519073011571092751";
@@ -67,9 +64,18 @@ or an long:
 	err = ehbi_set_l(bi, val);
 
 or another instance of struct ehbigint:
-	err = ehbi_set_l(bi, bi_other);
+	err = ehbi_set(bi, bi_other);
 
-or negate the current value:
+
+Zero
+----
+Set a value to zero, in place:
+	err = ehbi_zero(bi);
+
+
+Negation
+--------
+Negate a value, in place:
 	err = ehbi_negate(bi);
 
 

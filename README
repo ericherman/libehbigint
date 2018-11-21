@@ -20,21 +20,36 @@ contains the pointer to the underlying bytes, as well as some meta-data:
 		unsigned char sign;
 	};
 
-Prior to use, it is the caller's responsibility to construct the structure,
-and initialize it, for example:
 
+Prior to use, it is the caller's responsibility to allocate the
+structure and initialize it, for example:
+
+	struct ehbigint bi;
+	unsigned char bytes[BUF_LEN];
+	int err;
+
+	err = ehbi_init(&bi, &bytes, BUF_LEN);
+
+The value will be initalized to zero. If you wish  initialize it with
+a non-zero, but "long" value:
+	err = ehbi_init_l(&bi, &bytes, BUF_LEN, 42);
+
+
+The ehbigint functions internally do not need to call malloc/free, but
+if you would rather use the heap for the object itself, it's naturally
+like:
 	struct ehbigint *bi;
 	unsigned char *bytes;
 	size_t bytes_len;
 	int err;
 
-	bi = (struct ehbigint *) malloc(sizeof(struct ehbigint));
+	bi = (struct ehbigint *)malloc(sizeof(struct ehbigint));
 	bytes_len = 20;
-	bytes = malloc(bytes_len);
+	bytes = (unsigned char *)malloc(bytes_len);
 	err = ehbi_init(bi, bytes, bytes_len);
 
-If you would rather initialize it with a non-zero, but "long" value:
-	err = ehbi_init_l(bi, bytes, bytes_len, 42);
+The caller is, of course, responisible for freeing the objects.
+
 
 Most ehbigint functions return an error code. The "ehbigint.h" header
 defines the meaning of the error codes. Like posix return codes, a value

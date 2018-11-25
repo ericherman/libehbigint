@@ -12,9 +12,9 @@
  
  #include "ehbigint.h"		/* struct ehbigint */
  
-@@ -120,8 +122,10 @@
-  ehbi_log_backtrace(ehbi_log_file())
- #endif
+@@ -126,8 +128,10 @@
+ 	} while(0)
+ #endif /* EHBI_SKIP_STRUCT_NULL_CHECK */
  
 +/*
  #ifdef __cplusplus

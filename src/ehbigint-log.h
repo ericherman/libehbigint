@@ -35,6 +35,48 @@ FILE *ehbi_log_file(void);
 void set_ehbi_log_file(FILE *log);
 #endif /* SKIP_SDIO_H */
 
+#ifndef SKIP_STDIO_H
+/* if _POSIX_C_SOURCE backtrace_symbols_fd is used */
+void ehbi_log_backtrace(FILE *log);
+#endif
+
+#ifndef Ehbi_log_error0
+#define Ehbi_log_error0(format) \
+ fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
+ fprintf(ehbi_log_file(), format); \
+ fprintf(ehbi_log_file(), "\n"); \
+ ehbi_log_backtrace(ehbi_log_file())
+#endif
+
+#ifndef Ehbi_log_error1
+#define Ehbi_log_error1(format, arg) \
+ fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
+ fprintf(ehbi_log_file(), format, arg); \
+ fprintf(ehbi_log_file(), "\n"); \
+ ehbi_log_backtrace(ehbi_log_file())
+#endif
+
+#ifndef Ehbi_log_error2
+#define Ehbi_log_error2(format, arg1, arg2) \
+ fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
+ fprintf(ehbi_log_file(), format, arg1, arg2); \
+ fprintf(ehbi_log_file(), "\n"); \
+ ehbi_log_backtrace(ehbi_log_file())
+#endif
+
+#ifndef Ehbi_log_error3
+#define Ehbi_log_error3(format, arg1, arg2, arg3) \
+ fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
+ fprintf(ehbi_log_file(), format, arg1, arg2, arg3); \
+ fprintf(ehbi_log_file(), "\n"); \
+ ehbi_log_backtrace(ehbi_log_file())
+#endif
+
+#if EHBI_SKIP_STRUCT_NULL_CHECK
+#define Ehbi_struct_is_not_null(bi) Ehbi_noop
+#define Ehbi_struct_is_not_null_e(bi, err, err_rv) Ehbi_noop
+#define Ehbi_struct_is_not_null_e_j(bi, err, jump_target) Ehbi_noop
+#else
 #define Ehbi_struct_is_not_null(bi) \
 	do { \
 		if (bi == NULL) { \
@@ -82,43 +124,7 @@ void set_ehbi_log_file(FILE *log);
 			goto jump_target; \
 		} \
 	} while(0)
-
-#ifndef SKIP_STDIO_H
-/* if _POSIX_C_SOURCE backtrace_symbols_fd is used */
-void ehbi_log_backtrace(FILE *log);
-#endif
-
-#ifndef Ehbi_log_error0
-#define Ehbi_log_error0(format) \
- fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
- fprintf(ehbi_log_file(), format); \
- fprintf(ehbi_log_file(), "\n"); \
- ehbi_log_backtrace(ehbi_log_file())
-#endif
-
-#ifndef Ehbi_log_error1
-#define Ehbi_log_error1(format, arg) \
- fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
- fprintf(ehbi_log_file(), format, arg); \
- fprintf(ehbi_log_file(), "\n"); \
- ehbi_log_backtrace(ehbi_log_file())
-#endif
-
-#ifndef Ehbi_log_error2
-#define Ehbi_log_error2(format, arg1, arg2) \
- fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
- fprintf(ehbi_log_file(), format, arg1, arg2); \
- fprintf(ehbi_log_file(), "\n"); \
- ehbi_log_backtrace(ehbi_log_file())
-#endif
-
-#ifndef Ehbi_log_error3
-#define Ehbi_log_error3(format, arg1, arg2, arg3) \
- fprintf(ehbi_log_file(), "%s:%d: ", __FILE__, __LINE__); \
- fprintf(ehbi_log_file(), format, arg1, arg2, arg3); \
- fprintf(ehbi_log_file(), "\n"); \
- ehbi_log_backtrace(ehbi_log_file())
-#endif
+#endif /* EHBI_SKIP_STRUCT_NULL_CHECK */
 
 #ifdef __cplusplus
 }

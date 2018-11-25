@@ -21,7 +21,8 @@ ALLOCA_CFLAGS=
 RELEASE_HOSTED_CFLAGS=\
  -std=c89 -Wpedantic $(ALLOCA_CFLAGS) \
  -pipe -ggdb -O2 -fomit-frame-pointer \
- -Wall -Wextra -Werror -DNDEBUG=1
+ -Wall -Wextra -Werror -DNDEBUG=1 \
+ -DEHBI_SKIP_STRUCT_NULL_CHECK=1
 
 # if debugging, these flags may be better:
 #TODO get configure/autoconf to work right with BACKTRACE

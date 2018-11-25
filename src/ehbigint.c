@@ -129,11 +129,6 @@ int ehbi_set(struct ehbigint *bi, const struct ehbigint *val)
 	voffset = val->bytes_len - val->bytes_used;
 	Eba_memcpy(bi->bytes + offset, val->bytes + voffset, val->bytes_used);
 
-	/* see also ehbi_unsafe_reset_bytes_used */
-	if (offset && (bi->bytes[offset] > 0x7F)) {
-		++(bi->bytes_used);
-	}
-
 	Trace_msg_s_bi(6, "end", bi);
 	Return_i(6, EHBI_SUCCESS);
 }

@@ -78,45 +78,37 @@ int ehbi_init_l(struct ehbigint *bi, unsigned char *bytes, size_t len, long val)
 
 int ehbi_zero(struct ehbigint *bi)
 {
-	Trace_bi(6, bi);
-
-	Ehbi_struct_is_not_null(6, bi);
+	Ehbi_struct_is_not_null(bi);
 
 	ehbi_unsafe_zero(bi);
 
-	Trace_msg_s_bi(6, "end", bi);
-	Return_i(6, EHBI_SUCCESS);
+	return EHBI_SUCCESS;
 }
 
 int ehbi_set_l(struct ehbigint *bi, long val)
 {
 	int err;
 
-	Trace_bi_l(6, bi, val);
-
-	Ehbi_struct_is_not_null(6, bi);
+	Ehbi_struct_is_not_null(bi);
 
 	ehbi_unsafe_zero(bi);
 
 	err = ehbi_inc_l(bi, val);
 
-	Trace_msg_s_bi(4, "end", bi);
-	Return_i(6, err);
+	return err;
 }
 
 int ehbi_set(struct ehbigint *bi, const struct ehbigint *val)
 {
 	size_t offset, voffset;
 
-	Trace_bi_bi(6, bi, val);
-
-	Ehbi_struct_is_not_null(6, bi);
-	Ehbi_struct_is_not_null(6, val);
+	Ehbi_struct_is_not_null(bi);
+	Ehbi_struct_is_not_null(val);
 
 	if (val->bytes_used > bi->bytes_len) {
 		ehbi_unsafe_zero(bi);
 		Ehbi_log_error0("Result byte[] too small");
-		Return_i(6, EHBI_BYTES_TOO_SMALL);
+		return EHBI_BYTES_TOO_SMALL;
 	}
 	bi->sign = val->sign;
 	bi->bytes_used = val->bytes_used;
@@ -129,8 +121,7 @@ int ehbi_set(struct ehbigint *bi, const struct ehbigint *val)
 	voffset = val->bytes_len - val->bytes_used;
 	Eba_memcpy(bi->bytes + offset, val->bytes + voffset, val->bytes_used);
 
-	Trace_msg_s_bi(6, "end", bi);
-	Return_i(6, EHBI_SUCCESS);
+	return EHBI_SUCCESS;
 }
 
 int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
@@ -142,33 +133,31 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 	struct ehbigint tmp;
 	int err;
 
-	Trace_bi_bi_bi(2, res, bi1, bi2);
-
 	ehbi_unsafe_clear_null_struct(&tmp);
 
-	Ehbi_struct_is_not_null(2, res);
-	Ehbi_struct_is_not_null(2, bi1);
-	Ehbi_struct_is_not_null(2, bi2);
+	Ehbi_struct_is_not_null(res);
+	Ehbi_struct_is_not_null(bi1);
+	Ehbi_struct_is_not_null(bi2);
 
 	err = EHBI_SUCCESS;
 
 	/* adding zero */
 	if (bi2->bytes_used == 1 && bi2->bytes[bi2->bytes_len - 1] == 0x00) {
 		err = ehbi_set(res, bi1);
-		Return_i(2, err);
+		return err;
 	}
 
 	/* adding to zero */
 	if (bi1->bytes_used == 1 && bi1->bytes[bi1->bytes_len - 1] == 0x00) {
 		err = ehbi_set(res, bi2);
-		Return_i(2, err);
+		return err;
 	}
 
 	if (bi1->sign != bi2->sign) {
 		size = bi2->bytes_len;
 		Ehbi_stack_alloc_struct(tmp, size, err);
 		if (err) {
-			Return_i(2, err);
+			return err;
 		}
 		err = ehbi_set(&tmp, bi2);
 		if (!err) {
@@ -181,7 +170,7 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 		if (err) {
 			ehbi_unsafe_zero(res);
 		}
-		Return_i(2, err);
+		return err;
 	}
 	res->sign = bi1->sign;
 
@@ -200,7 +189,7 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 
 		if (i > res->bytes_len) {
 			Ehbi_log_error0("Result byte[] too small");
-			Return_i(2, EHBI_BYTES_TOO_SMALL);
+			return EHBI_BYTES_TOO_SMALL;
 		}
 		res->bytes[res->bytes_len - i] = c;
 		res->bytes_used++;
@@ -210,7 +199,7 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 	if (c) {
 		if (i > res->bytes_len) {
 			Ehbi_log_error0("Result byte[] too small for carry");
-			Return_i(2, EHBI_BYTES_TOO_SMALL_FOR_CARRY);
+			return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
 		}
 		res->bytes[res->bytes_len - i] = c;
 		res->bytes_used++;
@@ -218,7 +207,7 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 			if (res->bytes_used == res->bytes_len) {
 				Ehbi_log_error0
 				    ("Result byte[] too small for carry");
-				Return_i(2, EHBI_BYTES_TOO_SMALL_FOR_CARRY);
+				return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
 			}
 			res->bytes_used++;
 		}
@@ -228,8 +217,7 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 		res->sign = 0;
 	}
 
-	Trace_msg_s_bi(2, "end", res);
-	Return_i(2, EHBI_SUCCESS);
+	return EHBI_SUCCESS;
 }
 
 int ehbi_add_l(struct ehbigint *res, const struct ehbigint *bi1, long v2)
@@ -238,12 +226,10 @@ int ehbi_add_l(struct ehbigint *res, const struct ehbigint *bi1, long v2)
 	struct ehbigint temp;
 	int err;
 
-	Trace_bi_bi_l(4, res, bi1, v2);
-
 	ehbi_unsafe_clear_null_struct(&temp);
 
-	Ehbi_struct_is_not_null(4, res);
-	Ehbi_struct_is_not_null(4, bi1);
+	Ehbi_struct_is_not_null(res);
+	Ehbi_struct_is_not_null(bi1);
 
 	temp.bytes = bytes;
 	temp.bytes_len = sizeof(unsigned long);
@@ -252,8 +238,7 @@ int ehbi_add_l(struct ehbigint *res, const struct ehbigint *bi1, long v2)
 
 	err = ehbi_add(res, bi1, &temp);
 
-	Trace_msg_s_bi(4, "end", res);
-	Return_i(4, err);
+	return err;
 }
 
 int ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
@@ -265,13 +250,11 @@ int ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
 	unsigned int a, b, r;
 	struct ehbigint tmp;
 
-	Trace_bi_bi_bi(2, res, bi1, bi2);
-
 	ehbi_unsafe_clear_null_struct(&tmp);
 
-	Ehbi_struct_is_not_null(2, res);
-	Ehbi_struct_is_not_null(2, bi1);
-	Ehbi_struct_is_not_null(2, bi2);
+	Ehbi_struct_is_not_null(res);
+	Ehbi_struct_is_not_null(bi1);
+	Ehbi_struct_is_not_null(bi2);
 
 	err = 0;
 	if (bi1->bytes_used < bi2->bytes_used) {
@@ -320,8 +303,7 @@ ehbi_mul_end:
 		ehbi_stack_free(tmp.bytes, size);
 	}
 
-	Trace_msg_s_bi(2, "end", res);
-	Return_i(2, err);
+	return err;
 }
 
 int ehbi_mul_l(struct ehbigint *res, const struct ehbigint *bi1, long v2)
@@ -330,12 +312,10 @@ int ehbi_mul_l(struct ehbigint *res, const struct ehbigint *bi1, long v2)
 	struct ehbigint temp;
 	int err;
 
-	Trace_bi_bi_l(4, res, bi1, v2);
-
 	ehbi_unsafe_clear_null_struct(&temp);
 
-	Ehbi_struct_is_not_null(4, res);
-	Ehbi_struct_is_not_null(4, bi1);
+	Ehbi_struct_is_not_null(res);
+	Ehbi_struct_is_not_null(bi1);
 
 	temp.bytes = bytes;
 	temp.bytes_len = sizeof(unsigned long);
@@ -344,8 +324,7 @@ int ehbi_mul_l(struct ehbigint *res, const struct ehbigint *bi1, long v2)
 
 	err = ehbi_mul(res, bi1, &temp);
 
-	Trace_msg_s_bi(4, "end", res);
-	Return_i(4, err);
+	return err;
 }
 
 int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
@@ -359,15 +338,13 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	const struct ehbigint *abs_numer;
 	const struct ehbigint *abs_denom;
 
-	Trace_bi_bi_bi_bi(2, quotient, remainder, numerator, denominator);
-
 	ehbi_unsafe_clear_null_struct(&s_abs_numer);
 	ehbi_unsafe_clear_null_struct(&s_abs_denom);
 
-	Ehbi_struct_is_not_null(2, quotient);
-	Ehbi_struct_is_not_null(2, remainder);
-	Ehbi_struct_is_not_null(2, numerator);
-	Ehbi_struct_is_not_null(2, denominator);
+	Ehbi_struct_is_not_null(quotient);
+	Ehbi_struct_is_not_null(remainder);
+	Ehbi_struct_is_not_null(numerator);
+	Ehbi_struct_is_not_null(denominator);
 
 	if (remainder->bytes_len < numerator->bytes_used) {
 		Ehbi_log_error2("byte[] too small;"
@@ -375,7 +352,7 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 				" (%lu < %lu)",
 				(unsigned long)remainder->bytes_len,
 				(unsigned long)numerator->bytes_used);
-		Return_i(2, EHBI_BYTES_TOO_SMALL);
+		return EHBI_BYTES_TOO_SMALL;
 	}
 
 	err = EHBI_SUCCESS;
@@ -510,9 +487,7 @@ ehbi_div_end:
 			quotient->sign = 1;
 		}
 	}
-	Trace_msg_s_bi(2, "end quotient", quotient);
-	Trace_msg_s_bi(2, "end remainder", remainder);
-	Return_i(2, err);
+	return err;
 }
 
 int ehbi_div_l(struct ehbigint *quotient, struct ehbigint *remainder,
@@ -522,13 +497,11 @@ int ehbi_div_l(struct ehbigint *quotient, struct ehbigint *remainder,
 	struct ehbigint temp;
 	int err;
 
-	Trace_bi_bi_bi_l(4, quotient, remainder, numerator, denominator);
-
 	ehbi_unsafe_clear_null_struct(&temp);
 
-	Ehbi_struct_is_not_null(4, quotient);
-	Ehbi_struct_is_not_null(4, remainder);
-	Ehbi_struct_is_not_null(4, numerator);
+	Ehbi_struct_is_not_null(quotient);
+	Ehbi_struct_is_not_null(remainder);
+	Ehbi_struct_is_not_null(numerator);
 
 	temp.bytes = bytes;
 	temp.bytes_len = sizeof(unsigned long);
@@ -537,8 +510,7 @@ int ehbi_div_l(struct ehbigint *quotient, struct ehbigint *remainder,
 
 	err = ehbi_div(quotient, remainder, numerator, &temp);
 
-	Trace_msg_s_bi(4, "end", quotient);
-	Return_i(4, err);
+	return err;
 }
 
 int ehbi_sqrt(struct ehbigint *result, struct ehbigint *remainder,
@@ -551,8 +523,6 @@ int ehbi_sqrt(struct ehbigint *result, struct ehbigint *remainder,
 	unsigned char obytes[2];
 	unsigned char tbytes[2];
 	size_t size;
-
-	Trace_bi_bi_bi(2, result, remainder, val);
 
 	ehbi_unsafe_clear_null_struct(&zero);
 	ehbi_unsafe_clear_null_struct(&one);
@@ -576,9 +546,9 @@ int ehbi_sqrt(struct ehbigint *result, struct ehbigint *remainder,
 	ehbi_unsafe_zero(&two);
 	ehbi_inc_l(&two, 2);
 
-	Ehbi_struct_is_not_null(2, result);
-	Ehbi_struct_is_not_null(2, remainder);
-	Ehbi_struct_is_not_null(2, val);
+	Ehbi_struct_is_not_null(result);
+	Ehbi_struct_is_not_null(remainder);
+	Ehbi_struct_is_not_null(val);
 
 	ehbi_unsafe_zero(result);
 	ehbi_unsafe_zero(remainder);
@@ -588,11 +558,11 @@ int ehbi_sqrt(struct ehbigint *result, struct ehbigint *remainder,
 	if (ehbi_less_than(val, &zero, &err)) {
 		err = EHBI_SQRT_NEGATIVE;
 		Ehbi_log_error0("square root of a negative would be complex");
-		Return_i(2, err);
+		return err;
 	}
 
 	if (ehbi_equals(val, &zero, &err)) {
-		Return_i(2, err);
+		return err;
 	}
 
 	size = 1 + val->bytes_used;
@@ -675,7 +645,7 @@ ehbi_sqrt_end:
 		ehbi_zero(remainder);
 	}
 
-	Return_i(2, err);
+	return err;
 }
 
 int ehbi_exp(struct ehbigint *result, const struct ehbigint *base,
@@ -683,8 +653,6 @@ int ehbi_exp(struct ehbigint *result, const struct ehbigint *base,
 {
 	int err;
 	struct ehbigint loop, tmp;
-
-	Trace_bi_bi_bi(2, result, base, exponent);
 
 	ehbi_unsafe_clear_null_struct(&loop);
 
@@ -730,12 +698,10 @@ int ehbi_exp_l(struct ehbigint *result, const struct ehbigint *base, long exp)
 	struct ehbigint temp;
 	int err;
 
-	Trace_bi_bi_l(4, result, base, exp);
-
 	ehbi_unsafe_clear_null_struct(&temp);
 
-	Ehbi_struct_is_not_null(4, result);
-	Ehbi_struct_is_not_null(4, base);
+	Ehbi_struct_is_not_null(result);
+	Ehbi_struct_is_not_null(base);
 
 	temp.bytes = bytes;
 	temp.bytes_len = sizeof(unsigned long);
@@ -744,8 +710,7 @@ int ehbi_exp_l(struct ehbigint *result, const struct ehbigint *base, long exp)
 
 	err = ehbi_exp(result, base, &temp);
 
-	Trace_msg_s_bi(4, "end", result);
-	Return_i(4, err);
+	return err;
 
 }
 
@@ -758,18 +723,16 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 	struct ehbigint zero, tmp1, tjunk, texp, tbase;
 	unsigned char zero_bytes[2];
 
-	Trace_bi_bi_bi_bi(2, result, base, exponent, modulus);
-
 	ehbi_unsafe_clear_null_struct(&zero);
 	ehbi_unsafe_clear_null_struct(&tmp1);
 	ehbi_unsafe_clear_null_struct(&tbase);
 	ehbi_unsafe_clear_null_struct(&texp);
 	ehbi_unsafe_clear_null_struct(&tjunk);
 
-	Ehbi_struct_is_not_null(2, result);
-	Ehbi_struct_is_not_null(2, base);
-	Ehbi_struct_is_not_null(2, exponent);
-	Ehbi_struct_is_not_null(2, modulus);
+	Ehbi_struct_is_not_null(result);
+	Ehbi_struct_is_not_null(base);
+	Ehbi_struct_is_not_null(exponent);
+	Ehbi_struct_is_not_null(modulus);
 
 	ehbi_init(&zero, zero_bytes, 2);
 
@@ -900,8 +863,7 @@ ehbi_mod_exp_end:
 		ehbi_zero(result);
 	}
 
-	Trace_msg_s_bi(2, "end", result);
-	Return_i(2, err);
+	return err;
 }
 
 int ehbi_exp_mod_l(struct ehbigint *result, const struct ehbigint *base,
@@ -911,13 +873,11 @@ int ehbi_exp_mod_l(struct ehbigint *result, const struct ehbigint *base,
 	struct ehbigint temp;
 	int err;
 
-	Trace_bi_bi_bi_l(4, result, base, exponent, modulus);
-
 	ehbi_unsafe_clear_null_struct(&temp);
 
-	Ehbi_struct_is_not_null(4, result);
-	Ehbi_struct_is_not_null(4, base);
-	Ehbi_struct_is_not_null(4, exponent);
+	Ehbi_struct_is_not_null(result);
+	Ehbi_struct_is_not_null(base);
+	Ehbi_struct_is_not_null(exponent);
 
 	temp.bytes = bytes;
 	temp.bytes_len = sizeof(unsigned long);
@@ -926,8 +886,7 @@ int ehbi_exp_mod_l(struct ehbigint *result, const struct ehbigint *base,
 
 	err = ehbi_exp_mod(result, base, exponent, &temp);
 
-	Trace_msg_s_bi(4, "end", result);
-	Return_i(4, err);
+	return err;
 }
 
 int ehbi_exp_mod_ll(struct ehbigint *result, const struct ehbigint *base,
@@ -939,13 +898,11 @@ int ehbi_exp_mod_ll(struct ehbigint *result, const struct ehbigint *base,
 	struct ehbigint temp2;
 	int err;
 
-	Trace_bi_bi_l_l(4, result, base, exponent, modulus);
-
 	ehbi_unsafe_clear_null_struct(&temp1);
 	ehbi_unsafe_clear_null_struct(&temp2);
 
-	Ehbi_struct_is_not_null(4, result);
-	Ehbi_struct_is_not_null(4, base);
+	Ehbi_struct_is_not_null(result);
+	Ehbi_struct_is_not_null(base);
 
 	temp1.bytes = bytes1;
 	temp1.bytes_len = sizeof(unsigned long);
@@ -958,8 +915,7 @@ int ehbi_exp_mod_ll(struct ehbigint *result, const struct ehbigint *base,
 
 	err = ehbi_exp_mod(result, base, &temp1, &temp2);
 
-	Trace_msg_s_bi(4, "end", result);
-	Return_i(4, err);
+	return err;
 }
 
 int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
@@ -968,16 +924,14 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 	int err;
 	struct ehbigint temp;
 
-	Trace_bi_bi(4, bi, val);
-
 	ehbi_unsafe_clear_null_struct(&temp);
 
-	Ehbi_struct_is_not_null(4, bi);
-	Ehbi_struct_is_not_null(4, val);
+	Ehbi_struct_is_not_null(bi);
+	Ehbi_struct_is_not_null(val);
 
 	if (val->bytes_used > bi->bytes_len) {
 		Ehbi_log_error0("byte[] too small");
-		Return_i(4, EHBI_BYTES_TOO_SMALL);
+		return EHBI_BYTES_TOO_SMALL;
 	}
 
 	err = EHBI_SUCCESS;
@@ -986,7 +940,7 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 
 	Ehbi_stack_alloc_struct(temp, size, err);
 	if (err) {
-		Return_i(4, err);
+		return err;
 	}
 	err = ehbi_set(&temp, bi);
 	if (!err) {
@@ -994,8 +948,7 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 	}
 	ehbi_stack_free(temp.bytes, temp.bytes_len);
 
-	Trace_msg_s_bi(4, "end", bi);
-	Return_i(4, err);
+	return err;
 }
 
 int ehbi_inc_l(struct ehbigint *bi, long val)
@@ -1004,11 +957,9 @@ int ehbi_inc_l(struct ehbigint *bi, long val)
 	struct ehbigint temp;
 	int err;
 
-	Trace_bi_l(4, bi, val);
-
 	ehbi_unsafe_clear_null_struct(&temp);
 
-	Ehbi_struct_is_not_null(4, bi);
+	Ehbi_struct_is_not_null(bi);
 
 	temp.bytes = bytes;
 	temp.bytes_len = sizeof(unsigned long);
@@ -1017,8 +968,7 @@ int ehbi_inc_l(struct ehbigint *bi, long val)
 
 	err = ehbi_inc(bi, &temp);
 
-	Trace_msg_s_bi(4, "end", bi);
-	Return_i(4, err);
+	return err;
 }
 
 int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
@@ -1027,12 +977,10 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 	int err;
 	struct ehbigint temp;
 
-	Trace_bi_bi(4, bi, val);
-
 	ehbi_unsafe_clear_null_struct(&temp);
 
-	Ehbi_struct_is_not_null(4, bi);
-	Ehbi_struct_is_not_null(4, val);
+	Ehbi_struct_is_not_null(bi);
+	Ehbi_struct_is_not_null(val);
 
 	err = EHBI_SUCCESS;
 
@@ -1040,7 +988,7 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 
 	Ehbi_stack_alloc_struct(temp, size, err);
 	if (err) {
-		Return_i(4, err);
+		return err;
 	}
 	ehbi_unsafe_zero(&temp);
 
@@ -1053,8 +1001,7 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 
 	ehbi_stack_free(temp.bytes, temp.bytes_len);
 
-	Trace_msg_s_bi(4, "end", bi);
-	Return_i(4, err);
+	return err;
 }
 
 int ehbi_dec_l(struct ehbigint *bi, long val)
@@ -1063,11 +1010,9 @@ int ehbi_dec_l(struct ehbigint *bi, long val)
 	struct ehbigint temp;
 	int err;
 
-	Trace_bi_l(4, bi, val);
-
 	ehbi_unsafe_clear_null_struct(&temp);
 
-	Ehbi_struct_is_not_null(4, bi);
+	Ehbi_struct_is_not_null(bi);
 
 	temp.bytes = bytes;
 	temp.bytes_len = sizeof(unsigned long);
@@ -1076,8 +1021,7 @@ int ehbi_dec_l(struct ehbigint *bi, long val)
 
 	err = ehbi_dec(bi, &temp);
 
-	Trace_msg_s_bi(4, "end", bi);
-	Return_i(4, err);
+	return err;
 }
 
 int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
@@ -1091,13 +1035,11 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 	int err;
 	/* char buf[80]; */
 
-	Trace_bi_bi_bi(2, res, bi1, bi2);
-
 	ehbi_unsafe_clear_null_struct(&tmp);
 
-	Ehbi_struct_is_not_null(2, res);
-	Ehbi_struct_is_not_null(2, bi1);
-	Ehbi_struct_is_not_null(2, bi2);
+	Ehbi_struct_is_not_null(res);
+	Ehbi_struct_is_not_null(bi1);
+	Ehbi_struct_is_not_null(bi2);
 
 	err = EHBI_SUCCESS;
 
@@ -1232,8 +1174,7 @@ ehbi_subtract_end:
 		ehbi_stack_free(tmp.bytes, tmp.bytes_len);
 	}
 
-	Trace_msg_s_bi(2, "end", res);
-	Return_i(2, EHBI_SUCCESS);
+	return EHBI_SUCCESS;
 }
 
 int ehbi_subtract_l(struct ehbigint *res, const struct ehbigint *bi1, long v2)
@@ -1242,12 +1183,10 @@ int ehbi_subtract_l(struct ehbigint *res, const struct ehbigint *bi1, long v2)
 	struct ehbigint temp;
 	int err;
 
-	Trace_bi_bi_l(4, res, bi1, v2);
-
 	ehbi_unsafe_clear_null_struct(&temp);
 
-	Ehbi_struct_is_not_null(4, res);
-	Ehbi_struct_is_not_null(4, bi1);
+	Ehbi_struct_is_not_null(res);
+	Ehbi_struct_is_not_null(bi1);
 
 	temp.bytes = bytes;
 	temp.bytes_len = sizeof(unsigned long);
@@ -1256,8 +1195,7 @@ int ehbi_subtract_l(struct ehbigint *res, const struct ehbigint *bi1, long v2)
 
 	err = ehbi_subtract(res, bi1, &temp);
 
-	Trace_msg_s_bi(4, "end", res);
-	Return_i(4, err);
+	return err;
 }
 
 int ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits)
@@ -1265,13 +1203,11 @@ int ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits)
 	int err;
 	struct eba_s eba;
 
-	Trace_bi_l(2, bi, ((long)num_bits));
-
 	eba.endian = eba_big_endian;
 	eba.bits = NULL;
 	eba.size_bytes = 0;
 
-	Ehbi_struct_is_not_null(2, bi);
+	Ehbi_struct_is_not_null(bi);
 
 	eba.bits = bi->bytes;
 	eba.size_bytes = bi->bytes_len;
@@ -1286,8 +1222,7 @@ int ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits)
 		ehbi_zero(bi);
 	}
 
-	Trace_msg_s_bi(2, "end", bi);
-	Return_i(2, err);
+	return err;
 }
 
 int ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits)
@@ -1295,9 +1230,7 @@ int ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits)
 	int err;
 	struct eba_s eba;
 
-	Trace_bi_l(2, bi, ((long)num_bits));
-
-	Ehbi_struct_is_not_null(2, bi);
+	Ehbi_struct_is_not_null(bi);
 
 	eba.endian = eba_big_endian;
 	eba.bits = bi->bytes;
@@ -1313,8 +1246,7 @@ int ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits)
 		ehbi_zero(bi);
 	}
 
-	Trace_msg_s_bi(2, "end", bi);
-	Return_i(2, err);
+	return err;
 }
 
 int ehbi_n_choose_k(struct ehbigint *result, const struct ehbigint *n,
@@ -1324,11 +1256,9 @@ int ehbi_n_choose_k(struct ehbigint *result, const struct ehbigint *n,
 	size_t i, size;
 	struct ehbigint sum_n, sum_k, tmp;
 
-	Trace_bi_bi_bi(2, result, n, k);
-
-	Ehbi_struct_is_not_null(2, result);
-	Ehbi_struct_is_not_null(2, n);
-	Ehbi_struct_is_not_null(2, k);
+	Ehbi_struct_is_not_null(result);
+	Ehbi_struct_is_not_null(n);
+	Ehbi_struct_is_not_null(k);
 
 	err = 0;
 
@@ -1368,15 +1298,15 @@ int ehbi_n_choose_k(struct ehbigint *result, const struct ehbigint *n,
 
 	Ehbi_stack_alloc_struct(tmp, size, err);
 	if (err) {
-		Return_i(2, err);
+		return err;
 	}
 	Ehbi_stack_alloc_struct(sum_n, size, err);
 	if (err) {
-		Return_i(2, err);
+		return err;
 	}
 	Ehbi_stack_alloc_struct(sum_k, size, err);
 	if (err) {
-		Return_i(2, err);
+		return err;
 	}
 
 	if (!err) {
@@ -1434,8 +1364,7 @@ ehbi_n_choose_k_end:
 		ehbi_stack_free(sum_k.bytes, sum_k.bytes_len);
 	}
 
-	Trace_msg_s_bi(2, "end", result);
-	Return_i(2, err);
+	return err;
 }
 
 int ehbi_n_choose_k_l(struct ehbigint *result, const struct ehbigint *n, long k)
@@ -1444,12 +1373,10 @@ int ehbi_n_choose_k_l(struct ehbigint *result, const struct ehbigint *n, long k)
 	struct ehbigint temp;
 	int err;
 
-	Trace_bi_bi_l(4, result, n, k);
-
 	ehbi_unsafe_clear_null_struct(&temp);
 
-	Ehbi_struct_is_not_null(4, result);
-	Ehbi_struct_is_not_null(4, n);
+	Ehbi_struct_is_not_null(result);
+	Ehbi_struct_is_not_null(n);
 
 	temp.bytes = bytes;
 	temp.bytes_len = sizeof(unsigned long);
@@ -1458,8 +1385,7 @@ int ehbi_n_choose_k_l(struct ehbigint *result, const struct ehbigint *n, long k)
 
 	err = ehbi_mul(result, n, &temp);
 
-	Trace_msg_s_bi(4, "end", result);
-	Return_i(4, err);
+	return err;
 }
 
 int ehbi_n_choose_k_ll(struct ehbigint *result, long n, long k)
@@ -1470,12 +1396,10 @@ int ehbi_n_choose_k_ll(struct ehbigint *result, long n, long k)
 	struct ehbigint temp_k;
 	int err;
 
-	Trace_bi_l_l(4, result, n, k);
-
 	ehbi_unsafe_clear_null_struct(&temp_n);
 	ehbi_unsafe_clear_null_struct(&temp_k);
 
-	Ehbi_struct_is_not_null(4, result);
+	Ehbi_struct_is_not_null(result);
 
 	temp_n.bytes = n_bytes;
 	temp_n.bytes_len = sizeof(unsigned long);
@@ -1487,8 +1411,7 @@ int ehbi_n_choose_k_ll(struct ehbigint *result, long n, long k)
 
 	err = ehbi_mul(result, &temp_n, &temp_k);
 
-	Trace_msg_s_bi(4, "end", result);
-	Return_i(4, err);
+	return err;
 }
 
 #ifndef EHBI_SKIP_IS_PROBABLY_PRIME
@@ -1574,8 +1497,6 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	unsigned char z_bytes[4], o_bytes[4], t_bytes[4];
 	struct ehbigint bimin1, a, r, d, x, y, c, max_witness;
 
-	Trace_bi_l(2, bi, ((long)accuracy));
-
 	ehbi_unsafe_clear_null_struct(&zero);
 	ehbi_unsafe_clear_null_struct(&one);
 	ehbi_unsafe_clear_null_struct(&two);
@@ -1586,7 +1507,7 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	ehbi_unsafe_clear_null_struct(&y);
 	ehbi_unsafe_clear_null_struct(&max_witness);
 
-	Ehbi_struct_is_not_null(2, bi);
+	Ehbi_struct_is_not_null(bi);
 
 	if (!err) {
 		err = &local_err;
@@ -1596,7 +1517,7 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	is_probably_prime = 0;
 
 	if (ehbi_is_negative(bi, err)) {
-		Return_i(2, 0);
+		return 0;
 	}
 
 	ehbi_init(&zero, z_bytes, 4);
@@ -1796,7 +1717,7 @@ ehbi_is_probably_prime_end:
 		ehbi_stack_free(max_witness.bytes, max_witness.bytes_len);
 	}
 
-	Return_i(2, is_probably_prime);
+	return is_probably_prime;
 }
 
 #endif /* EHBI_SKIP_IS_PROBABLY_PRIME */
@@ -1805,9 +1726,7 @@ int ehbi_negate(struct ehbigint *bi)
 {
 	int err;
 
-	Trace_bi(6, bi);
-
-	Ehbi_struct_is_not_null(6, bi);
+	Ehbi_struct_is_not_null(bi);
 
 	bi->sign = (bi->sign == 0) ? 1 : 0;
 
@@ -1815,36 +1734,34 @@ int ehbi_negate(struct ehbigint *bi)
 
 	ehbi_unsafe_reset_bytes_used(bi);
 
-	Trace_msg_s_bi(6, "end", bi);
-	Return_i(6, err);
+	return err;
 }
 
 int ehbi_is_negative(const struct ehbigint *bi, int *err)
 {
 	int rv, local_err;
 
-	Trace_bi(8, bi);
 	if (!err) {
 		err = &local_err;
 	}
 
-	Ehbi_struct_is_not_null_e(8, bi, err, 0);
+	Ehbi_struct_is_not_null_e(bi, err, 0);
 
 	/* guard for negative zero? */
 	if (bi->bytes_used == 0) {
-		Return_i(8, 0);
+		return 0;
 	}
 	if (bi->bytes_used == 1) {
 		if (bi->bytes[bi->bytes_len - 1] == 0x00) {
 			if (bi->sign == 1) {
 				Ehbi_log_error0("Negative zero?");
 			}
-			Return_i(8, 0);
+			return 0;
 		}
 	}
 
 	rv = (bi->sign == 0) ? 0 : 1;
-	Return_i(8, rv);
+	return rv;
 }
 
 int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
@@ -1854,14 +1771,13 @@ int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 	unsigned char a, b;
 	int rv, b1_pos, b2_pos, local_err;
 
-	Trace_bi_bi(8, bi1, bi2);
 	if (!err) {
 		err = &local_err;
 	}
 	rv = 0;
 
-	Ehbi_struct_is_not_null_e(8, bi1, err, rv);
-	Ehbi_struct_is_not_null_e(8, bi2, err, rv);
+	Ehbi_struct_is_not_null_e(bi1, err, rv);
+	Ehbi_struct_is_not_null_e(bi2, err, rv);
 
 	*err = EHBI_SUCCESS;
 
@@ -1870,15 +1786,15 @@ int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 
 	if (b1_pos != b2_pos) {
 		rv = b1_pos ? 1 : -1;
-		Return_i(8, rv);
+		return rv;
 	}
 
 	if (bi1->bytes_used > bi2->bytes_used) {
 		rv = b1_pos ? 1 : -1;
-		Return_i(8, rv);
+		return rv;
 	} else if (bi1->bytes_used < bi2->bytes_used) {
 		rv = b1_pos ? -1 : 1;
-		Return_i(8, rv);
+		return rv;
 	}
 
 	for (i = 0; i < bi1->bytes_used; ++i) {
@@ -1886,14 +1802,14 @@ int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		b = bi2->bytes[(bi2->bytes_len - bi2->bytes_used) + i];
 		if (a > b) {
 			rv = b1_pos ? 1 : -1;
-			Return_i(8, rv);
+			return rv;
 		} else if (a < b) {
 			rv = b1_pos ? -1 : 1;
-			Return_i(8, rv);
+			return rv;
 		}
 	}
 
-	Return_i(8, rv);
+	return rv;
 }
 
 int ehbi_compare_l(const struct ehbigint *bi1, long i2, int *err)
@@ -1902,8 +1818,6 @@ int ehbi_compare_l(const struct ehbigint *bi1, long i2, int *err)
 	struct ehbigint bi2;
 	unsigned char bytes[sizeof(long)];
 
-	Trace_bi_l(8, bi1, i2);
-
 	ehbi_unsafe_clear_null_struct(&bi2);
 
 	if (!err) {
@@ -1911,19 +1825,19 @@ int ehbi_compare_l(const struct ehbigint *bi1, long i2, int *err)
 	}
 	rv = 0;
 
-	Ehbi_struct_is_not_null_e(8, bi1, err, rv);
+	Ehbi_struct_is_not_null_e(bi1, err, rv);
 
 	*err = ehbi_init(&bi2, bytes, sizeof(long));
 	if (*err) {
-		Return_i(8, rv);
+		return rv;
 	}
 	*err = ehbi_inc_l(&bi2, i2);
 	if (*err) {
-		Return_i(8, rv);
+		return rv;
 	}
 
 	rv = ehbi_compare(bi1, &bi2, err);
-	Return_i(8, rv);
+	return rv;
 }
 
 int ehbi_equals(const struct ehbigint *bi1, const struct ehbigint *bi2,
@@ -1931,18 +1845,17 @@ int ehbi_equals(const struct ehbigint *bi1, const struct ehbigint *bi2,
 {
 	int rv, local_err;
 
-	Trace_bi_bi(8, bi1, bi2);
 	if (!err) {
 		err = &local_err;
 	}
 	rv = 0;
 
-	Ehbi_struct_is_not_null_e(8, bi1, err, rv);
-	Ehbi_struct_is_not_null_e(8, bi2, err, rv);
+	Ehbi_struct_is_not_null_e(bi1, err, rv);
+	Ehbi_struct_is_not_null_e(bi2, err, rv);
 
 	rv = ((ehbi_compare(bi1, bi2, err) == 0) && (*err == EHBI_SUCCESS));
 
-	Return_i(8, rv);
+	return rv;
 }
 
 int ehbi_equals_l(const struct ehbigint *bi1, long i2, int *err)
@@ -1951,8 +1864,6 @@ int ehbi_equals_l(const struct ehbigint *bi1, long i2, int *err)
 	struct ehbigint bi2;
 	unsigned char bytes[sizeof(long)];
 
-	Trace_bi_l(8, bi1, i2);
-
 	if (!err) {
 		err = &local_err;
 	}
@@ -1960,19 +1871,19 @@ int ehbi_equals_l(const struct ehbigint *bi1, long i2, int *err)
 
 	ehbi_unsafe_clear_null_struct(&bi2);
 
-	Ehbi_struct_is_not_null_e(8, bi1, err, rv);
+	Ehbi_struct_is_not_null_e(bi1, err, rv);
 
 	*err = ehbi_init(&bi2, bytes, sizeof(long));
 	if (*err) {
-		Return_i(8, rv);
+		return rv;
 	}
 	*err = ehbi_inc_l(&bi2, i2);
 	if (*err) {
-		Return_i(8, rv);
+		return rv;
 	}
 
 	rv = ehbi_equals(bi1, &bi2, err);
-	Return_i(8, rv);
+	return rv;
 }
 
 int ehbi_less_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
@@ -1980,20 +1891,18 @@ int ehbi_less_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 {
 	int rv, local_err;
 
-	Trace_bi_bi(8, bi1, bi2);
-
 	if (!err) {
 		err = &local_err;
 	}
 
 	rv = 0;
 
-	Ehbi_struct_is_not_null_e(8, bi1, err, rv);
-	Ehbi_struct_is_not_null_e(8, bi2, err, rv);
+	Ehbi_struct_is_not_null_e(bi1, err, rv);
+	Ehbi_struct_is_not_null_e(bi2, err, rv);
 
 	rv = ((ehbi_compare(bi1, bi2, err) < 0) && (*err == EHBI_SUCCESS));
 
-	Return_i(8, rv);
+	return rv;
 }
 
 int ehbi_less_than_l(const struct ehbigint *bi1, long i2, int *err)
@@ -2002,8 +1911,6 @@ int ehbi_less_than_l(const struct ehbigint *bi1, long i2, int *err)
 	struct ehbigint bi2;
 	unsigned char bytes[sizeof(long)];
 
-	Trace_bi_l(8, bi1, i2);
-
 	if (!err) {
 		err = &local_err;
 	}
@@ -2011,19 +1918,19 @@ int ehbi_less_than_l(const struct ehbigint *bi1, long i2, int *err)
 
 	ehbi_unsafe_clear_null_struct(&bi2);
 
-	Ehbi_struct_is_not_null_e(8, bi1, err, rv);
+	Ehbi_struct_is_not_null_e(bi1, err, rv);
 
 	*err = ehbi_init(&bi2, bytes, sizeof(long));
 	if (*err) {
-		Return_i(8, rv);
+		return rv;
 	}
 	*err = ehbi_inc_l(&bi2, i2);
 	if (*err) {
-		Return_i(8, rv);
+		return rv;
 	}
 
 	rv = ehbi_less_than(bi1, &bi2, err);
-	Return_i(8, rv);
+	return rv;
 }
 
 int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
@@ -2031,19 +1938,17 @@ int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 {
 	int rv, local_err;
 
-	Trace_bi_bi(8, bi1, bi2);
-
 	if (!err) {
 		err = &local_err;
 	}
 	rv = 0;
 
-	Ehbi_struct_is_not_null_e(8, bi1, err, rv);
-	Ehbi_struct_is_not_null_e(8, bi2, err, rv);
+	Ehbi_struct_is_not_null_e(bi1, err, rv);
+	Ehbi_struct_is_not_null_e(bi2, err, rv);
 
 	rv = ((ehbi_compare(bi1, bi2, err) > 0) && (*err == EHBI_SUCCESS));
 
-	Return_i(8, rv);
+	return rv;
 }
 
 int ehbi_greater_than_l(const struct ehbigint *bi1, long i2, int *err)
@@ -2052,8 +1957,6 @@ int ehbi_greater_than_l(const struct ehbigint *bi1, long i2, int *err)
 	struct ehbigint bi2;
 	unsigned char bytes[sizeof(long)];
 
-	Trace_bi_l(8, bi1, i2);
-
 	if (!err) {
 		err = &local_err;
 	}
@@ -2061,19 +1964,19 @@ int ehbi_greater_than_l(const struct ehbigint *bi1, long i2, int *err)
 
 	ehbi_unsafe_clear_null_struct(&bi2);
 
-	Ehbi_struct_is_not_null_e(8, bi1, err, rv);
+	Ehbi_struct_is_not_null_e(bi1, err, rv);
 
 	*err = ehbi_init(&bi2, bytes, sizeof(long));
 	if (*err) {
-		Return_i(8, rv);
+		return rv;
 	}
 	*err = ehbi_inc_l(&bi2, i2);
 	if (*err) {
-		Return_i(8, rv);
+		return rv;
 	}
 
 	rv = ehbi_greater_than(bi1, &bi2, err);
-	Return_i(8, rv);
+	return rv;
 }
 
 int ehbi_is_odd(const struct ehbigint *bi, int *err)
@@ -2081,17 +1984,15 @@ int ehbi_is_odd(const struct ehbigint *bi, int *err)
 	unsigned char bit;
 	int rv, local_err;
 
-	Trace_bi(8, bi);
-
 	if (!err) {
 		err = &local_err;
 	}
 	rv = 0;
 
-	Ehbi_struct_is_not_null_e(8, bi, err, rv);
+	Ehbi_struct_is_not_null_e(bi, err, rv);
 
 	bit = 0x01 & bi->bytes[bi->bytes_len - 1];
 	rv = bit ? 1 : 0;
 
-	Return_i(8, rv);
+	return rv;
 }

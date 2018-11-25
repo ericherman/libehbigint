@@ -35,290 +35,33 @@ FILE *ehbi_log_file(void);
 void set_ehbi_log_file(FILE *log);
 #endif /* SKIP_SDIO_H */
 
-extern int ehbi_debug_log_level;
-int ehbi_debugf(int level, const char *fmt, ...);
-
-void ehbi_debug_to_hex(int level, const struct ehbigint *bi, const char *label);
-
-void ehbi_debug_to_string(int level, const struct ehbigint *bi,
-			  const char *label);
-
-#if (EHBI_DEBUG > 0) && (!defined(SKIP_STDIO_H))
-extern unsigned EHBI_DBUG_i;
-extern unsigned EHBI_DBUG_depth;
-extern char EHBI_DBUG_Buf0[80];
-extern char EHBI_DBUG_Buf1[80];
-
-#ifdef _GNU_SOURCE
-#define EHBI_FUNC __PRETTY_FUNCTION__
-#else
-#if (__STDC_VERSION__ >= 199901L)
-#define EHBI_FUNC __func__
-#else
-#define EHBI_FUNC NULL
-#endif /* _GNU_SOURCE */
-#endif /* __STDC_VERSION__ */
-
-#define Ehbi_trace_in(level) \
-	do { if (level < EHBI_DEBUG) { \
-		++EHBI_DBUG_depth; \
-		for (EHBI_DBUG_i= 0; \
-		     EHBI_DBUG_i < EHBI_DBUG_depth; \
-		     ++EHBI_DBUG_i) { \
-			EHBI_DBUG_Buf0[EHBI_DBUG_i] = '-'; \
-			EHBI_DBUG_Buf1[EHBI_DBUG_i] = ' '; \
-		} \
-		EHBI_DBUG_Buf0[EHBI_DBUG_i] = '\0'; \
-		EHBI_DBUG_Buf1[EHBI_DBUG_i] = '\0'; \
-		fprintf(stderr, "%s%s(", EHBI_DBUG_Buf0, EHBI_FUNC); \
-	} } while(0)
-
-#define Ehbi_trace_fprintf_bi(level, bi, name) \
-	do { if (level < EHBI_DEBUG) { \
-		for (EHBI_DBUG_i= 0; \
-		     EHBI_DBUG_i < EHBI_DBUG_depth; \
-		     ++EHBI_DBUG_i) { \
-			EHBI_DBUG_Buf1[EHBI_DBUG_i] = ' '; \
-		} \
-		EHBI_DBUG_Buf1[EHBI_DBUG_i] = '\0'; \
-		fprintf(stderr, \
-		        "\n%s\t\t%s{bytes_len:%lu,bytes_used:%lu,sign:%u,0x", \
-			EHBI_DBUG_Buf1, \
-			name, \
-			((bi)) ? (unsigned long)((bi)->bytes_len) : 0, \
-			((bi)) ? (unsigned long)((bi)->bytes_used) : 0, \
-			((bi)) ? (unsigned)((bi)->sign) : 0); \
-		for (EHBI_DBUG_i = 0; \
-		     EHBI_DBUG_i < (((bi))? (bi)->bytes_len : 0); \
-		     ++EHBI_DBUG_i) { \
-			fprintf(stderr, "%02X", \
-				((bi)->bytes) ? (bi)->bytes[EHBI_DBUG_i] : 0); \
-		} \
-		fprintf(stderr, "}"); \
-	} } while(0)
-
-#define Ehbi_trace_fprintf_s(level, val, name) \
-	do { if (level < EHBI_DEBUG) { \
-		for (EHBI_DBUG_i= 0; \
-		     EHBI_DBUG_i < EHBI_DBUG_depth; \
-		     ++EHBI_DBUG_i) { \
-			EHBI_DBUG_Buf1[EHBI_DBUG_i] = ' '; \
-		} \
-		EHBI_DBUG_Buf1[EHBI_DBUG_i] = '\0'; \
-		fprintf(stderr, "\n%s\t\t%s: \"%s\"", \
-			EHBI_DBUG_Buf1, name, val); \
-	} } while(0)
-
-#define Ehbi_trace_fprintf_l(level, val, name) \
-	do { if (level < EHBI_DEBUG) { \
-		for (EHBI_DBUG_i= 0; \
-		     EHBI_DBUG_i < EHBI_DBUG_depth; \
-		     ++EHBI_DBUG_i) { \
-			EHBI_DBUG_Buf1[EHBI_DBUG_i] = ' '; \
-		} \
-		EHBI_DBUG_Buf1[EHBI_DBUG_i] = '\0'; \
-		fprintf(stderr, "\n%s\t\t%s: %ld", \
-			EHBI_DBUG_Buf1, name, val); \
-	} } while(0)
-
-#define Trace_bi(level, bi) \
-	do { if (level < EHBI_DEBUG) { \
-		Ehbi_trace_in(level); \
-		Ehbi_trace_fprintf_bi(level, bi, "bi"); \
-		fprintf(stderr, ")\n"); \
-	} } while(0)
-
-#define Trace_bi_l(level, bi, l) \
-	do { if (level < EHBI_DEBUG) { \
-		Ehbi_trace_in(level); \
-		Ehbi_trace_fprintf_bi(level, bi, "bi"); \
-		fprintf(stderr, ",\n%s\t\t%ld)\n", EHBI_DBUG_Buf1, l); \
-	} } while(0)
-
-#define Trace_bi_s(level, bi, s) \
-	do { if (level < EHBI_DEBUG) { \
-		Ehbi_trace_in(level); \
-		Ehbi_trace_fprintf_bi(level, bi, "bi"); \
-		fprintf(stderr, ",\n%s\t\t%s)\n", EHBI_DBUG_Buf1, s); \
-	} } while(0)
-
-#define Trace_bi_bi(level, bi1, bi2) \
-	do { if (level < EHBI_DEBUG) { \
-		Ehbi_trace_in(level); \
-		Ehbi_trace_fprintf_bi(level, bi1, "bi1"); \
-		fprintf(stderr, ","); \
-		Ehbi_trace_fprintf_bi(level, bi2, "bi2"); \
-		fprintf(stderr, ")\n"); \
-	} } while(0)
-
-#define Trace_bi_bi_bi(level, bi1, bi2, bi3) \
-	do { if (level < EHBI_DEBUG) { \
-		Ehbi_trace_in(level); \
-		Ehbi_trace_fprintf_bi(level, bi1, "bi1"); \
-		fprintf(stderr, ","); \
-		Ehbi_trace_fprintf_bi(level, bi2, "bi2"); \
-		fprintf(stderr, ","); \
-		Ehbi_trace_fprintf_bi(level, bi3, "bi3"); \
-		fprintf(stderr, ")\n"); \
-	} } while(0)
-
-#define Trace_bi_bi_l(level, bi1, bi2, l3) \
-	do { if (level < EHBI_DEBUG) { \
-		Ehbi_trace_in(level); \
-		Ehbi_trace_fprintf_bi(level, bi1, "bi1"); \
-		fprintf(stderr, ","); \
-		Ehbi_trace_fprintf_bi(level, bi2, "bi2"); \
-		fprintf(stderr, ","); \
-		Ehbi_trace_fprintf_l(level, l3, "l3"); \
-		fprintf(stderr, ")\n"); \
-	} } while(0)
-
-#define Trace_bi_l_l(level, bi1, l2, l3) \
-	do { if (level < EHBI_DEBUG) { \
-		Ehbi_trace_in(level); \
-		Ehbi_trace_fprintf_bi(level, bi1, "bi1"); \
-		fprintf(stderr, ","); \
-		Ehbi_trace_fprintf_l(level, l2, "l2"); \
-		fprintf(stderr, ","); \
-		Ehbi_trace_fprintf_l(level, l3, "l3"); \
-		fprintf(stderr, ")\n"); \
-	} } while(0)
-
-#define Trace_bi_bi_bi_bi(level, bi1, bi2, bi3, bi4) \
-	do { if (level < EHBI_DEBUG) { \
-		Ehbi_trace_in(level); \
-		Ehbi_trace_fprintf_bi(level, bi1, "bi1"); \
-		fprintf(stderr, ","); \
-		Ehbi_trace_fprintf_bi(level, bi2, "bi2"); \
-		fprintf(stderr, ","); \
-		Ehbi_trace_fprintf_bi(level, bi3, "bi3"); \
-		fprintf(stderr, ","); \
-		Ehbi_trace_fprintf_bi(level, bi4, "bi4"); \
-		fprintf(stderr, ")\n"); \
-	} } while(0)
-
-#define Trace_bi_bi_bi_l(level, bi1, bi2, bi3, l4) \
-	do { if (level < EHBI_DEBUG) { \
-		Ehbi_trace_in(level); \
-		Ehbi_trace_fprintf_bi(level, bi1, "bi1"); \
-		fprintf(stderr, ","); \
-		Ehbi_trace_fprintf_bi(level, bi2, "bi2"); \
-		fprintf(stderr, ","); \
-		Ehbi_trace_fprintf_bi(level, bi3, "bi3"); \
-		fprintf(stderr, ","); \
-		Ehbi_trace_fprintf_l(level, l4, "l4"); \
-		fprintf(stderr, ")\n"); \
-	} } while(0)
-
-#define Trace_bi_bi_l_l(level, bi1, bi2, l3, l4) \
-	do { if (level < EHBI_DEBUG) { \
-		Ehbi_trace_in(level); \
-		Ehbi_trace_fprintf_bi(level, bi1, "bi1"); \
-		fprintf(stderr, ","); \
-		Ehbi_trace_fprintf_bi(level, bi2, "bi2"); \
-		fprintf(stderr, ","); \
-		Ehbi_trace_fprintf_l(level, l3, "l3"); \
-		fprintf(stderr, ","); \
-		Ehbi_trace_fprintf_l(level, l4, "l4"); \
-		fprintf(stderr, ")\n"); \
-	} } while(0)
-
-#define Trace_msg_s_bi(level, msg, bi) \
-	do { if (level < EHBI_DEBUG) { \
-		Ehbi_trace_fprintf_bi(level, bi, msg); \
-		fprintf(stderr, "\n"); \
-	} } while(0)
-
-#define Trace_msg_s_s(level, msg, val) \
-	do { if (level < EHBI_DEBUG) { \
-		Ehbi_trace_fprintf_s(level, msg, val); \
-		fprintf(stderr, "\n"); \
-	} } while(0)
-
-#define Return_stack(level) \
-	do { if (level < EHBI_DEBUG) { \
-		for (EHBI_DBUG_i= 0; \
-		     EHBI_DBUG_i < EHBI_DBUG_depth; \
-		     ++EHBI_DBUG_i) { \
-			EHBI_DBUG_Buf0[EHBI_DBUG_i] = '-'; \
-			EHBI_DBUG_Buf1[EHBI_DBUG_i] = ' '; \
-		} \
-		EHBI_DBUG_Buf0[EHBI_DBUG_i] = '\0'; \
-		EHBI_DBUG_Buf1[EHBI_DBUG_i] = '\0'; \
-		--EHBI_DBUG_depth; \
-	} } while(0)
-
-#define Return_i(level,val) \
-	if (level < EHBI_DEBUG) { \
-		Return_stack(level); \
-		fprintf(stderr, "%s%s return (%d)\n", \
-			EHBI_DBUG_Buf0, EHBI_FUNC, val); \
-	} \
-	return val
-
-#define Return_s(level, val) \
-	if (level < EHBI_DEBUG) { \
-		Return_stack(level); \
-		fprintf(stderr, "%s%s return (\"%s\")\n", \
-		EHBI_DBUG_Buf0, EHBI_FUNC, val); \
-	} \
-	return val
-
-#define Return_void(level) \
-	if (level < EHBI_DEBUG) { \
-		Return_stack(level); \
-		fprintf(stderr, "%s%s return\n", \
-		EHBI_DBUG_Buf0, EHBI_FUNC); \
-	} \
-	return
-
-#else /* no EHBI_DEBUG */
-
-#define Trace_bi(level, bi) Ehbi_noop
-#define Trace_bi_l(level, bi, l) Ehbi_noop
-#define Trace_bi_s(level, bi, s) Ehbi_noop
-#define Trace_bi_bi(level, bi1, bi2) Ehbi_noop
-#define Trace_bi_bi_bi(level, bi1, bi2, bi3) Ehbi_noop
-#define Trace_bi_bi_l(level, bi1, bi2, l3) Ehbi_noop
-#define Trace_bi_l_l(level, bi1, l2, l3) Ehbi_noop
-#define Trace_bi_bi_bi_bi(level, bi1, bi2, bi3, bi4) Ehbi_noop
-#define Trace_bi_bi_bi_l(level, bi1, bi2, bi3, l4) Ehbi_noop
-#define Trace_bi_bi_l_l(level, bi1, bi2, l3, l4) Ehbi_noop
-#define Trace_msg_s_bi(level, s, bi) Ehbi_noop
-#define Trace_msg_s_s(level, msg, val) Ehbi_noop
-#define Return_i(level, val) return val
-#define Return_s(level, val) return val
-#define Return_void(level) return
-
-#endif /* EHBI_DEBUG */
-
-#define Ehbi_struct_is_not_null(level, bi) \
+#define Ehbi_struct_is_not_null(bi) \
 	do { \
 		if (bi == NULL) { \
 			Ehbi_log_error0("Null struct"); \
-			Return_i(level, EHBI_NULL_STRUCT); \
+			return EHBI_NULL_STRUCT; \
 		} \
 		if (bi->bytes == NULL) { \
 			Ehbi_log_error0("Null bytes[]"); \
-			Return_i(level, EHBI_NULL_BYTES); \
+			return EHBI_NULL_BYTES; \
 		} \
 	} while(0)
 
-#define Ehbi_struct_is_not_null_e(level, bi, err, err_rv) \
+#define Ehbi_struct_is_not_null_e(bi, err, err_rv) \
 	do { \
 		if (bi == NULL) { \
 			Ehbi_log_error0("Null argument(s)"); \
 			if (err) { \
 				*err = EHBI_NULL_ARGS; \
 			} \
-			Return_i(level, err_rv); \
+			return err_rv; \
 		} \
 		if (bi->bytes == NULL) { \
 			Ehbi_log_error0("Null bytes[]"); \
 			if (err) { \
 				*err = EHBI_NULL_BYTES; \
 			} \
-			Return_i(level, err_rv); \
+			return err_rv; \
 		} \
 	} while(0)
 

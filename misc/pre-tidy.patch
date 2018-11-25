@@ -12,7 +12,7 @@
  
  #include "ehbigint.h"		/* struct ehbigint */
  
-@@ -377,8 +379,10 @@
+@@ -120,8 +122,10 @@
   ehbi_log_backtrace(ehbi_log_file())
  #endif
  
@@ -61,7 +61,7 @@
  
  #ifdef EHBI_NO_ALLOCA
  #include <stdlib.h>
-@@ -41,8 +43,10 @@
+@@ -40,8 +42,10 @@
  #endif /* ehbi_random_bytes */
  #endif /* EHBI_SKIP_IS_PROBABLY_PRIME */
  

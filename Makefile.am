@@ -21,7 +21,7 @@ ALLOCA_CFLAGS=
 RELEASE_HOSTED_CFLAGS=\
  -std=c89 -Wpedantic $(ALLOCA_CFLAGS) \
  -pipe -ggdb -O2 -fomit-frame-pointer \
- -Wall -Wextra -Werror
+ -Wall -Wextra -Werror -DNDEBUG=1
 
 # if debugging, these flags may be better:
 #TODO get configure/autoconf to work right with BACKTRACE
@@ -34,7 +34,7 @@ BACKTRACE_CFLAGS=-D_POSIX_SOURCE -DEBHI_CAN_BACKTRACE -rdynamic
 #endif
 DEBUG_HOSTED_GNU_CFLAGS=\
  -std=gnu11 -D_GNU_SOURCE $(BACKTRACE_CFLAGS) $(ALLOCA_CFLAGS) \
- -pipe -ggdb -O0 -DEHBI_DEBUG=1 \
+ -pipe -ggdb -O0 \
  -Wall -Wextra -Werror
 
 BUILD_TYPE_CFLAGS=$(RELEASE_HOSTED_CFLAGS)

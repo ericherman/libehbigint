@@ -22,8 +22,6 @@ void ehbi_unsafe_reset_bytes_used(struct ehbigint *bi)
 {
 	size_t i;
 
-	Trace_bi(10, bi);
-
 	for (i = 0; i < bi->bytes_len; ++i) {
 		if (bi->bytes[i] != 0) {
 			break;
@@ -37,21 +35,13 @@ void ehbi_unsafe_reset_bytes_used(struct ehbigint *bi)
 	if ((bi->bytes_used == 1) && (bi->bytes[bi->bytes_len - 1] == 0x00)) {
 		bi->sign = 0;
 	}
-
-	Trace_msg_s_bi(10, "end", bi);
-	Return_void(10);
 }
 
 void ehbi_unsafe_zero(struct ehbigint *bi)
 {
-	Trace_bi(10, bi);
-
 	Eba_memset(bi->bytes, 0x00, bi->bytes_len);
 	bi->bytes_used = 1;
 	bi->sign = 0;
-
-	Trace_msg_s_bi(10, "end", bi);
-	Return_void(10);
 }
 
 void ehbi_unsafe_clear_null_struct(struct ehbigint *bi)

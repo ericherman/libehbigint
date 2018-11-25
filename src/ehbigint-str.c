@@ -40,13 +40,11 @@ int ehbi_set_binary_string(struct ehbigint *bi, const char *str, size_t len)
 	struct eba_s eba;
 	int err;
 
-	Trace_bi_s(8, bi, str);
-
 	eba.endian = eba_big_endian;
 	eba.bits = NULL;
 	eba.size_bytes = 0;
 
-	Ehbi_struct_is_not_null(8, bi);
+	Ehbi_struct_is_not_null(bi);
 	ehbi_zero(bi);
 
 	eba.bits = bi->bytes;
@@ -54,11 +52,11 @@ int ehbi_set_binary_string(struct ehbigint *bi, const char *str, size_t len)
 
 	if (str == 0) {
 		Ehbi_log_error0("Null string");
-		Return_i(8, EHBI_NULL_STRING);
+		return EHBI_NULL_STRING;
 	}
 	if (len == 0 || str[0] == 0) {
 		Ehbi_log_error0("Zero length string");
-		Return_i(8, EHBI_ZERO_LEN_STRING);
+		return EHBI_ZERO_LEN_STRING;
 	}
 	if (len > 2 && str[0] == '0' && (str[1] == 'b' || str[1] == 'B')) {
 		str = str + 2;
@@ -82,8 +80,7 @@ int ehbi_set_binary_string(struct ehbigint *bi, const char *str, size_t len)
 	}
 
 	ehbi_unsafe_reset_bytes_used(bi);
-
-	Return_i(8, err);
+	return err;
 }
 
 int ehbi_set_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
@@ -91,17 +88,15 @@ int ehbi_set_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 	size_t i, j;
 	unsigned char high, low;
 
-	Trace_bi_s(8, bi, str);
-
-	Ehbi_struct_is_not_null(8, bi);
+	Ehbi_struct_is_not_null(bi);
 
 	if (str == 0) {
 		Ehbi_log_error0("Null string");
-		Return_i(8, EHBI_NULL_STRING);
+		return EHBI_NULL_STRING;
 	}
 	if (str_len == 0 || str[0] == 0) {
 		Ehbi_log_error0("Zero length string");
-		Return_i(8, EHBI_ZERO_LEN_STRING);
+		return EHBI_ZERO_LEN_STRING;
 	}
 
 	bi->sign = 0;
@@ -133,12 +128,12 @@ int ehbi_set_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 		}
 		if (bi->bytes_used >= bi->bytes_len) {
 			Ehbi_log_error0("byte[] too small");
-			Return_i(8, EHBI_BYTES_TOO_SMALL);
+			return EHBI_BYTES_TOO_SMALL;
 		}
 		if (ehbi_hex_chars_to_byte(high, low, &(bi->bytes[--i]))) {
 			Ehbi_log_error2("Bad data (high: %c, low: %c)", high,
 					low);
-			Return_i(8, EHBI_BAD_DATA);
+			return EHBI_BAD_DATA;
 		}
 		bi->bytes_used++;
 	}
@@ -148,8 +143,7 @@ int ehbi_set_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 
 	ehbi_unsafe_reset_bytes_used(bi);
 
-	Trace_msg_s_bi(8, "end", bi);
-	Return_i(8, EHBI_SUCCESS);
+	return EHBI_SUCCESS;
 }
 
 int ehbi_set_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
@@ -159,16 +153,14 @@ int ehbi_set_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 	size_t size;
 	int err, negative;
 
-	Trace_bi(8, bi);
-
-	Ehbi_struct_is_not_null(8, bi);
+	Ehbi_struct_is_not_null(bi);
 
 	if (len == 0) {
 		str = "0x00";
 		len = 4;
 	} else if (dec == NULL) {
 		Ehbi_log_error0("Null string");
-		Return_i(8, EHBI_NULL_STRING);
+		return EHBI_NULL_STRING;
 	}
 
 	size = 4 /* strlen("0x00") */  + len + 1;
@@ -176,7 +168,7 @@ int ehbi_set_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 	if (!hex) {
 		Ehbi_log_error2("Could not %s(%lu) bytes", ehbi_stack_alloc_str,
 				(unsigned long)size);
-		Return_i(8, EHBI_STACK_TOO_SMALL);
+		return EHBI_STACK_TOO_SMALL;
 	}
 	if (dec[0] == '-') {
 		str = dec + 1;
@@ -188,7 +180,7 @@ int ehbi_set_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 	}
 	err = ehbi_decimal_to_hex(str, len, hex, size);
 	if (err) {
-		Return_i(8, err);
+		return err;
 	}
 
 	err = ehbi_set_hex_string(bi, hex, size);
@@ -200,8 +192,7 @@ int ehbi_set_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 	ehbi_unsafe_reset_bytes_used(bi);
 
 	ehbi_stack_free(hex, size);
-	Trace_msg_s_bi(8, "end", bi);
-	Return_i(8, err);
+	return err;
 }
 
 char *ehbi_to_binary_string(const struct ehbigint *bi, char *buf,
@@ -210,8 +201,6 @@ char *ehbi_to_binary_string(const struct ehbigint *bi, char *buf,
 	size_t i, j, k, written;
 	unsigned char bit;
 	struct eba_s eba;
-
-	Trace_bi(8, bi);
 
 	eba.endian = eba_big_endian;
 	eba.bits = NULL;
@@ -274,8 +263,6 @@ char *ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len,
 	size_t i, j;
 	char *rv;
 
-	Trace_bi(8, bi);
-
 	Ehbi_struct_is_not_null_e_j(bi, err, ehbi_to_hex_string_end);
 
 	if (buf == 0) {
@@ -332,8 +319,7 @@ ehbi_to_hex_string_end:
 	}
 	rv = ((err == NULL || *err) ? NULL : buf);
 
-	Trace_msg_s_s(8, "end", buf);
-	Return_s(8, rv);
+	return rv;
 }
 
 char *ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len,
@@ -341,8 +327,6 @@ char *ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len,
 {
 	char *hex, *rv;
 	size_t size;
-
-	Trace_bi(8, bi);
 
 	hex = NULL;
 	rv = NULL;
@@ -395,8 +379,7 @@ ehbi_to_decimal_string_end:
 
 	rv = (err == NULL || *err) ? NULL : rv;
 
-	Trace_msg_s_s(8, "end", buf);
-	Return_s(8, rv);
+	return rv;
 }
 
 int ehbi_byte_to_hex_chars(unsigned char byte, char *high, char *low)

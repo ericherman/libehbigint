@@ -250,7 +250,7 @@ bi-calc:
 demo: bi-calc
 	./bi-calc 132904811234120000312412 + 123412413132500
 
-valgrind: $(check_PROGRAMS)
+valgrind: $(check_PROGRAMS) $(lib_LTLIBRARIES)
 	./libtool --mode=execute valgrind -q ./test-add
 	./libtool --mode=execute valgrind -q ./test-compare
 	./libtool --mode=execute valgrind -q ./test-comp-exp-mod-with-gmp

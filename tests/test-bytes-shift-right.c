@@ -19,14 +19,18 @@ int test_bytes_shift_right(int verbose, const char *val, size_t bytes,
 {
 	int err, failures;
 	unsigned char bytes_buf1[20];
+	unsigned char bytes_buf2[20];
 	struct ehbigint bi;
+	struct ehbigint expect_bi;
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
 	ehbi_init(&bi, bytes_buf1, 20);
+	ehbi_init(&expect_bi, bytes_buf2, 20);
 
 	err = ehbi_set_hex_string(&bi, val, strlen(val));
+	err += ehbi_set_hex_string(&expect_bi, expected, strlen(expected));
 	if (err) {
 		Test_log_error1("error %d from ehbi_set_hex_string\n", err);
 		Test_log_error("Aborting test\n");
@@ -40,7 +44,7 @@ int test_bytes_shift_right(int verbose, const char *val, size_t bytes,
 		return (1 + failures);
 	}
 
-	failures += Check_ehbigint_hex(&bi, expected);
+	failures += Check_ehbigint(&bi, &expect_bi);
 
 	if (failures) {
 		Test_log_error4

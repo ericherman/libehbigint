@@ -21,9 +21,6 @@ License for more details.
 
 #include <limits.h>		/* LONG_MAX */
 
-static int ehbi_bytes_shift_right(struct ehbigint *bi, size_t num_bytes);
-static int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes);
-
 static void ehbi_unsafe_struct_l(struct ehbigint *temp, long val)
 {
 	unsigned long v;
@@ -302,10 +299,10 @@ int ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
 				err = ehbi_set_l(&tmp, r);
 			}
 			if (!err) {
-				err = ehbi_bytes_shift_left(&tmp, i);
+				err = ehbi_shift_left(&tmp, i * EBA_CHAR_BIT);
 			}
 			if (!err) {
-				err = ehbi_bytes_shift_left(&tmp, j);
+				err = ehbi_shift_left(&tmp, j * EBA_CHAR_BIT);
 			}
 			if (!err) {
 				err = ehbi_inc(res, &tmp);
@@ -451,7 +448,7 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	for (i = 0; i < abs_denom->bytes_used; ++i) {
 		if ((remainder->bytes_used > 1)
 		    || (remainder->bytes[remainder->bytes_len - 1] != 0x00)) {
-			err = ehbi_bytes_shift_left(remainder, 1);
+			err = ehbi_shift_left(remainder, EBA_CHAR_BIT);
 			if (err) {
 				goto ehbi_div_end;
 			}
@@ -459,7 +456,7 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		ehbi_inc_l(remainder, abs_numer->bytes[num_idx++]);
 	}
 	if (ehbi_greater_than(abs_denom, remainder, &err)) {
-		err = ehbi_bytes_shift_left(remainder, 1);
+		err = ehbi_shift_left(remainder, EBA_CHAR_BIT);
 		if (err) {
 			goto ehbi_div_end;
 		}
@@ -485,12 +482,12 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		}
 		while (!err && ehbi_less_than(remainder, abs_denom, &err)
 		       && (num_idx < abs_numer->bytes_len)) {
-			err = ehbi_bytes_shift_left(quotient, 1);
+			err = ehbi_shift_left(quotient, EBA_CHAR_BIT);
 			if (err) {
 				goto ehbi_div_end;
 			}
 
-			err = ehbi_bytes_shift_left(remainder, 1);
+			err = ehbi_shift_left(remainder, EBA_CHAR_BIT);
 			if (err) {
 				goto ehbi_div_end;
 			}
@@ -1268,91 +1265,8 @@ int ehbi_subtract_l(struct ehbigint *res, const struct ehbigint *bi1, long v2)
 	Return_i(4, err);
 }
 
-static int ehbi_bytes_shift_left(struct ehbigint *bi, size_t num_bytes)
-{
-	size_t i;
-
-	Trace_bi_l(2, bi, ((long)num_bytes));
-
-	Ehbi_struct_is_not_null(2, bi);
-
-	if (num_bytes == 0) {
-		Trace_msg_s_bi(2, "end", bi);
-		Return_i(2, EHBI_SUCCESS);
-	}
-
-	if (bi->bytes_len < (bi->bytes_used + num_bytes)) {
-		Ehbi_log_error3("Result byte[] too small for shift"
-				" (bi->bytes_len <"
-				" (bi->bytes_used + num_bytes))"
-				" (%lu < (%lu + %lu))",
-				(unsigned long)bi->bytes_len,
-				(unsigned long)bi->bytes_used,
-				(unsigned long)num_bytes);
-		Return_i(2, EHBI_BYTES_TOO_SMALL_FOR_CARRY);
-	}
-
-	bi->bytes_used += num_bytes;
-
-	/* shift the value left by num_bytes bytes */
-	for (i = 0; i < bi->bytes_len; ++i) {
-		/* shift the value byte one byte */
-		if (i + num_bytes >= bi->bytes_len) {
-			/* set the zero/-1 value on the right */
-			bi->bytes[i] = bi->bytes[0];
-		} else {
-			bi->bytes[i] = bi->bytes[i + num_bytes];
-		}
-	}
-
-	/* make sure we keep "bytes_used" reasonable */
-	while (bi->bytes_used > 1
-	       && bi->bytes[bi->bytes_len - bi->bytes_used] == bi->bytes[0]
-	       && bi->bytes[bi->bytes_len - (bi->bytes_used - 1)] < 0x80) {
-		--(bi->bytes_used);
-	}
-
-	Trace_msg_s_bi(2, "end", bi);
-	Return_i(2, EHBI_SUCCESS);
-}
-
-static int ehbi_bytes_shift_right(struct ehbigint *bi, size_t num_bytes)
-{
-	size_t i;
-
-	Trace_bi_l(2, bi, ((long)num_bytes));
-
-	Ehbi_struct_is_not_null(2, bi);
-
-	if (num_bytes == 0) {
-		Trace_msg_s_bi(2, "end", bi);
-		Return_i(2, EHBI_SUCCESS);
-	}
-
-	if (bi->bytes_used <= num_bytes) {
-		ehbi_unsafe_zero(bi);
-
-		Trace_msg_s_bi(2, "end", bi);
-		Return_i(2, EHBI_SUCCESS);
-	}
-
-	/* shift the value left by num_bytes bytes */
-	for (i = bi->bytes_len; i > 0; --i) {
-		if (i > num_bytes) {
-			bi->bytes[i - 1] = bi->bytes[i - (1 + num_bytes)];
-		} else {
-			bi->bytes[i - 1] = 0x00;
-		}
-	}
-	bi->bytes_used -= num_bytes;
-
-	Trace_msg_s_bi(2, "end", bi);
-	Return_i(2, EHBI_SUCCESS);
-}
-
 int ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits)
 {
-	size_t bytes;
 	int err;
 	struct eba_s eba;
 
@@ -1363,14 +1277,6 @@ int ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits)
 	eba.size_bytes = 0;
 
 	Ehbi_struct_is_not_null(2, bi);
-
-	if ((num_bits % 8UL) == 0) {
-		bytes = (size_t)(num_bits / 8UL);
-		err = ehbi_bytes_shift_right(bi, bytes);
-
-		Trace_msg_s_bi(2, "end", bi);
-		Return_i(2, err);
-	}
 
 	eba.bits = bi->bytes;
 	eba.size_bytes = bi->bytes_len;
@@ -1391,7 +1297,6 @@ int ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits)
 
 int ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits)
 {
-	size_t bytes;
 	int err;
 	struct eba_s eba;
 
@@ -1399,13 +1304,6 @@ int ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits)
 
 	Ehbi_struct_is_not_null(2, bi);
 
-	if ((num_bits % 8UL) == 0) {
-		bytes = (size_t)(num_bits / 8UL);
-		err = ehbi_bytes_shift_left(bi, bytes);
-
-		Trace_msg_s_bi(2, "end", bi);
-		Return_i(2, err);
-	}
 	eba.endian = eba_big_endian;
 	eba.bits = bi->bytes;
 	eba.size_bytes = bi->bytes_len;
@@ -1633,7 +1531,7 @@ static void ehbi_get_witness(size_t i, struct ehbigint *a,
 			*err = ehbi_random_bytes(a->bytes, a->bytes_len);
 			a->bytes_used = a->bytes_len;
 			shift = a->bytes_len - max_witness->bytes_used;
-			*err = ehbi_bytes_shift_right(a, shift);
+			*err = ehbi_shift_right(a, shift * EBA_CHAR_BIT);
 			ehbi_unsafe_reset_bytes_used(a);
 		} while ((ehbi_greater_than(a, max_witness, err)
 			  || ehbi_less_than(a, two, err)) && (j++ < max_rnd));
@@ -1943,6 +1841,9 @@ int ehbi_is_negative(const struct ehbigint *bi, int *err)
 	}
 	if (bi->bytes_used == 1) {
 		if (bi->bytes[bi->bytes_len - 1] == 0x00) {
+			if (bi->sign == 1) {
+				Ehbi_log_error0("Negative zero?");
+			}
 			Return_i(8, 0);
 		}
 	}

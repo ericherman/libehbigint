@@ -15,6 +15,51 @@ License for more details.
 #include "test-ehbigint-private-utils.h"
 #include <errno.h>
 
+int check_ehbigint(struct ehbigint *val, struct ehbigint *expected, int line,
+		   const char *msg)
+{
+	int err;
+	char buf[BUFLEN];
+	char vbuf[BUFLEN];
+	char ebuf[BUFLEN];
+
+	err = 0;
+	if (!val && expected) {
+		sprintf(buf, "%s:%d", msg, line);
+		Test_log_error2("%s: val is NULL, expected: %s\n", buf,
+				ehbi_to_decimal_string(expected, ebuf, BUFLEN,
+						       &err));
+		return 1;
+	}
+	if (val && !expected) {
+		sprintf(buf, "%s:%d", msg, line);
+		Test_log_error2("%s val is %s, expected: NULL\n", buf,
+				ehbi_to_decimal_string(val, vbuf, BUFLEN,
+						       &err));
+		return 1;
+	}
+
+	if (ehbi_equals(val, expected, &err)) {
+		return 0;
+	}
+
+	sprintf(buf, "%s:%d", msg, line);
+	ehbi_to_decimal_string(val, vbuf, BUFLEN, &err);
+	if (err) {
+		Test_log_error1("error %d from ehbi_to_decimal_string\n", err);
+		Test_log_error1("%s Aborting test\n", msg);
+		return 1;
+	}
+	ehbi_to_decimal_string(expected, ebuf, BUFLEN, &err);
+	if (err) {
+		Test_log_error1("error %d from ehbi_to_decimal_string\n", err);
+		Test_log_error1("%s Aborting test\n", msg);
+		return 1;
+	}
+	Test_log_error3("%s val is %s, expected %s\n", buf, vbuf, ebuf);
+	return 1;
+}
+
 int check_ehbigint_dec(struct ehbigint *val, const char *expected, int line,
 		       const char *msg)
 {

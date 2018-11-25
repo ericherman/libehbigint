@@ -22,15 +22,14 @@ extern "C" {
 #ifdef EHBI_NO_ALLOCA
 #include <stdlib.h>
 void ehbi_do_stack_free(void *ptr, size_t size);
-#define ehbi_stack_alloc malloc
+#define ehbi_stack_alloc(len) malloc(len)
 #define ehbi_stack_alloc_str "malloc"
-#define ehbi_stack_free ehbi_do_stack_free
+#define ehbi_stack_free(p, len) ehbi_do_stack_free(p, len)
 #else
 #include <alloca.h>
-void ehbi_no_stack_free(void *ptr, size_t size);
-#define ehbi_stack_alloc alloca
+#define ehbi_stack_alloc(len) alloca(len)
 #define ehbi_stack_alloc_str "alloca"
-#define ehbi_stack_free ehbi_no_stack_free
+#define ehbi_stack_free(p, len) ((void)0)
 #endif
 
 #ifndef EHBI_SKIP_IS_PROBABLY_PRIME

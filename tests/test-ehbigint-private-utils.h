@@ -51,6 +51,12 @@ License for more details.
 #define BUFLEN 80
 #define BILEN 10
 
+int check_ehbigint(struct ehbigint *val, struct ehbigint *expected, int line,
+		   const char *msg);
+
+#define Check_ehbigint(val, expected) \
+	check_ehbigint(val, expected, __LINE__, TEST_FUNC)
+
 int check_ehbigint_dec(struct ehbigint *val, const char *expected, int line,
 		       const char *msg);
 

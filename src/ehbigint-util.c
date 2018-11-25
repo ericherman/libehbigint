@@ -25,14 +25,6 @@ void ehbi_do_stack_free(void *ptr, size_t size)
 	}
 	free(ptr);
 }
-#else
-void ehbi_no_stack_free(void *ptr, size_t size)
-{
-	if (size == 0) {
-		Ehbi_log_error2("size is 0? (%p, %lu)\n", ptr,
-				(unsigned long)size);
-	}
-}
 #endif
 
 #ifndef EHBI_SKIP_IS_PROBABLY_PRIME

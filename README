@@ -1,9 +1,11 @@
 A thought experiment for creating arbitrarily large integers.
 
-This is just a learning exercise, although perhaps it may be useful.
+This was created as a learning exercise. Although it has proven somewhat
+useful in a few other projects, I do not expect the value to be much
+beyond educational. If you find value within, please drop me and email.
 
-Goals include:
- * suitability for 8bit CPUs and embedded environments
+Library goals include:
+ * suitability for 8-bit CPUs and embedded environments
  * no use of malloc/free, everything on the stack
  * core functionality should not even depend upon libc
 
@@ -52,7 +54,7 @@ The caller is, of course, responisible for freeing the objects.
 
 
 Most ehbigint functions return an error code. The "ehbigint.h" header
-defines the meaning of the error codes. Like posix return codes, a value
+defines the meaning of the error codes. Like POXIX return codes, a value
 of 0 is success. Typically a non-zero error code will be the result of
 programmer error, although EHBI_BYTES_TOO_SMALL_FOR_CARRY for example
 denotes that an overflow would have occured.

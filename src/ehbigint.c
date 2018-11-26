@@ -1200,7 +1200,6 @@ int ehbi_subtract_l(struct ehbigint *res, const struct ehbigint *bi1, long v2)
 
 int ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits)
 {
-	int err;
 	struct eba_s eba;
 
 	eba.endian = eba_big_endian;
@@ -1212,22 +1211,21 @@ int ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits)
 	eba.bits = bi->bytes;
 	eba.size_bytes = bi->bytes_len;
 
-	ehbi_eba_err = EHBI_SUCCESS;
+	ehbi_eba_err = 0;
 	eba_shift_right(&eba, num_bits);
-	err = ehbi_eba_err;
 
 	ehbi_unsafe_reset_bytes_used(bi);
 
-	if (err) {
+	if (ehbi_eba_err != 0) {
 		ehbi_zero(bi);
+		return EHBI_EBA_CRASH;
 	}
 
-	return err;
+	return EHBI_SUCCESS;
 }
 
 int ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits)
 {
-	int err;
 	struct eba_s eba;
 
 	Ehbi_struct_is_not_null(bi);
@@ -1236,17 +1234,17 @@ int ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits)
 	eba.bits = bi->bytes;
 	eba.size_bytes = bi->bytes_len;
 
-	ehbi_eba_err = EHBI_SUCCESS;
+	ehbi_eba_err = 0;
 	eba_shift_left(&eba, num_bits);
-	err = ehbi_eba_err;
 
 	ehbi_unsafe_reset_bytes_used(bi);
 
-	if (err) {
+	if (ehbi_eba_err != 0) {
 		ehbi_zero(bi);
+		return EHBI_EBA_CRASH;
 	}
 
-	return err;
+	return EHBI_SUCCESS;
 }
 
 int ehbi_n_choose_k(struct ehbigint *result, const struct ehbigint *n,

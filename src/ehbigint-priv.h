@@ -48,9 +48,9 @@ extern "C" {
 		} \
 	} while (0)
 
-void ehbi_unsafe_zero(struct ehbigint *bi);
-void ehbi_unsafe_clear_null_struct(struct ehbigint *bi);
-void ehbi_unsafe_reset_bytes_used(struct ehbigint *bi);
+void ehbi_internal_zero(struct ehbigint *bi);
+void ehbi_internal_clear_null_struct(struct ehbigint *bi);
+void ehbi_internal_reset_bytes_used(struct ehbigint *bi);
 
 #ifdef __cplusplus
 }

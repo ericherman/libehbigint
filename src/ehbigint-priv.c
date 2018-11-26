@@ -18,7 +18,7 @@ License for more details.
 #include "ehbigint-util.h"
 #include "ehbigint-eba.h"
 
-void ehbi_unsafe_reset_bytes_used(struct ehbigint *bi)
+void ehbi_internal_reset_bytes_used(struct ehbigint *bi)
 {
 	size_t i;
 
@@ -37,14 +37,14 @@ void ehbi_unsafe_reset_bytes_used(struct ehbigint *bi)
 	}
 }
 
-void ehbi_unsafe_zero(struct ehbigint *bi)
+void ehbi_internal_zero(struct ehbigint *bi)
 {
 	Eba_memset(bi->bytes, 0x00, bi->bytes_len);
 	bi->bytes_used = 1;
 	bi->sign = 0;
 }
 
-void ehbi_unsafe_clear_null_struct(struct ehbigint *bi)
+void ehbi_internal_clear_null_struct(struct ehbigint *bi)
 {
 	bi->bytes = NULL;
 	bi->bytes_len = 0;

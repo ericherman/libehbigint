@@ -79,7 +79,7 @@ int ehbi_set_binary_string(struct ehbigint *bi, const char *str, size_t len)
 		}
 	}
 
-	ehbi_unsafe_reset_bytes_used(bi);
+	ehbi_internal_reset_bytes_used(bi);
 	return err;
 }
 
@@ -141,7 +141,7 @@ int ehbi_set_hex_string(struct ehbigint *bi, const char *str, size_t str_len)
 	/* let's just zero out the rest of the bytes, for easier debug */
 	Eba_memset(bi->bytes, 0x00, i);
 
-	ehbi_unsafe_reset_bytes_used(bi);
+	ehbi_internal_reset_bytes_used(bi);
 
 	return EHBI_SUCCESS;
 }
@@ -189,7 +189,7 @@ int ehbi_set_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 		err = err ? err : ehbi_negate(bi);
 	}
 
-	ehbi_unsafe_reset_bytes_used(bi);
+	ehbi_internal_reset_bytes_used(bi);
 
 	ehbi_stack_free(hex, size);
 	return err;

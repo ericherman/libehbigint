@@ -37,7 +37,7 @@ static void ehbi_internal_struct_l(struct ehbigint *temp, long val)
 		temp->bytes[j] = c;
 	}
 	temp->sign = (val < 0);
-	ehbi_internal_reset_bytes_used(temp);
+	ehbi_internal_reset_bytes_used(temp, sizeof(unsigned long));
 }
 
 int ehbi_init(struct ehbigint *bi, unsigned char *bytes, size_t len)
@@ -1155,7 +1155,9 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 				--(bi1a->bytes[bi1a->bytes_len - j]);
 				++j;
 			}
-			ehbi_internal_reset_bytes_used(bi1a);
+			ehbi_internal_reset_bytes_used(bi1a,
+						       bi1a->bytes_used + 1 +
+						       j);
 		}
 	}
 
@@ -1164,7 +1166,7 @@ int ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 	if ((res->bytes_used == 1) && (res->bytes[res->bytes_len - 1] == 0x00)) {
 		res->sign = 0;
 	}
-	ehbi_internal_reset_bytes_used(res);
+	ehbi_internal_reset_bytes_used(res, res->bytes_used + 1);
 
 ehbi_subtract_end:
 	if (err && res) {
@@ -1214,7 +1216,7 @@ int ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits)
 	ehbi_eba_err = 0;
 	eba_shift_right(&eba, num_bits);
 
-	ehbi_internal_reset_bytes_used(bi);
+	ehbi_internal_reset_bytes_used(bi, bi->bytes_used + 1);
 
 	if (ehbi_eba_err != 0) {
 		ehbi_zero(bi);
@@ -1237,7 +1239,9 @@ int ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits)
 	ehbi_eba_err = 0;
 	eba_shift_left(&eba, num_bits);
 
-	ehbi_internal_reset_bytes_used(bi);
+	ehbi_internal_reset_bytes_used(bi,
+				       bi->bytes_used + 2 +
+				       (num_bits / CHAR_BIT));
 
 	if (ehbi_eba_err != 0) {
 		ehbi_zero(bi);
@@ -1448,7 +1452,7 @@ static void ehbi_get_witness(size_t i, struct ehbigint *a,
 			a->bytes_used = a->bytes_len;
 			shift = a->bytes_len - max_witness->bytes_used;
 			*err = ehbi_shift_right(a, shift * EBA_CHAR_BIT);
-			ehbi_internal_reset_bytes_used(a);
+			ehbi_internal_reset_bytes_used(a, a->bytes_used + 1);
 		} while ((ehbi_greater_than(a, max_witness, err)
 			  || ehbi_less_than(a, two, err)) && (j++ < max_rnd));
 	}
@@ -1729,8 +1733,6 @@ int ehbi_negate(struct ehbigint *bi)
 	bi->sign = (bi->sign == 0) ? 1 : 0;
 
 	err = EHBI_SUCCESS;
-
-	ehbi_internal_reset_bytes_used(bi);
 
 	return err;
 }

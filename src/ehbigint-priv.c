@@ -18,11 +18,14 @@ License for more details.
 #include "ehbigint-util.h"
 #include "ehbigint-eba.h"
 
-void ehbi_internal_reset_bytes_used(struct ehbigint *bi)
+void ehbi_internal_reset_bytes_used(struct ehbigint *bi, size_t from)
 {
 	size_t i;
 
-	for (i = 0; i < bi->bytes_len; ++i) {
+	if (from > bi->bytes_len) {
+		from = bi->bytes_len;
+	}
+	for (i = (bi->bytes_len - from); i < bi->bytes_len; ++i) {
 		if (bi->bytes[i] != 0) {
 			break;
 		}

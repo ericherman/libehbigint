@@ -50,7 +50,7 @@ extern "C" {
 
 void ehbi_internal_zero(struct ehbigint *bi);
 void ehbi_internal_clear_null_struct(struct ehbigint *bi);
-void ehbi_internal_reset_bytes_used(struct ehbigint *bi);
+void ehbi_internal_reset_bytes_used(struct ehbigint *bi, size_t from);
 
 #ifdef __cplusplus
 }

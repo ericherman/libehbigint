@@ -1,3 +1,23 @@
+2018-12-24  Eric Herman <eric@freesa.org>
+
+	change:
+		void ehbi_internal_reset_bytes_used(struct ehbigint *bi);
+	to:
+		void ehbi_internal_reset_bytes_used(struct ehbigint *bi,
+						    size_t from);
+
+	in order to avoid walking the whole byte array when the maximum change
+	is typically a single byte one direction or the other.
+
+	* src/ehbigint-priv.h: reset_bytes_used now takes a "from" param
+	* src/ehbigint-priv.c: avoid walking the whole byte array
+	* src/ehbigint-str.c: reset_bytes_used
+	* src/ehbigint.c: reset_bytes_used
+	* Makefile.am: comments
+	* misc/pre-tidy.patch: respin
+	* src/ehbigint-arduino.h: tidy
+
+
 2018-11-20  Eric Herman <eric@freesa.org>
 
 	update libeba 1.1.0-dev

@@ -34,7 +34,8 @@
 #define LONGBITS (4 * CHAR_BIT)
 
 /* https://github.com/ericherman/libeh-printf
-   /blob/master/src/eh-printf-arduino-serialobj.h */
+     /blob/master/src/eh-printf-arduino-serialobj.h
+     /blob/master/src/eh-printf-sys-context-arduino.cpp */
 #include "eh-printf.h"
 
 #define Ehbi_log_error0(format) \

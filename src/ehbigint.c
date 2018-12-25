@@ -107,7 +107,9 @@ int ehbi_set(struct ehbigint *bi, const struct ehbigint *val)
 
 	if (val->bytes_used > bi->bytes_len) {
 		ehbi_internal_zero(bi);
-		Ehbi_log_error0("Result byte[] too small");
+		Ehbi_log_error2("Result byte[%lu] too small (%lu)",
+				(unsigned long)bi->bytes_len,
+				(unsigned long)val->bytes_used);
 		return EHBI_BYTES_TOO_SMALL;
 	}
 	bi->sign = val->sign;
@@ -188,7 +190,9 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 		c = c + a + b;
 
 		if (i > res->bytes_len) {
-			Ehbi_log_error0("Result byte[] too small");
+			Ehbi_log_error2("Result byte[%lu] too small (%lu)",
+					(unsigned long)res->bytes_len,
+					(unsigned long)i);
 			return EHBI_BYTES_TOO_SMALL;
 		}
 		res->bytes[res->bytes_len - i] = c;
@@ -198,15 +202,18 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 	}
 	if (c) {
 		if (i > res->bytes_len) {
-			Ehbi_log_error0("Result byte[] too small for carry");
+			Ehbi_log_error2("Result byte[%lu] too small (%lu)",
+					(unsigned long)res->bytes_len,
+					(unsigned long)i);
 			return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
 		}
 		res->bytes[res->bytes_len - i] = c;
 		res->bytes_used++;
 		if (c == 0xFF) {
 			if (res->bytes_used == res->bytes_len) {
-				Ehbi_log_error0
-				    ("Result byte[] too small for carry");
+				Ehbi_log_error1
+				    ("Result byte[%lu] too small for carry",
+				     (unsigned long)res->bytes_len);
 				return EHBI_BYTES_TOO_SMALL_FOR_CARRY;
 			}
 			res->bytes_used++;
@@ -930,7 +937,9 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 	Ehbi_struct_is_not_null(val);
 
 	if (val->bytes_used > bi->bytes_len) {
-		Ehbi_log_error0("byte[] too small");
+		Ehbi_log_error2("byte[%lu] too small (%lu)",
+				(unsigned long)bi->bytes_len,
+				(unsigned long)val->bytes_used);
 		return EHBI_BYTES_TOO_SMALL;
 	}
 

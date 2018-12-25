@@ -139,6 +139,9 @@ int main(int argc, char **argv)
 	failures += test_exp_mod(v, "10", "2", "7", "2");
 	failures += test_exp_mod(v, "5", "3", "13", "8");
 	failures += test_exp_mod(v, "4", "13", "497", "445");
+	failures += test_exp_mod(v, "16", "16", "10000000000", "3709551616");
+	failures += test_exp_mod(v, "255", "255", "63", "27");
+	failures += test_exp_mod(v, "999", "999", "10000000000", "499998999");
 
 	failures += test_exp_mod_by_zero(v);
 

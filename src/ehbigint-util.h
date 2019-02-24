@@ -31,6 +31,18 @@ void ehbi_do_stack_free(void *ptr, size_t size);
 #define ehbi_stack_alloc_str "alloca"
 #define ehbi_stack_free(p, len) ((void)0)
 #endif
+#ifndef NDEBUG
+#define Ehbi_null_bytes_zero_len(p, len) do { p = NULL; len = 0; } while (0)
+#else
+#define Ehbi_null_bytes_zero_len(p, len) ((void)0)
+#endif
+#define Ehbi_stack_free(p, len) \
+	do { \
+		if (p) { \
+			ehbi_stack_free(p, len); \
+			Ehbi_null_bytes_zero_len(p, len); \
+		} \
+	} while (0)
 
 #ifndef EHBI_SKIP_IS_PROBABLY_PRIME
 #ifndef ehbi_random_bytes

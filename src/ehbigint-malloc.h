@@ -23,7 +23,7 @@ extern "C" {
 #include "ehbigint.h"
 
 /* function pointer to use if malloc fails */
-extern void (*ehbi_alloc_fail) (int err);
+extern void (*ehbi_alloc_fail)(int err);
 
 struct ehbigint *ehbi_alloc(size_t bytes);
 struct ehbigint *ehbi_alloc_l(size_t bytes, long val);

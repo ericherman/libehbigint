@@ -21,6 +21,50 @@ License for more details.
 
 #include <limits.h>		/* LONG_MAX */
 
+#define Ehbi_stack_alloc_struct(tmp, size, err) \
+	do { \
+		if (!err) { \
+			tmp.bytes = NULL; \
+			tmp.bytes_len = 0; \
+			tmp.bytes_used = 0; \
+			tmp.sign = 0; \
+			tmp.bytes = (unsigned char *)ehbi_stack_alloc(size); \
+			if (!tmp.bytes) { \
+				Ehbi_log_error2("Could not %s(%lu) bytes", \
+						ehbi_stack_alloc_str, \
+						(unsigned long)(size)); \
+				err = EHBI_STACK_TOO_SMALL; \
+			} else { \
+				tmp.bytes_len = size; \
+				tmp.bytes[size-1] = 0x00; \
+				tmp.bytes_used = 1; \
+			} \
+		} \
+	} while (0)
+
+#define Ehbi_stack_alloc_struct_j(tmp, size, err, err_jmp_label) \
+	do { \
+		Ehbi_stack_alloc_struct(tmp, size, err); \
+		if (err) { \
+			goto err_jmp_label; \
+		} \
+	} while (0)
+
+static void ehbi_internal_zero(struct ehbigint *bi)
+{
+	Eba_memset(bi->bytes, 0x00, bi->bytes_len);
+	bi->bytes_used = 1;
+	bi->sign = 0;
+}
+
+static void ehbi_internal_clear_null_struct(struct ehbigint *bi)
+{
+	bi->bytes = NULL;
+	bi->bytes_len = 0;
+	bi->bytes_used = 0;
+	bi->sign = 0;
+}
+
 static void ehbi_internal_struct_l(struct ehbigint *temp, long val)
 {
 	unsigned long v;
@@ -159,6 +203,7 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 		size = bi2->bytes_len;
 		Ehbi_stack_alloc_struct(tmp, size, err);
 		if (err) {
+			Ehbi_stack_free(tmp.bytes, size);
 			return err;
 		}
 		err = ehbi_set(&tmp, bi2);
@@ -168,7 +213,7 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 		if (!err) {
 			err = ehbi_subtract(res, bi1, &tmp);
 		}
-		ehbi_stack_free(tmp.bytes, size);
+		Ehbi_stack_free(tmp.bytes, size);
 		if (err) {
 			ehbi_internal_zero(res);
 		}
@@ -306,9 +351,7 @@ ehbi_mul_end:
 			res->sign = 1;
 		}
 	}
-	if (tmp.bytes) {
-		ehbi_stack_free(tmp.bytes, size);
-	}
+	Ehbi_stack_free(tmp.bytes, size);
 
 	return err;
 }
@@ -479,12 +522,9 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	}
 
 ehbi_div_end:
-	if (s_abs_denom.bytes) {
-		ehbi_stack_free(s_abs_denom.bytes, s_abs_denom.bytes_len);
-	}
-	if (s_abs_numer.bytes) {
-		ehbi_stack_free(s_abs_numer.bytes, s_abs_numer.bytes_len);
-	}
+	Ehbi_stack_free(s_abs_denom.bytes, s_abs_denom.bytes_len);
+	Ehbi_stack_free(s_abs_numer.bytes, s_abs_numer.bytes_len);
+
 	/* if error, let's not return garbage or 1/2 an answer */
 	if (err) {
 		ehbi_zero(quotient);
@@ -637,15 +677,9 @@ int ehbi_sqrt(struct ehbigint *result, struct ehbigint *remainder,
 	}
 
 ehbi_sqrt_end:
-	if (guess.bytes) {
-		ehbi_stack_free(guess.bytes, guess.bytes_len);
-	}
-	if (temp.bytes) {
-		ehbi_stack_free(temp.bytes, temp.bytes_len);
-	}
-	if (junk.bytes) {
-		ehbi_stack_free(junk.bytes, junk.bytes_len);
-	}
+	Ehbi_stack_free(guess.bytes, guess.bytes_len);
+	Ehbi_stack_free(temp.bytes, temp.bytes_len);
+	Ehbi_stack_free(junk.bytes, junk.bytes_len);
 
 	if (err) {
 		ehbi_zero(result);
@@ -687,12 +721,8 @@ int ehbi_exp(struct ehbigint *result, const struct ehbigint *base,
 	}
 
 ehbi_exp_end:
-	if (loop.bytes) {
-		ehbi_stack_free(loop.bytes, loop.bytes_len);
-	}
-	if (tmp.bytes) {
-		ehbi_stack_free(tmp.bytes, tmp.bytes_len);
-	}
+	Ehbi_stack_free(loop.bytes, loop.bytes_len);
+	Ehbi_stack_free(tmp.bytes, tmp.bytes_len);
 	if (err) {
 		ehbi_zero(result);
 	}
@@ -854,18 +884,11 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 	/* return result */
 
 ehbi_mod_exp_end:
-	if (tmp1.bytes) {
-		ehbi_stack_free(tmp1.bytes, tmp1.bytes_len);
-	}
-	if (tbase.bytes) {
-		ehbi_stack_free(tbase.bytes, tbase.bytes_len);
-	}
-	if (texp.bytes) {
-		ehbi_stack_free(texp.bytes, texp.bytes_len);
-	}
-	if (tjunk.bytes) {
-		ehbi_stack_free(tjunk.bytes, tjunk.bytes_len);
-	}
+	Ehbi_stack_free(tmp1.bytes, tmp1.bytes_len);
+	Ehbi_stack_free(tbase.bytes, tbase.bytes_len);
+	Ehbi_stack_free(texp.bytes, texp.bytes_len);
+	Ehbi_stack_free(tjunk.bytes, tjunk.bytes_len);
+
 	if (err) {
 		ehbi_zero(result);
 	}
@@ -947,15 +970,14 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 
 	size = bi->bytes_used;
 
-	Ehbi_stack_alloc_struct(temp, size, err);
-	if (err) {
-		return err;
-	}
+	Ehbi_stack_alloc_struct_j(temp, size, err, ehbi_inc_end);
 	err = ehbi_set(&temp, bi);
 	if (!err) {
 		err = ehbi_add(bi, &temp, val);
 	}
-	ehbi_stack_free(temp.bytes, temp.bytes_len);
+
+ehbi_inc_end:
+	Ehbi_stack_free(temp.bytes, temp.bytes_len);
 
 	return err;
 }
@@ -995,10 +1017,7 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 
 	size = bi->bytes_len;
 
-	Ehbi_stack_alloc_struct(temp, size, err);
-	if (err) {
-		return err;
-	}
+	Ehbi_stack_alloc_struct_j(temp, size, err, ehbi_dec_end);
 	ehbi_internal_zero(&temp);
 
 	if (!err) {
@@ -1008,7 +1027,8 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 		err = ehbi_set(bi, &temp);
 	}
 
-	ehbi_stack_free(temp.bytes, temp.bytes_len);
+ehbi_dec_end:
+	Ehbi_stack_free(temp.bytes, temp.bytes_len);
 
 	return err;
 }
@@ -1181,9 +1201,7 @@ ehbi_subtract_end:
 	if (err && res) {
 		ehbi_zero(res);
 	}
-	if (tmp.bytes) {
-		ehbi_stack_free(tmp.bytes, tmp.bytes_len);
-	}
+	Ehbi_stack_free(tmp.bytes, tmp.bytes_len);
 
 	return EHBI_SUCCESS;
 }
@@ -1307,18 +1325,9 @@ int ehbi_n_choose_k(struct ehbigint *result, const struct ehbigint *n,
 		size = k->bytes_len;
 	}
 
-	Ehbi_stack_alloc_struct(tmp, size, err);
-	if (err) {
-		return err;
-	}
-	Ehbi_stack_alloc_struct(sum_n, size, err);
-	if (err) {
-		return err;
-	}
-	Ehbi_stack_alloc_struct(sum_k, size, err);
-	if (err) {
-		return err;
-	}
+	Ehbi_stack_alloc_struct_j(tmp, size, err, ehbi_n_choose_k_end);
+	Ehbi_stack_alloc_struct_j(sum_n, size, err, ehbi_n_choose_k_end);
+	Ehbi_stack_alloc_struct_j(sum_k, size, err, ehbi_n_choose_k_end);
 
 	if (!err) {
 		err = ehbi_inc(&sum_n, n);
@@ -1341,7 +1350,8 @@ int ehbi_n_choose_k(struct ehbigint *result, const struct ehbigint *n,
 			err = ehbi_set(&sum_n, result);
 		}
 
-		/* sum_k *= (k - i) */ ;
+		/* sum_k *= (k - i) */
+		;
 		if (!err) {
 			err = ehbi_set_l(&tmp, -((long)i));
 		}
@@ -1365,15 +1375,9 @@ ehbi_n_choose_k_end:
 		Ehbi_log_error1("error %d, setting result = 0", err);
 		ehbi_internal_zero(result);
 	}
-	if (tmp.bytes) {
-		ehbi_stack_free(tmp.bytes, tmp.bytes_len);
-	}
-	if (sum_n.bytes) {
-		ehbi_stack_free(sum_n.bytes, sum_n.bytes_len);
-	}
-	if (sum_k.bytes) {
-		ehbi_stack_free(sum_k.bytes, sum_k.bytes_len);
-	}
+	Ehbi_stack_free(tmp.bytes, tmp.bytes_len);
+	Ehbi_stack_free(sum_n.bytes, sum_n.bytes_len);
+	Ehbi_stack_free(sum_k.bytes, sum_k.bytes_len);
 
 	return err;
 }
@@ -1703,30 +1707,14 @@ ehbi_is_probably_prime_end:
 				*err);
 		is_probably_prime = 0;
 	}
-	if (bimin1.bytes) {
-		ehbi_stack_free(bimin1.bytes, bimin1.bytes_len);
-	}
-	if (a.bytes) {
-		ehbi_stack_free(a.bytes, a.bytes_len);
-	}
-	if (r.bytes) {
-		ehbi_stack_free(r.bytes, r.bytes_len);
-	}
-	if (d.bytes) {
-		ehbi_stack_free(d.bytes, d.bytes_len);
-	}
-	if (x.bytes) {
-		ehbi_stack_free(x.bytes, x.bytes_len);
-	}
-	if (y.bytes) {
-		ehbi_stack_free(y.bytes, y.bytes_len);
-	}
-	if (c.bytes) {
-		ehbi_stack_free(c.bytes, c.bytes_len);
-	}
-	if (max_witness.bytes) {
-		ehbi_stack_free(max_witness.bytes, max_witness.bytes_len);
-	}
+	Ehbi_stack_free(bimin1.bytes, bimin1.bytes_len);
+	Ehbi_stack_free(a.bytes, a.bytes_len);
+	Ehbi_stack_free(r.bytes, r.bytes_len);
+	Ehbi_stack_free(d.bytes, d.bytes_len);
+	Ehbi_stack_free(x.bytes, x.bytes_len);
+	Ehbi_stack_free(y.bytes, y.bytes_len);
+	Ehbi_stack_free(c.bytes, c.bytes_len);
+	Ehbi_stack_free(max_witness.bytes, max_witness.bytes_len);
 
 	return is_probably_prime;
 }

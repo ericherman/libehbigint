@@ -39,18 +39,3 @@ void ehbi_internal_reset_bytes_used(struct ehbigint *bi, size_t from)
 		bi->sign = 0;
 	}
 }
-
-void ehbi_internal_zero(struct ehbigint *bi)
-{
-	Eba_memset(bi->bytes, 0x00, bi->bytes_len);
-	bi->bytes_used = 1;
-	bi->sign = 0;
-}
-
-void ehbi_internal_clear_null_struct(struct ehbigint *bi)
-{
-	bi->bytes = NULL;
-	bi->bytes_len = 0;
-	bi->bytes_used = 0;
-	bi->sign = 0;
-}

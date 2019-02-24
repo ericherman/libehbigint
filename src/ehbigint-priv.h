@@ -21,35 +21,6 @@ extern "C" {
 
 #include "ehbigint.h"		/* struct ehbigint */
 
-#define Ehbi_stack_alloc_struct(tmp, size, err) \
-	do { \
-		tmp.bytes = NULL; \
-		tmp.bytes_len = 0; \
-		tmp.bytes_used = 0; \
-		tmp.sign = 0; \
-		tmp.bytes = (unsigned char *)ehbi_stack_alloc(size); \
-		if (!tmp.bytes) { \
-			Ehbi_log_error2("Could not %s(%lu) bytes", \
-					ehbi_stack_alloc_str, \
-					(unsigned long)(size)); \
-			err = EHBI_STACK_TOO_SMALL; \
-		} else { \
-			tmp.bytes_len = size; \
-			tmp.bytes[size-1] = 0x00; \
-			tmp.bytes_used = 1; \
-		} \
-	} while (0)
-
-#define Ehbi_stack_alloc_struct_j(tmp, size, err, err_jmp_label) \
-	do { \
-		Ehbi_stack_alloc_struct(tmp, size, err); \
-		if (err) { \
-			goto err_jmp_label; \
-		} \
-	} while (0)
-
-void ehbi_internal_zero(struct ehbigint *bi);
-void ehbi_internal_clear_null_struct(struct ehbigint *bi);
 void ehbi_internal_reset_bytes_used(struct ehbigint *bi, size_t from);
 
 #ifdef __cplusplus

@@ -17,7 +17,7 @@ License for more details.
 #include "ehbigint-log.h"
 #include <stdlib.h>
 
-void (*ehbi_alloc_fail) (int status) = NULL;
+void (*ehbi_alloc_fail)(int status) = NULL;
 
 #define Ehbi_alloc_fail(err) do { \
 	if (ehbi_alloc_fail) { \

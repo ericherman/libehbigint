@@ -16,16 +16,21 @@ License for more details.
 #define EHBIGINT_STR_H
 
 #ifdef __cplusplus
-extern "C" {
+#define Ehbigint_str_begin_C_functions extern "C" {
+#define Ehbigint_str_end_C_functions }
+#else
+#define Ehbigint_str_begin_C_functions
+#define Ehbigint_str_end_C_functions
 #endif
 
 #include "ehbigint.h"
 
+Ehbigint_str_begin_C_functions
+#undef Ehbigint_str_begin_C_functions
+/* would a union make this nicer? */
 int ehbi_byte_to_hex_chars(unsigned char byte, char *high, char *low);
 int ehbi_hex_chars_to_byte(char high, char low, unsigned char *byte);
 
-#ifdef __cplusplus
-}
-#endif
-
+Ehbigint_str_end_C_functions
+#undef Ehbigint_str_end_C_functions
 #endif /* EHBIGINT_STR_H */

@@ -16,7 +16,11 @@ License for more details.
 #define EHBIGINT_H
 
 #ifdef __cplusplus
-extern "C" {
+#define Ehbigint_begin_C_functions extern "C" {
+#define Ehbigint_end_C_functions }
+#else
+#define Ehbigint_begin_C_functions
+#define Ehbigint_end_C_functions
 #endif
 
 #include <stddef.h>		/* size_t */
@@ -28,6 +32,8 @@ struct ehbigint {
 	unsigned char sign;
 };
 
+Ehbigint_begin_C_functions
+#undef Ehbigint_begin_C_functions
 /*
    assignes the byte[] to the struct, sets to zero
    returns 0 on success or error_code on error
@@ -405,7 +411,9 @@ char *ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len,
 char *ehbi_to_decimal_string(const struct ehbigint *bi, char *buf,
 			     size_t buf_len, int *err);
 
+/*****************************************************************************/
 /* error codes */
+/*****************************************************************************/
 enum {
 	EHBI_SUCCESS = 0,
 	EHBI_NULL_CHAR_PTR,
@@ -435,8 +443,7 @@ enum {
 	EHBI_LAST
 };
 
-#ifdef __cplusplus
-}
-#endif
-
+/*****************************************************************************/
+Ehbigint_end_C_functions
+#undef Ehbigint_end_C_functions
 #endif /* EHBIGINT_H */

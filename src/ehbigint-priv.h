@@ -16,15 +16,20 @@ License for more details.
 #define EHBIGINT_PRIV_H
 
 #ifdef __cplusplus
-extern "C" {
+#define Ehbigint_priv_begin_C_functions extern "C" {
+#define Ehbigint_priv_end_C_functions }
+#else
+#define Ehbigint_priv_begin_C_functions
+#define Ehbigint_priv_end_C_functions
 #endif
 
 #include "ehbigint.h"		/* struct ehbigint */
 
+Ehbigint_priv_begin_C_functions
+#undef Ehbigint_priv_begin_C_functions
+/*****************************************************************************/
 void ehbi_internal_reset_bytes_used(struct ehbigint *bi, size_t from);
-
-#ifdef __cplusplus
-}
-#endif
-
+/*****************************************************************************/
+Ehbigint_priv_end_C_functions
+#undef Ehbigint_priv_end_C_functions
 #endif /* EHBIGINT_PRIV_H */

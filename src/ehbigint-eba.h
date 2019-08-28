@@ -15,13 +15,20 @@ License for more details.
 #ifndef EHBIGINT_EBA_H
 #define EHBIGINT_EBA_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "ehbigint-log.h"
 #include "ehbigint-util.h"
 
+#ifdef __cplusplus
+#define Ehbigint_eba_begin_C_functions extern "C" {
+#define Ehbigint_eba_end_C_functions }
+#else
+#define Ehbigint_eba_begin_C_functions
+#define Ehbigint_eba_end_C_functions
+#endif
+
+Ehbigint_eba_begin_C_functions
+#undef Ehbigint_eba_begin_C_functions
+/*****************************************************************************/
 extern int ehbi_eba_err;
 #define Eba_crash() do { \
 	Ehbi_log_error0("EBA CRASH!\n"); \
@@ -45,10 +52,11 @@ extern int ehbi_eba_err;
 #define Eba_stack_free ehbi_stack_free
 
 #include "eba.h"
+#include "eba-internal.h"
+
 #define Ehstr_memset Eba_memset
 
-#ifdef __cplusplus
-}
-#endif
-
+/*****************************************************************************/
+Ehbigint_eba_end_C_functions
+#undef Ehbigint_eba_end_C_functions
 #endif /* EHBIGINT_EBA_H */

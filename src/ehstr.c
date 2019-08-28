@@ -1,21 +1,6 @@
-/*
-libecheck: a few handy stirng functions
-Copyright (C) 2016 Eric Herman <eric@freesa.org>
-
-This work is free software: you can redistribute it and/or modify it
-under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or (at
-your option) any later version.
-
-This work is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License and the GNU General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-(COPYING) and the GNU General Public License (COPYING.GPL3).  If not, see
-<http://www.gnu.org/licenses/>.
-*/
+/* SPDX-License-Identifier: LGPL-3.0-or-later */
+/* libecheck: a few handy stirng functions */
+/* Copyright (C) 2016, 2019 Eric Herman <eric@freesa.org> */
 
 #ifndef LONGBITS
 #include <values.h>		/* LONGBITS */
@@ -28,6 +13,10 @@ You should have received a copy of the GNU Lesser General Public License
 #ifndef Ehstr_memset
 #include <string.h>		/* memset */
 #define Ehstr_memset memset
+#endif
+
+#ifndef assert
+#include <assert.h>
 #endif
 
 char *utob(char *buf, size_t buf_size, unsigned long val, size_t bits)
@@ -123,17 +112,24 @@ void revstr(char *str, size_t buf_size)
 
 static char nibble_to_hex(unsigned char nibble)
 {
+	assert(nibble < 16);
+
 	if (nibble < 10) {
 		return '0' + nibble;
 	} else if (nibble < 16) {
 		return 'A' + nibble - 10;
-	} else {
-		return '\0';
 	}
+
+	/* crash */
+	((char *)NULL)[0] = nibble;
+	return '\0';
 }
 
 static unsigned char hex_to_nibble(char hex)
 {
+	assert((hex >= '0' && hex <= '9') || (hex >= 'a' && hex <= 'f')
+	       || (hex >= 'A' && hex <= 'F'));
+
 	if (hex >= '0' && hex <= '9') {
 		return (unsigned char)hex - '0';
 	} else if (hex >= 'a' && hex <= 'f') {
@@ -212,10 +208,7 @@ char *decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
 
 	/* leave a "00" if the leading byte would be greater than 7F */
 	if (j + 1 < hex_len) {
-		byte = 0;
-
-		byte = hex_to_nibble(hex_buf[j]) << 4;
-		byte += hex_to_nibble(hex_buf[j + 1]);
+		byte = hex_chars_to_byte(hex_buf[j], hex_buf[j + 1]);
 		if (byte > 0x7F) {
 			j -= 2;
 		}
@@ -317,4 +310,20 @@ char *hex_to_decimal(const char *hex, size_t hex_len, char *buf, size_t buf_len)
 	buf[buf_len - 1 - j] = '\0';
 
 	return buf;
+}
+
+void byte_to_hex_chars(unsigned char byte, char *high, char *low)
+{
+	*high = nibble_to_hex((byte & 0xF0) >> 4);
+	*low = nibble_to_hex((byte & 0x0F));
+}
+
+unsigned char hex_chars_to_byte(char high, char low)
+{
+	unsigned char byte;
+
+	byte = hex_to_nibble(high) << 4;
+	byte += hex_to_nibble(low);
+
+	return byte;
 }

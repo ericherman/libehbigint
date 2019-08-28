@@ -16,34 +16,38 @@ License for more details.
 #define EHBIGINT_UTIL_H
 
 #ifdef __cplusplus
-extern "C" {
+#define Ehbigint_util_begin_C_functions extern "C" {
+#define Ehbigint_util_end_C_functions }
+#else
+#define Ehbigint_util_begin_C_functions
+#define Ehbigint_util_end_C_functions
 #endif
 
+Ehbigint_util_begin_C_functions
+#undef Ehbigint_util_begin_C_functions
+/*****************************************************************************/
 #ifdef EHBI_NO_ALLOCA
 #include <stdlib.h>
-void ehbi_do_stack_free(void *ptr, size_t size);
+void ehbi_do_stack_free(void *ptr);
 #define ehbi_stack_alloc(len) malloc(len)
 #define ehbi_stack_alloc_str "malloc"
-#define ehbi_stack_free(p, len) ehbi_do_stack_free(p, len)
+#define ehbi_stack_free(p) ehbi_do_stack_free(p)
 #else
 #include <alloca.h>
 #define ehbi_stack_alloc(len) alloca(len)
 #define ehbi_stack_alloc_str "alloca"
-#define ehbi_stack_free(p, len) ((void)0)
+#define ehbi_stack_free(p) ((void)0)
 #endif
 #ifndef NDEBUG
-#define Ehbi_null_bytes_zero_len(p, len) do { p = NULL; len = 0; } while (0)
+#define Ehbi_null_the_ptr(p) do { p = NULL; } while (0)
 #else
-#define Ehbi_null_bytes_zero_len(p, len) ((void)0)
+#define Ehbi_null_the_ptr(p) ((void)0)
 #endif
-#define Ehbi_stack_free(p, len) \
+#define Ehbi_stack_free(p) \
 	do { \
-		if (p) { \
-			ehbi_stack_free(p, len); \
-			Ehbi_null_bytes_zero_len(p, len); \
-		} \
+		ehbi_stack_free(p); \
+		Ehbi_null_the_ptr(p); \
 	} while (0)
-
 #ifndef EHBI_SKIP_IS_PROBABLY_PRIME
 #ifndef ehbi_random_bytes
 #define EHBI_RANDOM_FROM_LINUX_DEV_URANDOM
@@ -52,8 +56,7 @@ int ehbi_dev_urandom_bytes(unsigned char *buf, size_t len);
 #endif /* ehbi_random_bytes */
 #endif /* EHBI_SKIP_IS_PROBABLY_PRIME */
 
-#ifdef __cplusplus
-}
-#endif
-
+/*****************************************************************************/
+Ehbigint_util_end_C_functions
+#undef Ehbigint_util_end_C_functions
 #endif /* EHBIGINT_UTIL_H */

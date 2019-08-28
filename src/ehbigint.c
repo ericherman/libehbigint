@@ -203,7 +203,7 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 		size = bi2->bytes_len;
 		Ehbi_stack_alloc_struct(tmp, size, err);
 		if (err) {
-			Ehbi_stack_free(tmp.bytes, size);
+			Ehbi_stack_free(tmp.bytes);
 			return err;
 		}
 		err = ehbi_set(&tmp, bi2);
@@ -213,7 +213,7 @@ int ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 		if (!err) {
 			err = ehbi_subtract(res, bi1, &tmp);
 		}
-		Ehbi_stack_free(tmp.bytes, size);
+		Ehbi_stack_free(tmp.bytes);
 		if (err) {
 			ehbi_internal_zero(res);
 		}
@@ -351,7 +351,7 @@ ehbi_mul_end:
 			res->sign = 1;
 		}
 	}
-	Ehbi_stack_free(tmp.bytes, size);
+	Ehbi_stack_free(tmp.bytes);
 
 	return err;
 }
@@ -522,8 +522,8 @@ int ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	}
 
 ehbi_div_end:
-	Ehbi_stack_free(s_abs_denom.bytes, s_abs_denom.bytes_len);
-	Ehbi_stack_free(s_abs_numer.bytes, s_abs_numer.bytes_len);
+	Ehbi_stack_free(s_abs_denom.bytes);
+	Ehbi_stack_free(s_abs_numer.bytes);
 
 	/* if error, let's not return garbage or 1/2 an answer */
 	if (err) {
@@ -677,9 +677,9 @@ int ehbi_sqrt(struct ehbigint *result, struct ehbigint *remainder,
 	}
 
 ehbi_sqrt_end:
-	Ehbi_stack_free(guess.bytes, guess.bytes_len);
-	Ehbi_stack_free(temp.bytes, temp.bytes_len);
-	Ehbi_stack_free(junk.bytes, junk.bytes_len);
+	Ehbi_stack_free(guess.bytes);
+	Ehbi_stack_free(temp.bytes);
+	Ehbi_stack_free(junk.bytes);
 
 	if (err) {
 		ehbi_zero(result);
@@ -721,8 +721,8 @@ int ehbi_exp(struct ehbigint *result, const struct ehbigint *base,
 	}
 
 ehbi_exp_end:
-	Ehbi_stack_free(loop.bytes, loop.bytes_len);
-	Ehbi_stack_free(tmp.bytes, tmp.bytes_len);
+	Ehbi_stack_free(loop.bytes);
+	Ehbi_stack_free(tmp.bytes);
 	if (err) {
 		ehbi_zero(result);
 	}
@@ -884,10 +884,10 @@ int ehbi_exp_mod(struct ehbigint *result, const struct ehbigint *base,
 	/* return result */
 
 ehbi_mod_exp_end:
-	Ehbi_stack_free(tmp1.bytes, tmp1.bytes_len);
-	Ehbi_stack_free(tbase.bytes, tbase.bytes_len);
-	Ehbi_stack_free(texp.bytes, texp.bytes_len);
-	Ehbi_stack_free(tjunk.bytes, tjunk.bytes_len);
+	Ehbi_stack_free(tmp1.bytes);
+	Ehbi_stack_free(tbase.bytes);
+	Ehbi_stack_free(texp.bytes);
+	Ehbi_stack_free(tjunk.bytes);
 
 	if (err) {
 		ehbi_zero(result);
@@ -977,7 +977,7 @@ int ehbi_inc(struct ehbigint *bi, const struct ehbigint *val)
 	}
 
 ehbi_inc_end:
-	Ehbi_stack_free(temp.bytes, temp.bytes_len);
+	Ehbi_stack_free(temp.bytes);
 
 	return err;
 }
@@ -1028,7 +1028,7 @@ int ehbi_dec(struct ehbigint *bi, const struct ehbigint *val)
 	}
 
 ehbi_dec_end:
-	Ehbi_stack_free(temp.bytes, temp.bytes_len);
+	Ehbi_stack_free(temp.bytes);
 
 	return err;
 }
@@ -1201,7 +1201,7 @@ ehbi_subtract_end:
 	if (err && res) {
 		ehbi_zero(res);
 	}
-	Ehbi_stack_free(tmp.bytes, tmp.bytes_len);
+	Ehbi_stack_free(tmp.bytes);
 
 	return EHBI_SUCCESS;
 }
@@ -1375,9 +1375,9 @@ ehbi_n_choose_k_end:
 		Ehbi_log_error1("error %d, setting result = 0", err);
 		ehbi_internal_zero(result);
 	}
-	Ehbi_stack_free(tmp.bytes, tmp.bytes_len);
-	Ehbi_stack_free(sum_n.bytes, sum_n.bytes_len);
-	Ehbi_stack_free(sum_k.bytes, sum_k.bytes_len);
+	Ehbi_stack_free(tmp.bytes);
+	Ehbi_stack_free(sum_n.bytes);
+	Ehbi_stack_free(sum_k.bytes);
 
 	return err;
 }
@@ -1707,14 +1707,14 @@ ehbi_is_probably_prime_end:
 				*err);
 		is_probably_prime = 0;
 	}
-	Ehbi_stack_free(bimin1.bytes, bimin1.bytes_len);
-	Ehbi_stack_free(a.bytes, a.bytes_len);
-	Ehbi_stack_free(r.bytes, r.bytes_len);
-	Ehbi_stack_free(d.bytes, d.bytes_len);
-	Ehbi_stack_free(x.bytes, x.bytes_len);
-	Ehbi_stack_free(y.bytes, y.bytes_len);
-	Ehbi_stack_free(c.bytes, c.bytes_len);
-	Ehbi_stack_free(max_witness.bytes, max_witness.bytes_len);
+	Ehbi_stack_free(bimin1.bytes);
+	Ehbi_stack_free(a.bytes);
+	Ehbi_stack_free(r.bytes);
+	Ehbi_stack_free(d.bytes);
+	Ehbi_stack_free(x.bytes);
+	Ehbi_stack_free(y.bytes);
+	Ehbi_stack_free(c.bytes);
+	Ehbi_stack_free(max_witness.bytes);
 
 	return is_probably_prime;
 }

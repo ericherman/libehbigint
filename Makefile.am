@@ -230,13 +230,11 @@ EXTRA_DIST=COPYING.LESSER misc
 LINDENT=indent -npro -kr -i8 -ts8 -sob -l80 -ss -ncs -cp1 -il0
 
 tidy:
-	patch -Np1 -i misc/pre-tidy.patch
 	$(LINDENT) \
 		-T size_t \
 		-T FILE \
 		-T ehbigint \
 		`find src tests demos -name '*.h' -o -name '*.c'`
-	patch -Rp1 -i misc/pre-tidy.patch
 
 spotless:
 	rm -rf `cat .gitignore | sed -e 's/#.*//'`

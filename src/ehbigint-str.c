@@ -189,7 +189,7 @@ int ehbi_set_decimal_string(struct ehbigint *bi, const char *dec, size_t len)
 		err = err ? err : ehbi_negate(bi);
 	}
 
-	Ehbi_stack_free(hex, size);
+	Ehbi_stack_free(hex);
 	return err;
 }
 
@@ -368,7 +368,7 @@ char *ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len,
 	*err = ehbi_hex_to_decimal(hex, size, buf, len);
 
 ehbi_to_decimal_string_end:
-	Ehbi_stack_free(hex, size);
+	Ehbi_stack_free(hex);
 	if (buf && (err == NULL || *err)) {
 		buf[0] = '\0';
 	}

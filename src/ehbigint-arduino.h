@@ -58,29 +58,26 @@
  eh_printf(format, arg1, arg2, arg3); \
  eh_printf("\r\n")
 
+/**********************************************************************/
+#ifdef __cplusplus
+#define Ehbi_arduino_begin_C_functions extern "C" {
+#define Ehbi_arduino_end_C_functions }
+#else
+#define Ehbi_arduino_begin_C_functions
+#define Ehbi_arduino_end_C_functions
+#endif
+/**********************************************************************/
+Ehbi_arduino_begin_C_functions
+#undef Ehbi_arduino_begin_C_functions
+/**********************************************************************/
 #ifndef EHBI_SKIP_IS_PROBABLY_PRIME
 #define ehbi_random_bytes totally_bogus_random_bytes
+int totally_bogus_random_bytes(unsigned char *buf, size_t len);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#endif /* EHBI_SKIP_IS_PROBABLY_PRIME */
 
-	int totally_bogus_random_bytes(unsigned char *buf, size_t len);
-
-#ifdef __cplusplus
-}
-#endif
-#endif				/* EHBI_SKIP_IS_PROBABLY_PRIME */
-/*
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+/**********************************************************************/
 extern int ehbi_eba_err;
-
-#ifdef __cplusplus
-}
-#endif
 
 #define Eba_log_error0 Ehbi_log_error0
 #define Eba_log_error1 Ehbi_log_error1
@@ -101,6 +98,10 @@ extern int ehbi_eba_err;
         ehbi_eba_err = EHBI_EBA_CRASH; \
         return 0; \
         } while(0)
-*/
+
+/**********************************************************************/
+Ehbi_arduino_end_C_functions
+#undef Ehbi_arduino_end_C_functions
+/**********************************************************************/
 #include "ehbigint.h"
-#endif				/* EHBIGINT_ARDUINO_H */
+#endif /* EHBIGINT_ARDUINO_H */

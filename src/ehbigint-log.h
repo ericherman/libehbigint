@@ -15,16 +15,23 @@ License for more details.
 #ifndef EHBIGINT_LOG_H
 #define EHBIGINT_LOG_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "ehbigint.h"		/* struct ehbigint */
 
+#ifdef __cplusplus
+#define Ehbigint_log_begin_C_functions extern "C" {
+#define Ehbigint_log_end_C_functions }
+#else
+#define Ehbigint_log_begin_C_functions
+#define Ehbigint_log_end_C_functions
+#endif
+
+Ehbigint_log_begin_C_functions
+#undef Ehbigint_log_begin_C_functions
+/*****************************************************************************/
 #ifndef Ehbi_noop
 #define Ehbi_noop ((void)(0))
 #endif
-
+/*****************************************************************************/
 #ifndef SKIP_STDIO_H
 #include <stdio.h>		/* FILE */
 /* Get the FILE pointer to where fprintf messages currently target.
@@ -126,8 +133,7 @@ void ehbi_log_backtrace(FILE *log);
 	} while(0)
 #endif /* EHBI_SKIP_STRUCT_NULL_CHECK */
 
-#ifdef __cplusplus
-}
-#endif
-
+/*****************************************************************************/
+Ehbigint_log_end_C_functions
+#undef Ehbigint_log_end_C_functions
 #endif /* EHBIGINT_LOG_H */

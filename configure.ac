@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: LGPL-3.0-or-later */
+# configure.ac
+# Copyright (C) 2016, 2018, 2019 Eric Herman <eric@freesa.org>
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 

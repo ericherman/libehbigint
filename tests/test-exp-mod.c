@@ -3,12 +3,13 @@
 /* Copyright (C) 2016, 2019 Eric Herman <eric@freesa.org> */
 
 #include "test-ehbigint-private-utils.h"
-#include "../src/ehbigint-log.h"	/* set_ehbi_log_file */
 
-int test_exp_mod(int verbose, const char *sbase, const char *sexponent,
-		 const char *smodulus, const char *sresult)
+unsigned test_exp_mod_v(int verbose, const char *sbase, const char *sexponent,
+			const char *smodulus, const char *sresult)
 {
-	int err, failures;
+	struct eembed_log *log = eembed_err_log;
+	int err;
+	unsigned failures;
 
 	unsigned char bytes_base[10];
 	unsigned char bytes_exponent[10];
@@ -28,50 +29,84 @@ int test_exp_mod(int verbose, const char *sbase, const char *sexponent,
 	ehbi_init(&modulus, bytes_modulus, 10);
 	ehbi_init(&result, bytes_result, 10);
 
-	err = ehbi_set_decimal_string(&base, sbase, strlen(sbase));
+	err = ehbi_set_decimal_string(&base, sbase, eembed_strlen(sbase));
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_hex_string\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_decimal_string(");
+		log->append_s(log, sbase);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
 	failures += Check_ehbigint_dec(&base, sbase);
 	if (failures) {
-		Test_log_error1("round trip failed %s\n", sbase);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "round trip failed? ");
+		log->append_s(log, sbase);
+		log->append_s(log, " Aborting test.");
+		log->append_eol(log);
+		return failures;
 	}
 
-	err = ehbi_set_decimal_string(&exponent, sexponent, strlen(sexponent));
+	err =
+	    ehbi_set_decimal_string(&exponent, sexponent,
+				    eembed_strlen(sexponent));
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_hex_string\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_decimal_string(");
+		log->append_s(log, sexponent);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
 	failures += Check_ehbigint_dec(&exponent, sexponent);
 	if (failures) {
-		Test_log_error1("round trip failed %s\n", sexponent);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "round trip failed? ");
+		log->append_s(log, sexponent);
+		log->append_s(log, " Aborting test.");
+		log->append_eol(log);
+		return failures;
 	}
 
-	err = ehbi_set_decimal_string(&modulus, smodulus, strlen(smodulus));
+	err =
+	    ehbi_set_decimal_string(&modulus, smodulus,
+				    eembed_strlen(smodulus));
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_hex_string\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_decimal_string(");
+		log->append_s(log, smodulus);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
 	failures += Check_ehbigint_dec(&modulus, smodulus);
 	if (failures) {
-		Test_log_error1("round trip failed %s\n", smodulus);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "round trip failed? ");
+		log->append_s(log, smodulus);
+		log->append_s(log, " Aborting test.");
+		log->append_eol(log);
+		return failures;
 	}
 
 	err = ehbi_exp_mod(&result, &base, &exponent, &modulus);
 	if (err) {
-		Test_log_error1("error %d from ehbi_exp_mod\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_exp_mod");
+		log->append_eol(log);
 	}
 
 	failures += Check_ehbigint_dec(&result, sresult);
@@ -79,10 +114,17 @@ int test_exp_mod(int verbose, const char *sbase, const char *sexponent,
 	return failures;
 }
 
-int test_exp_mod_by_zero(int verbose)
+unsigned test_exp_mod_by_zero(int verbose)
 {
-	int err, failures;
-	FILE *log;
+	int err;
+	unsigned failures;
+
+	const size_t buflen = 250;
+	char buf[250];
+	struct eembed_str_buf sbuf;
+	struct eembed_log slog;
+	struct eembed_log *log;
+	struct eembed_log *orig;
 
 	unsigned char bytes_base[10];
 	unsigned char bytes_exponent[10];
@@ -96,8 +138,13 @@ int test_exp_mod_by_zero(int verbose)
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
-	log = tmpfile();
-	set_ehbi_log_file(log);
+
+	orig = ehbi_log_get();
+	eembed_memset(buf, 0x00, buflen);
+	log = eembed_char_buf_log_init(&slog, &sbuf, buf, buflen);
+	if (log) {
+		ehbi_log_set(log);
+	}
 
 	ehbi_init(&base, bytes_base, 10);
 	ehbi_init(&exponent, bytes_exponent, 10);
@@ -111,33 +158,30 @@ int test_exp_mod_by_zero(int verbose)
 	err = ehbi_exp_mod(&result, &base, &exponent, &modulus);
 	if (!err) {
 		++failures;
-		Test_log_error("no error from ehbi_exp_mod by zero?\n");
+		STDERR_FILE_LINE_FUNC(orig);
+		orig->append_s(orig, "no error from ehbi_exp_mod by zero?");
+		orig->append_eol(orig);
 	}
-	failures += log_contains(log, "modulus == 0");
-	fclose(log);
+	failures += check_str_contains(buf, "modulus == 0");
+
+	ehbi_log_set(orig);
+	return failures;
+}
+
+unsigned test_exp_mod(int v)
+{
+	unsigned failures = 0;
+
+	failures += test_exp_mod_v(v, "10", "2", "7", "2");
+	failures += test_exp_mod_v(v, "5", "3", "13", "8");
+	failures += test_exp_mod_v(v, "4", "13", "497", "445");
+	failures += test_exp_mod_v(v, "16", "16", "10000000000", "3709551616");
+	failures += test_exp_mod_v(v, "255", "255", "63", "27");
+	failures += test_exp_mod_v(v, "999", "999", "10000000000", "499998999");
+
+	failures += test_exp_mod_by_zero(v);
 
 	return failures;
 }
 
-int main(int argc, char **argv)
-{
-	int v, failures;
-
-	v = (argc > 1) ? atoi(argv[1]) : 0;
-	failures = 0;
-
-	failures += test_exp_mod(v, "10", "2", "7", "2");
-	failures += test_exp_mod(v, "5", "3", "13", "8");
-	failures += test_exp_mod(v, "4", "13", "497", "445");
-	failures += test_exp_mod(v, "16", "16", "10000000000", "3709551616");
-	failures += test_exp_mod(v, "255", "255", "63", "27");
-	failures += test_exp_mod(v, "999", "999", "10000000000", "499998999");
-
-	failures += test_exp_mod_by_zero(v);
-
-	if (failures) {
-		Test_log_error2("%d failures in %s\n", failures, __FILE__);
-	}
-
-	return check_status(failures);
-}
+ECHECK_TEST_MAIN_V(test_exp_mod)

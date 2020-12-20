@@ -3,12 +3,19 @@
 /* Copyright (C) 2016, 2019 Eric Herman <eric@freesa.org> */
 
 #include "test-ehbigint-private-utils.h"
-#include "../src/ehbigint-log.h"	/* set_ehbi_log_file */
 
-int test_sqrt(int verbose, const char *sval, const char *ssqrt,
-	      const char *sremainder)
+unsigned test_sqrt_v(int verbose, const char *sval, const char *ssqrt,
+		     const char *sremainder)
 {
-	int err, failures;
+	int err;
+	unsigned failures;
+
+	const size_t buflen = 250;
+	char buf[250];
+	struct eembed_str_buf sbuf;
+	struct eembed_log slog;
+	struct eembed_log *log;
+	struct eembed_log *orig;
 
 	unsigned char bytes_val[50];
 	unsigned char bytes_sqrt[50];
@@ -21,41 +28,67 @@ int test_sqrt(int verbose, const char *sval, const char *ssqrt,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
+	orig = ehbi_log_get();
+	eembed_memset(buf, 0x00, buflen);
+	log = eembed_char_buf_log_init(&slog, &sbuf, buf, buflen);
+	if (log) {
+		ehbi_log_set(log);
+	}
+
 	ehbi_init(&val, bytes_val, 50);
 	ehbi_init(&sqrt, bytes_sqrt, 50);
 	ehbi_init(&remainder, bytes_remainder, 50);
 
-	err = ehbi_set_decimal_string(&val, sval, strlen(sval));
+	err = ehbi_set_decimal_string(&val, sval, eembed_strlen(sval));
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_hex_string\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_decimal_string(");
+		log->append_s(log, sval);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
 	failures += Check_ehbigint_dec(&val, sval);
 	if (failures) {
-		Test_log_error1("round trip failed %s\n", sval);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "round trip failed? (");
+		log->append_s(log, sval);
+		Test_log_error(") Aborting test\n");
+		return 1;
 	}
 
 	err = ehbi_sqrt(&sqrt, &remainder, &val);
 	if (err) {
-		Test_log_error1("error %d from ehbi_div\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_sqrt");
+		log->append_eol(log);
 	}
 
 	failures += Check_ehbigint_dec(&sqrt, ssqrt);
 
 	failures += Check_ehbigint_dec(&remainder, sremainder);
 
+	ehbi_log_set(orig);
+
 	return failures;
 }
 
-int test_sqrt_negative(int verbose)
+unsigned test_sqrt_negative(int verbose)
 {
-	int err, failures;
-	FILE *log;
+	int err;
+	unsigned failures;
+
+	const size_t buflen = 250;
+	char buf[250];
+	struct eembed_str_buf sbuf;
+	struct eembed_log slog;
+	struct eembed_log *log;
+	struct eembed_log *orig;
 
 	unsigned char bytes_val[10];
 	unsigned char bytes_sqrt[10];
@@ -67,8 +100,13 @@ int test_sqrt_negative(int verbose)
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
-	log = tmpfile();
-	set_ehbi_log_file(log);
+
+	orig = ehbi_log_get();
+	eembed_memset(buf, 0x00, buflen);
+	log = eembed_char_buf_log_init(&slog, &sbuf, buf, buflen);
+	if (log) {
+		ehbi_log_set(log);
+	}
 
 	ehbi_init(&val, bytes_val, 10);
 	ehbi_init(&sqrt, bytes_sqrt, 10);
@@ -79,38 +117,35 @@ int test_sqrt_negative(int verbose)
 	err = ehbi_sqrt(&sqrt, &remainder, &val);
 	if (!err) {
 		++failures;
-		Test_log_error("no error from ehbi_sqrt of negative?\n");
+		STDERR_FILE_LINE_FUNC(orig);
+		orig->append_s(orig, "no error from ehbi_sqrt of negative?");
+		orig->append_eol(orig);
 	}
-	failures += log_contains(log, "complex");
-	fclose(log);
+	failures += check_str_contains(buf, "complex");
+
+	ehbi_log_set(orig);
+	return failures;
+}
+
+unsigned test_sqrt(int v)
+{
+	unsigned failures = 0;
+
+	failures += test_sqrt_v(v, "100", "10", "0");
+	failures += test_sqrt_v(v, "10001", "100", "1");
+	failures += test_sqrt_v(v, "10000000000000001", "100000000", "1");
+	failures +=
+	    test_sqrt_v(v, "10000000000000000000001", "100000000000", "1");
+	failures +=
+	    test_sqrt_v(v,
+			"22934986159900715116108208953020869407965649891682811",
+			"151443012912120561509118328",
+			"111863686247280161986167227");
+
+	failures += test_sqrt_v(v, "0", "0", "0");
+	failures += test_sqrt_negative(v);
 
 	return failures;
 }
 
-int main(int argc, char **argv)
-{
-	int v, failures;
-
-	v = (argc > 1) ? atoi(argv[1]) : 0;
-	failures = 0;
-
-	failures += test_sqrt(v, "100", "10", "0");
-	failures += test_sqrt(v, "10001", "100", "1");
-	failures += test_sqrt(v, "10000000000000001", "100000000", "1");
-	failures +=
-	    test_sqrt(v, "10000000000000000000001", "100000000000", "1");
-	failures +=
-	    test_sqrt(v,
-		      "22934986159900715116108208953020869407965649891682811",
-		      "151443012912120561509118328",
-		      "111863686247280161986167227");
-
-	failures += test_sqrt(v, "0", "0", "0");
-	failures += test_sqrt_negative(v);
-
-	if (failures) {
-		Test_log_error2("%d failures in %s\n", failures, __FILE__);
-	}
-
-	return check_status(failures);
-}
+ECHECK_TEST_MAIN_V(test_sqrt)

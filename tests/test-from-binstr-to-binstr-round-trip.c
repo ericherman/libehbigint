@@ -4,9 +4,11 @@
 
 #include "test-ehbigint-private-utils.h"
 
-int test_from_binstr_to_binstr_round_trip(int verbose, const char *bstr)
+unsigned test_from_binstr_to_binstr_round_trip_s(int verbose, const char *bstr)
 {
-	int err, failures;
+	struct eembed_log *log = eembed_err_log;
+	int err;
+	unsigned failures;
 	unsigned char bytes_buf[20];
 	char as_string[BUFLEN];
 	struct ehbigint a_bigint;
@@ -15,28 +17,39 @@ int test_from_binstr_to_binstr_round_trip(int verbose, const char *bstr)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	prefix = (bstr && (strlen(bstr) > 2)
+	prefix = (bstr && (eembed_strlen(bstr) > 2)
 		  && (bstr[1] == 'b' || bstr[1] == 'B')) ? 2 : 0;
 
 	ehbi_init(&a_bigint, bytes_buf, 20);
 
-	err = ehbi_set_binary_string(&a_bigint, bstr, strlen(bstr));
+	err = ehbi_set_binary_string(&a_bigint, bstr, eembed_strlen(bstr));
 	if (err) {
-		Test_log_error1("error %d ehbi_set_binary_string\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_binary_string(");
+		log->append_s(log, bstr);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
+
+	err = 0;
 	ehbi_to_binary_string(&a_bigint, as_string, BUFLEN, &err);
 	if (err) {
-		Test_log_error1("error %d ehbi_to_binary_string\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_to_binary_string");
+		log->append_eol(log);
 	}
 
 	/* skip the 0b */
 	skip = 2;
 	/* skip extra byte of zero padding if present */
-	if ((strlen(as_string + skip) - 8) == (strlen(bstr + prefix))) {
+	if ((eembed_strlen(as_string + skip) - 8) ==
+	    (eembed_strlen(bstr + prefix))) {
 		ones = 0;
 		for (i = 0; i < 8; ++i) {
 			if (*(as_string + skip + i) != '0') {
@@ -49,17 +62,24 @@ int test_from_binstr_to_binstr_round_trip(int verbose, const char *bstr)
 	}
 	failures += check_str(as_string + skip, bstr + prefix);
 	if (failures) {
-		Test_log_error1("%d failures in "
-				"check_binstr_to_binstr_round_trip\n",
-				failures);
+		log->append_l(log, failures);
+		log->append_s(log,
+			      " faiures in "
+			      "test_from_binstr_to_binstr_round_trip(");
+		log->append_s(log, bstr);
+		log->append_s(log, ")");
+		log->append_eol(log);
 	}
 
 	return failures;
 }
 
-int test_hex_vs_binary_string(int verbose, const char *hex, const char *bstr)
+unsigned test_hex_vs_binary_string(int verbose, const char *hex,
+				   const char *bstr)
 {
-	int err, failures;
+	struct eembed_log *log = eembed_err_log;
+	int err;
+	unsigned failures;
 	struct ehbigint a_bigint;
 	unsigned char a_bytes[20];
 	struct ehbigint b_bigint;
@@ -75,11 +95,11 @@ int test_hex_vs_binary_string(int verbose, const char *hex, const char *bstr)
 	ehbi_init(&a_bigint, a_bytes, 20);
 	ehbi_init(&b_bigint, b_bytes, 20);
 
-	ehbi_set_hex_string(&a_bigint, hex, strlen(hex));
+	ehbi_set_hex_string(&a_bigint, hex, eembed_strlen(hex));
 	ehbi_to_hex_string(&a_bigint, hexhexs, BUFLEN, &err);
 	ehbi_to_binary_string(&a_bigint, hexbins, BUFLEN, &err);
 
-	ehbi_set_binary_string(&b_bigint, bstr, strlen(bstr));
+	ehbi_set_binary_string(&b_bigint, bstr, eembed_strlen(bstr));
 	ehbi_to_hex_string(&b_bigint, binhexs, BUFLEN, &err);
 	ehbi_to_binary_string(&b_bigint, binbins, BUFLEN, &err);
 
@@ -93,38 +113,37 @@ int test_hex_vs_binary_string(int verbose, const char *hex, const char *bstr)
 	failures += check_str(binbins, hexbins);
 
 	if (failures) {
-		Test_log_error1("%d failures in "
-				"check_binstr_to_binstr_round_trip\n",
-				failures);
+		log->append_l(log, failures);
+		log->append_s(log, " faiures in test_hex_vs_binary_string(");
+		log->append_s(log, hex);
+		log->append_s(log, ", ");
+		log->append_s(log, bstr);
+		log->append_s(log, ")");
+		log->append_eol(log);
 	}
 
 	return failures;
 }
 
-int main(int argc, char **argv)
+unsigned test_from_binstr_to_binstr_round_trip(int v)
 {
-	int v, failures;
+	unsigned failures = 0;
 	const char *bin_str, *hex_str;
 
-	v = (argc > 1) ? atoi(argv[1]) : 0;
-	failures = 0;
-
 	bin_str = "0b00001111010101010101010101010000";
-	failures += test_from_binstr_to_binstr_round_trip(v, bin_str);
+	failures += test_from_binstr_to_binstr_round_trip_s(v, bin_str);
 
 	bin_str = "0b1111111100001111010101010101010101010000";
-	failures += test_from_binstr_to_binstr_round_trip(v, bin_str);
+	failures += test_from_binstr_to_binstr_round_trip_s(v, bin_str);
 
 	bin_str = "1011111100001111010101010101010101010001";
-	failures += test_from_binstr_to_binstr_round_trip(v, bin_str);
+	failures += test_from_binstr_to_binstr_round_trip_s(v, bin_str);
 
 	hex_str = "0x0A0F";
 	bin_str = "0b0000101000001111";
 	failures += test_hex_vs_binary_string(v, hex_str, bin_str);
 
-	if (failures) {
-		Test_log_error2("%d failures in %s\n", failures, __FILE__);
-	}
-
-	return check_status(failures);
+	return failures;
 }
+
+ECHECK_TEST_MAIN_V(test_from_binstr_to_binstr_round_trip)

@@ -4,10 +4,12 @@
 
 #include "test-ehbigint-private-utils.h"
 
-int test_dec_hex(int verbose, const char *str_1, const char *str_2,
-		 const char *expect)
+unsigned test_dec_hex(int verbose, const char *str_1, const char *str_2,
+		      const char *expect)
 {
-	int err, failures;
+	struct eembed_log *log = eembed_err_log;
+	int err;
+	unsigned failures;
 	unsigned char bytes_buf1[20];
 	unsigned char bytes_buf2[20];
 	struct ehbigint bi1, bi2;
@@ -18,34 +20,62 @@ int test_dec_hex(int verbose, const char *str_1, const char *str_2,
 	ehbi_init(&bi1, bytes_buf1, BILEN);
 	ehbi_init(&bi2, bytes_buf2, BILEN);
 
-	err = ehbi_set_hex_string(&bi1, str_1, strlen(str_1));
-	err += ehbi_set_hex_string(&bi2, str_2, strlen(str_2));
+	err = ehbi_set_hex_string(&bi1, str_1, eembed_strlen(str_1));
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_hex_string\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_hex_string(");
+		log->append_s(log, str_1);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
+	}
+
+	err = ehbi_set_hex_string(&bi2, str_2, eembed_strlen(str_2));
+	if (err) {
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_hex_string(");
+		log->append_s(log, str_2);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
 
 	err = ehbi_dec(&bi1, &bi2);
 	if (err) {
-		Test_log_error1("error %d from ehbi_inc\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_dec");
+		log->append_eol(log);
 	}
-
 	failures += Check_ehbigint_hex(&bi1, expect);
 
 	if (failures) {
-		Test_log_error1("%d failures in test_dec\n", failures);
+		log->append_ul(log, failures);
+		log->append_s(log, " failures in test_dec_hex(");
+		log->append_s(log, str_1);
+		log->append_s(log, ",");
+		log->append_s(log, str_2);
+		log->append_s(log, ",");
+		log->append_s(log, expect);
+		log->append_s(log, ")");
+		log->append_eol(log);
 	}
 
 	return failures;
 }
 
-int test_dec(int verbose, const char *str_1, const char *str_2,
-	     const char *expect)
+unsigned test_dec_inner(int verbose, const char *str_1, const char *str_2,
+			const char *expect)
 {
-	int err, failures;
+	struct eembed_log *log = eembed_err_log;
+	int err;
+	unsigned failures;
 	unsigned char bytes_buf1[20];
 	unsigned char bytes_buf2[20];
 	struct ehbigint bi1, bi2;
@@ -56,43 +86,65 @@ int test_dec(int verbose, const char *str_1, const char *str_2,
 	ehbi_init(&bi1, bytes_buf1, BILEN);
 	ehbi_init(&bi2, bytes_buf2, BILEN);
 
-	err = ehbi_set_decimal_string(&bi1, str_1, strlen(str_1));
-	err += ehbi_set_decimal_string(&bi2, str_2, strlen(str_2));
+	err = ehbi_set_decimal_string(&bi1, str_1, eembed_strlen(str_1));
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_hex_string\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_decimal_string(");
+		log->append_s(log, str_1);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
+	}
+
+	err = ehbi_set_decimal_string(&bi2, str_2, eembed_strlen(str_2));
+	if (err) {
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_decimal_string(");
+		log->append_s(log, str_2);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
 
 	err = ehbi_dec(&bi1, &bi2);
 	if (err) {
-		Test_log_error1("error %d from ehbi_inc\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_dec");
+		log->append_eol(log);
 	}
-
 	failures += Check_ehbigint_dec(&bi1, expect);
 
 	if (failures) {
-		Test_log_error1("%d failures in test_dec\n", failures);
+		log->append_ul(log, failures);
+		log->append_s(log, " failures in test_dec(");
+		log->append_s(log, str_1);
+		log->append_s(log, ",");
+		log->append_s(log, str_2);
+		log->append_s(log, ",");
+		log->append_s(log, expect);
+		log->append_s(log, ")");
+		log->append_eol(log);
 	}
 
 	return failures;
 }
 
-int main(int argc, char **argv)
+unsigned test_dec(int v)
 {
-	int v, failures;
+	unsigned failures = 0;
 	const char *hexstr_1, *hexstr_2, *hexexpct;
 
-	v = (argc > 1) ? atoi(argv[1]) : 0;
-
-	failures = 0;
-
-	failures += test_dec(v, "5", "2", "3");
-	failures += test_dec(v, "7", "0", "7");
-	failures += test_dec(v, "0", "1", "-1");
-	failures += test_dec(v, "9", "11", "-2");
+	failures += test_dec_inner(v, "5", "2", "3");
+	failures += test_dec_inner(v, "7", "0", "7");
+	failures += test_dec_inner(v, "0", "1", "-1");
+	failures += test_dec_inner(v, "9", "11", "-2");
 
 	/* u64_max = "0xFFFFFFFFFFFFFFFF" */
 	hexstr_1 = "0x700002000000000001";
@@ -100,9 +152,7 @@ int main(int argc, char **argv)
 	hexexpct = "0x600001F00000000000";
 	failures += test_dec_hex(v, hexstr_1, hexstr_2, hexexpct);
 
-	if (failures) {
-		Test_log_error2("%d failures in %s\n", failures, __FILE__);
-	}
-
-	return check_status(failures);
+	return failures;
 }
+
+ECHECK_TEST_MAIN_V(test_dec)

@@ -4,9 +4,12 @@
 
 #include "test-ehbigint-private-utils.h"
 
-int test_inc_l(int verbose, const char *dec_str1, long v2, const char *expect)
+unsigned test_inc_lv(int verbose, const char *dec_str1, long v2,
+		     const char *expect)
 {
-	int err, failures;
+	struct eembed_log *log = eembed_err_log;
+	int err;
+	unsigned failures;
 	unsigned char bytes_buf1[20];
 	struct ehbigint bi1;
 
@@ -15,43 +18,54 @@ int test_inc_l(int verbose, const char *dec_str1, long v2, const char *expect)
 
 	ehbi_init(&bi1, bytes_buf1, 20);
 
-	err = ehbi_set_decimal_string(&bi1, dec_str1, strlen(dec_str1));
+	err = ehbi_set_decimal_string(&bi1, dec_str1, eembed_strlen(dec_str1));
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_decimal_string\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_decimal_string(");
+		log->append_s(log, dec_str1);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
 
 	err = ehbi_inc_l(&bi1, v2);
 	if (err) {
-		Test_log_error1("error %d from ehbi_inc_l\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_inc_l");
+		log->append_eol(log);
 	}
 
 	failures += Check_ehbigint_dec(&bi1, expect);
 
 	if (failures) {
-		Test_log_error1("%d failures in test_inc_l\n", failures);
+		log->append_ul(log, failures);
+		log->append_s(log, " failures in test_inc_l(");
+		log->append_s(log, dec_str1);
+		log->append_s(log, ", ");
+		log->append_l(log, v2);
+		log->append_s(log, ", ");
+		log->append_s(log, expect);
+		log->append_s(log, ")");
+		log->append_eol(log);
 	}
 
 	return failures;
 }
 
-int main(int argc, char **argv)
+unsigned test_inc_l(int v)
 {
-	int v, failures;
+	unsigned failures = 0;
 
-	v = (argc > 1) ? atoi(argv[1]) : 0;
-	failures = 0;
+	failures += test_inc_lv(v, "700000000000", 134124, "700000134124");
+	failures += test_inc_lv(v, "700000000000", -2, "699999999998");
+	failures += test_inc_lv(v, "1", -3, "-2");
 
-	failures += test_inc_l(v, "700000000000", 134124, "700000134124");
-	failures += test_inc_l(v, "700000000000", -2, "699999999998");
-	failures += test_inc_l(v, "1", -3, "-2");
-
-	if (failures) {
-		Test_log_error2("%d failures in %s\n", failures, __FILE__);
-	}
-
-	return check_status(failures);
+	return failures;
 }
+
+ECHECK_TEST_MAIN_V(test_inc_l)

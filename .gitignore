@@ -58,6 +58,8 @@ $*
 *.log
 *.trs
 *.log
+*.gcno
+*.gcda
 
 ################
 # autotools

@@ -1,0 +1,1 @@
+../tests/test-n-choose-k.c

@@ -5,16 +5,24 @@
 #include "test-ehbigint-private-utils.h"
 #include <limits.h>
 
-int test_compare3(int verbose, long a, long b)
+unsigned test_compare3_ab(int verbose, long a, long b)
 {
-	int err, failures, result, result_l;
+	struct eembed_log *log = eembed_err_log;
+	int err;
+	unsigned failures;
+	int result, result_l;
 	unsigned char bytes_buf1[1 + sizeof(long)];
 	unsigned char bytes_buf2[sizeof(long)];
 	struct ehbigint bi_a, bi_b;
 
 	VERBOSE_ANNOUNCE(verbose);
 	if (verbose) {
-		fprintf(stderr, "(%ld, %ld)\n", a, b);
+		log->append_c(log, '(');
+		log->append_l(log, a);
+		log->append_s(log, ", ");
+		log->append_l(log, b);
+		log->append_c(log, ')');
+		log->append_eol(log);
 	}
 
 	failures = 0;
@@ -24,22 +32,36 @@ int test_compare3(int verbose, long a, long b)
 
 	err = ehbi_set_l(&bi_a, a);
 	if (err) {
-		Test_log_error2("error %d from ehbi_set_l(%ld)\n", err, a);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_l(");
+		log->append_l(log, a);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
+
 	err = ehbi_set_l(&bi_b, b);
 	if (err) {
-		Test_log_error2("error %d from ehbi_set_l(%ld)\n", err, b);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_l(");
+		log->append_l(log, a);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
 
 	result = ehbi_compare(&bi_a, &bi_b, &err);
 	if (err) {
-		Test_log_error1("error %d from ehbi_compare\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_compare");
+		log->append_eol(log);
 	}
 	failures += check_int((result == 0), (a == b));
 	failures += check_int((result > 0), (a > b));
@@ -47,60 +69,85 @@ int test_compare3(int verbose, long a, long b)
 
 	result_l = ehbi_compare_l(&bi_a, b, &err);
 	if (err) {
-		Test_log_error1("error %d from ehbi_compare_l\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_compare_l");
+		log->append_eol(log);
 	}
 	failures += check_int(result, result_l);
 
 	result = ehbi_less_than(&bi_a, &bi_b, &err);
 	if (err) {
-		Test_log_error1("error %d from ehbi_less_than\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_less_than");
+		log->append_eol(log);
 	}
 	failures += check_int(result == 0, !(a < b));
+
 	result_l = ehbi_less_than_l(&bi_a, b, &err);
 	if (err) {
-		Test_log_error1("error %d from ehbi_less_than_l\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_less_than_l");
+		log->append_eol(log);
 	}
 	failures += check_int(result, result_l);
 
 	result = ehbi_greater_than(&bi_a, &bi_b, &err);
 	if (err) {
-		Test_log_error1("error %d from ehbi_greater_than\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_greater_than");
+		log->append_eol(log);
 	}
 	failures += check_int((result == 0), !(a > b));
+
 	result_l = ehbi_greater_than_l(&bi_a, b, &err);
 	if (err) {
-		Test_log_error1("error %d from ehbi_greater_than_l\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_greater_than_l");
+		log->append_eol(log);
 	}
 	failures += check_int(result, result_l);
 
 	if (failures) {
-		Test_log_error1("%d failures in test_compare\n", failures);
+		log->append_ul(log, failures);
+		log->append_s(log, " failures in test_compare3_ab(");
+		log->append_l(log, a);
+		log->append_s(log, ",");
+		log->append_l(log, b);
+		log->append_s(log, ")");
+		log->append_eol(log);
 	}
 
 	return failures;
 }
 
-int test_compare_both_ways(int verbose, long a, long b)
+unsigned test_compare_both_ways(int verbose, long a, long b)
 {
-	return test_compare3(verbose, a, b) + test_compare3(verbose, b, a);
+	unsigned failures = 0;
+
+	failures += test_compare3_ab(verbose, a, b);
+	failures += test_compare3_ab(verbose, b, a);
+
+	return failures;
 }
 
-int main(int argc, char **argv)
+unsigned test_compare3(int v)
 {
-	int v, failures;
-
-	v = (argc > 1) ? atoi(argv[1]) : 0;
-	failures = 0;
+	unsigned failures = 0;
 
 	failures += test_compare_both_ways(v, 0, 0);
 	failures += test_compare_both_ways(v, 1, 0);
@@ -110,9 +157,7 @@ int main(int argc, char **argv)
 	failures += test_compare_both_ways(v, -1, 0);
 	failures += test_compare_both_ways(v, LONG_MAX, LONG_MIN);
 
-	if (failures) {
-		Test_log_error2("%d failures in %s\n", failures, __FILE__);
-	}
-
-	return check_status(failures);
+	return failures;
 }
+
+ECHECK_TEST_MAIN_V(test_compare3)

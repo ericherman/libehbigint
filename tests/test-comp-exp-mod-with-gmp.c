@@ -5,10 +5,12 @@
 #include "test-ehbigint-private-utils.h"
 #include <gmp.h>
 
-int test_comp_exp_with_gmp(int verbose, unsigned long base, unsigned long exp,
-			   unsigned long mod)
+int test_comp_exp_with_gmp_bem(int verbose, unsigned long base,
+			       unsigned long exp, unsigned long mod)
 {
-	int failures, err;
+	struct eembed_log *log = eembed_err_log;
+	unsigned failures;
+	int err;
 	char ebuf[BUFLEN];
 	char gbuf[BUFLEN];
 	struct ehbigint eres, ebase, eexp, emod;
@@ -33,7 +35,11 @@ int test_comp_exp_with_gmp(int verbose, unsigned long base, unsigned long exp,
 	ehbi_exp_mod(&eres, &ebase, &eexp, &emod);
 	ehbi_to_decimal_string(&eres, ebuf, BUFLEN, &err);
 	if (err) {
-		Test_log_error1("ehbi_to_decimal_string error: %d\n", err);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " ehbi_to_decimal_string");
+		log->append_eol(log);
 	}
 
 	mpz_init(gbase);
@@ -59,45 +65,33 @@ int test_comp_exp_with_gmp(int verbose, unsigned long base, unsigned long exp,
 	mpz_clear(gres);
 
 	if (failures) {
-		Test_log_error3("failure in test_comp_exp_with_gmp"
-				"(%lu,%lu,%lu)", base, exp, mod);
+		log->append_ul(log, failures);
+		log->append_s(log, " failures in test_comp_exp_with_gmp_bem(");
+		log->append_ul(log, base);
+		log->append_s(log, ", ");
+		log->append_ul(log, exp);
+		log->append_s(log, ", ");
+		log->append_ul(log, mod);
+		log->append_s(log, ")");
+		log->append_eol(log);
 	}
 
 	return failures;
 }
 
-int main(int argc, char **argv)
+unsigned test_comp_exp_mod_with_gmp(int v)
 {
-	int v, failures, extra;
-	unsigned long base, exp, mod;
+	unsigned failures = 0;
 
-	v = (argc > 1) ? atoi(argv[1]) : 0;
-	if (argc > 4) {
-		extra = 1;
-		base = atoi(argv[2]);
-		exp = atoi(argv[3]);
-		mod = atoi(argv[4]);
-	} else {
-		extra = 0;
-	}
+	failures += test_comp_exp_with_gmp_bem(v, 1, 2, 3);
+	failures += test_comp_exp_with_gmp_bem(v, 10, 2, 7);
+	failures += test_comp_exp_with_gmp_bem(v, 5, 3, 13);
+	failures += test_comp_exp_with_gmp_bem(v, 4, 13, 497);
+	failures += test_comp_exp_with_gmp_bem(v, 121, 23, 13);
+	failures += test_comp_exp_with_gmp_bem(v, 1254, 523, 5513);
+	failures += test_comp_exp_with_gmp_bem(v, 3, 491225789, 982451579);
 
-	failures = 0;
-
-	failures += test_comp_exp_with_gmp(v, 1, 2, 3);
-	failures += test_comp_exp_with_gmp(v, 10, 2, 7);
-	failures += test_comp_exp_with_gmp(v, 5, 3, 13);
-	failures += test_comp_exp_with_gmp(v, 4, 13, 497);
-	failures += test_comp_exp_with_gmp(v, 121, 23, 13);
-	failures += test_comp_exp_with_gmp(v, 1254, 523, 5513);
-	failures += test_comp_exp_with_gmp(v, 3, 491225789, 982451579);
-
-	if (extra) {
-		failures += test_comp_exp_with_gmp(v, base, exp, mod);
-	}
-
-	if (failures) {
-		Test_log_error2("%d failures in %s\n", failures, __FILE__);
-	}
-
-	return check_status(failures);
+	return failures;
 }
+
+ECHECK_TEST_MAIN_V(test_comp_exp_mod_with_gmp)

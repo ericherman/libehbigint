@@ -5,9 +5,10 @@
 #include "test-ehbigint-private-utils.h"
 #include <limits.h>		/* LONG_MAX */
 
-int test_to_string_65605(int verbose)
+unsigned test_to_string_65605(int verbose)
 {
-	int failures;
+	struct eembed_log *log = eembed_err_log;
+	unsigned failures;
 
 	unsigned char bytes[4] = { 0x00, 0x01, 0x00, 0x45 };
 	struct ehbigint a_bigint;
@@ -24,15 +25,18 @@ int test_to_string_65605(int verbose)
 	failures += Check_ehbigint_dec(&a_bigint, "65605");
 
 	if (failures) {
-		Test_log_error1("%d failures in test_to_string\n", failures);
+		log->append_ul(log, failures);
+		log->append_s(log, " failures in test_to_string_65605");
+		log->append_eol(log);
 	}
 
 	return failures;
 }
 
-int test_to_string_negative_3(int verbose)
+unsigned test_to_string_negative_3(int verbose)
 {
-	int failures;
+	struct eembed_log *log = eembed_err_log;
+	unsigned failures;
 
 	unsigned char bytes[20];
 	struct ehbigint bi;
@@ -49,16 +53,18 @@ int test_to_string_negative_3(int verbose)
 	failures += Check_ehbigint_dec(&bi, "-3");
 
 	if (failures) {
-		Test_log_error1("%d failures in test_to_string_negative_3\n",
-				failures);
+		log->append_ul(log, failures);
+		log->append_s(log, " failures in test_to_string_negative_3");
+		log->append_eol(log);
 	}
 
 	return failures;
 }
 
-int test_to_string_ld(int verbose, long val)
+unsigned test_to_string_ld(int verbose, long val)
 {
-	int failures;
+	struct eembed_log *log = eembed_err_log;
+	unsigned failures;
 	unsigned char bytes[1 + sizeof(long)];
 	struct ehbigint bi;
 	char expected[80];
@@ -70,22 +76,23 @@ int test_to_string_ld(int verbose, long val)
 
 	ehbi_set_l(&bi, val);
 
-	sprintf(expected, "%ld", val);
+	eembed_long_to_str(expected, 80, val);
 	failures += Check_ehbigint_dec(&bi, expected);
 
 	if (failures) {
-		Test_log_error1("%d failures in test_to_string_ld\n", failures);
+		log->append_ul(log, failures);
+		log->append_s(log, " failures in test_to_string_ld(");
+		log->append_l(log, val);
+		log->append_s(log, ")");
+		log->append_eol(log);
 	}
 
 	return failures;
 }
 
-int main(int argc, char **argv)
+unsigned test_to_string(int v)
 {
-	int v, failures;
-
-	v = (argc > 1) ? atoi(argv[1]) : 0;
-	failures = 0;
+	unsigned failures = 0;
 
 	failures += test_to_string_65605(v);
 
@@ -98,9 +105,7 @@ int main(int argc, char **argv)
 	failures += test_to_string_ld(v, LONG_MIN);
 	failures += test_to_string_ld(v, LONG_MAX);
 
-	if (failures) {
-		Test_log_error2("%d failures in %s\n", failures, __FILE__);
-	}
-
-	return check_status(failures);
+	return failures;
 }
+
+ECHECK_TEST_MAIN_V(test_to_string)

@@ -3,12 +3,14 @@
 /* Copyright (C) 2016, 2019 Eric Herman <eric@freesa.org> */
 
 #include "test-ehbigint-private-utils.h"
-#include "../src/ehbigint-log.h"	/* set_ehbi_log_file */
 
-int test_div(int verbose, const char *snumerator, const char *sdenominator,
-	     const char *squotient, const char *sremainder)
+unsigned test_div_v(int verbose, const char *snumerator,
+		    const char *sdenominator, const char *squotient,
+		    const char *sremainder)
 {
-	int err, failures;
+	struct eembed_log *log = eembed_err_log;
+	int err;
+	unsigned failures;
 
 	unsigned char bytes_numerator[10];
 	unsigned char bytes_denominator[10];
@@ -29,39 +31,59 @@ int test_div(int verbose, const char *snumerator, const char *sdenominator,
 	ehbi_init(&remainder, bytes_remainder, 10);
 
 	err =
-	    ehbi_set_decimal_string(&numerator, snumerator, strlen(snumerator));
+	    ehbi_set_decimal_string(&numerator, snumerator,
+				    eembed_strlen(snumerator));
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_hex_string\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_decimal_string(");
+		log->append_s(log, snumerator);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
 	failures += Check_ehbigint_dec(&numerator, snumerator);
 	if (failures) {
-		Test_log_error1("round trip failed %s\n", snumerator);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "round trip failed? ");
+		log->append_s(log, snumerator);
+		log->append_s(log, ". Aborting test");
+		log->append_eol(log);
+		return failures;
 	}
 
 	err =
 	    ehbi_set_decimal_string(&denominator, sdenominator,
-				    strlen(sdenominator));
+				    eembed_strlen(sdenominator));
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_hex_string\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_decimal_string(");
+		log->append_s(log, sdenominator);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
 	failures += Check_ehbigint_dec(&denominator, sdenominator);
 	if (failures) {
-		Test_log_error1("round trip failed %s\n", sdenominator);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "round trip failed? ");
+		log->append_s(log, sdenominator);
+		log->append_s(log, ". Aborting test");
+		log->append_eol(log);
+		return failures;
 	}
 
 	err = ehbi_div(&quotient, &remainder, &numerator, &denominator);
 	if (err) {
-		Test_log_error1("error %d from ehbi_div\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_div");
+		log->append_eol(log);
 	}
 
 	failures += Check_ehbigint_dec(&quotient, squotient);
@@ -71,10 +93,12 @@ int test_div(int verbose, const char *snumerator, const char *sdenominator,
 	return failures;
 }
 
-int test_div_l(int verbose, const char *snumerator, long ldenominator,
-	       const char *squotient, const char *sremainder)
+unsigned test_div_l(int verbose, const char *snumerator, long ldenominator,
+		    const char *squotient, const char *sremainder)
 {
-	int err, failures;
+	struct eembed_log *log = eembed_err_log;
+	int err;
+	unsigned failures;
 
 	unsigned char bytes_numerator[10];
 	unsigned char bytes_quotient[10];
@@ -92,24 +116,36 @@ int test_div_l(int verbose, const char *snumerator, long ldenominator,
 	ehbi_init(&remainder, bytes_remainder, 10);
 
 	err =
-	    ehbi_set_decimal_string(&numerator, snumerator, strlen(snumerator));
+	    ehbi_set_decimal_string(&numerator, snumerator,
+				    eembed_strlen(snumerator));
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_hex_string\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_decimal_string(");
+		log->append_s(log, snumerator);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
 	failures += Check_ehbigint_dec(&numerator, snumerator);
 	if (failures) {
-		Test_log_error1("round trip failed %s\n", snumerator);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "round trip failed? ");
+		log->append_s(log, snumerator);
+		log->append_s(log, ". Aborting test");
+		log->append_eol(log);
+		return failures;
 	}
 
 	err = ehbi_div_l(&quotient, &remainder, &numerator, ldenominator);
 	if (err) {
-		Test_log_error1("error %d from ehbi_div\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_div");
+		log->append_eol(log);
 	}
 
 	failures += Check_ehbigint_dec(&quotient, squotient);
@@ -119,10 +155,17 @@ int test_div_l(int verbose, const char *snumerator, long ldenominator,
 	return failures;
 }
 
-int test_div_by_zero(int verbose)
+unsigned test_div_by_zero(int verbose)
 {
-	int err, failures;
-	FILE *log;
+	int err;
+	unsigned failures;
+
+	const size_t buflen = 250;
+	char buf[250];
+	struct eembed_str_buf sbuf;
+	struct eembed_log slog;
+	struct eembed_log *log;
+	struct eembed_log *orig;
 
 	unsigned char bytes_numerator[10];
 	unsigned char bytes_denominator[10];
@@ -136,8 +179,13 @@ int test_div_by_zero(int verbose)
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
-	log = tmpfile();
-	set_ehbi_log_file(log);
+
+	orig = ehbi_log_get();
+	eembed_memset(buf, 0x00, buflen);
+	log = eembed_char_buf_log_init(&slog, &sbuf, buf, buflen);
+	if (log) {
+		ehbi_log_set(log);
+	}
 
 	ehbi_init(&numerator, bytes_numerator, 10);
 	ehbi_init(&denominator, bytes_denominator, 10);
@@ -152,43 +200,38 @@ int test_div_by_zero(int verbose)
 		++failures;
 		Test_log_error("no error from ehbi_div by zero?\n");
 	}
-	failures += log_contains(log, "denominator == 0");
-	fclose(log);
+	failures += check_str_contains(buf, "denominator == 0");
 
+	ehbi_log_set(orig);
 	return failures;
 }
 
-int main(int argc, char **argv)
+unsigned test_div(int v)
 {
-	int v, failures;
+	unsigned failures = 0;
 
-	v = (argc > 1) ? atoi(argv[1]) : 0;
-	failures = 0;
+	failures += test_div_v(v, "20000", "100", "200", "0");
+	failures += test_div_v(v, "20001", "100", "200", "1");
+	failures += test_div_v(v, "20013", "200", "100", "13");
+	failures += test_div_v(v, "287713", "571", "503", "500");
 
-	failures += test_div(v, "20000", "100", "200", "0");
-	failures += test_div(v, "20001", "100", "200", "1");
-	failures += test_div(v, "20013", "200", "100", "13");
-	failures += test_div(v, "287713", "571", "503", "500");
-
-	failures += test_div(v, "-13", "6", "-2", "1");
-	failures += test_div(v, "20", "-7", "-2", "6");
-	failures += test_div(v, "-100", "-9", "11", "1");
+	failures += test_div_v(v, "-13", "6", "-2", "1");
+	failures += test_div_v(v, "20", "-7", "-2", "6");
+	failures += test_div_v(v, "-100", "-9", "11", "1");
 
 	/*
 	   lldiv_t result = lldiv(5088824049625,33554393);
 	   result.quot: 151658, result.remainder: 31916031
 	 */
 	failures +=
-	    test_div(v, "5088824049625", "33554393", "151658", "31916031");
+	    test_div_v(v, "5088824049625", "33554393", "151658", "31916031");
 
 	failures += test_div_by_zero(v);
 
 	failures += test_div_l(v, "-13", 6, "-2", "1");
 	failures += test_div_l(v, "600851475143", 65521, "9170364", "55499");
 
-	if (failures) {
-		Test_log_error2("%d failures in %s\n", failures, __FILE__);
-	}
-
-	return check_status(failures);
+	return failures;
 }
+
+ECHECK_TEST_MAIN_V(test_div)

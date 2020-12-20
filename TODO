@@ -12,8 +12,4 @@
 * would there be an advantage to creating an abstract interface?
   - testing could wrap a real lib and compare results impl (GMP's mpz_t maybe?)
 
-* add sqrt() function (Newton's method?)
-
 * make stack allocation plugable for embedded non-alloca environments
-
-* optimize shifting with memmove

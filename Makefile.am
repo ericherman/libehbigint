@@ -2,70 +2,85 @@
 # Makefile.am
 # Copyright (C) 2016, 2018, 2019 Eric Herman <eric@freesa.org>
 
-# for environments that do not have alloca, malloc is used
-# malloc instead of alloca can be forced: #define EHBI_NO_ALLOCA 1
-# TODO: make this plugable for non-alloca, non-C11 environments
-#ALLOCA_CFLAGS=-DEHBI_NO_ALLOCA=1
-ALLOCA_CFLAGS=
+if DEBUG
+BUILD_TYPE_CFLAGS=\
+	-std=gnu11 -D_GNU_SOURCE \
+	-ggdb -O0 \
+	-D_POSIX_SOURCE \
+	-DEBHI_CAN_BACKTRACE \
+	-rdynamic \
+	-fno-inline-small-functions \
+	-fkeep-inline-functions \
+	-fkeep-static-functions \
+	--coverage
+BUILD_TYPE_LDFLAGS=--coverage
+else
+BUILD_TYPE_CFLAGS=\
+	-std=c89 -Wpedantic \
+	-ggdb -O2 \
+	-fomit-frame-pointer \
+	-DNDEBUG=1 \
+	-DEHBI_SKIP_STRUCT_NULL_CHECK=1
+endif
 
-# typical builds:
-RELEASE_HOSTED_CFLAGS=\
- -std=c89 -Wpedantic $(ALLOCA_CFLAGS) \
- -pipe -ggdb -O2 -fomit-frame-pointer \
- -Wall -Wextra -Werror -DNDEBUG=1 \
- -DEHBI_SKIP_STRUCT_NULL_CHECK=1
+if FAUX_FREESTANDING
+EEMBED_HOSTED_CFLAGS=-DEEMBED_HOSTED=0 -DFAUX_FREESTANDING=1
+endif
 
-# if debugging, these flags may be better:
-#TODO get configure/autoconf to work right with BACKTRACE
-#if HAVE_BACKTRACE
-#if HAVE_BACKTRACE_SYMBOLS_FD
-BACKTRACE_CFLAGS=-D_POSIX_SOURCE -DEBHI_CAN_BACKTRACE -rdynamic
-#endif
-#else
-#BACKTRACE_CFLAGS=
-#endif
-DEBUG_HOSTED_GNU_CFLAGS=\
- -std=gnu11 -D_GNU_SOURCE $(BACKTRACE_CFLAGS) $(ALLOCA_CFLAGS) \
- -pipe -ggdb -O0 \
- -Wall -Wextra -Werror
+# # for environments that do not have alloca, malloc is used
+# # malloc instead of alloca can be forced: #define EEMBED_NO_ALLOCA 1
+# if NO_ALLOCA
+# NO_ALLOCA_CFLAGS=-DEEMBED_NO_ALLOCA=1
+# endif
+# if SKIP_ALLOCA_H
+# SKIP_ALLOCA_H_CFLAGS=-DEEMBED_SKIP_ALLOCA_H=1
+# endif
+# ALLOCA_CFLAGS=$(NO_ALLOCA_CFLAGS) $(SKIP_ALLOCA_H_CFLAGS)
 
-#BUILD_TYPE_CFLAGS=$(DEBUG_HOSTED_GNU_CFLAGS)
-BUILD_TYPE_CFLAGS=$(RELEASE_HOSTED_CFLAGS)
+EEMBED_SRC=./submodules/libecheck/src
+EEMBED_CFLAGS=-I $(EEMBED_SRC)
 
-
-EBA_CLFAGS=\
+EBA_SRC=./submodules/libeba/src
+EBA_CFLAGS=-I $(EBA_SRC) \
+ -DEBA_SKIP_TOGGLE=1 \
  -DEBA_SKIP_EBA_NEW=1 \
- -DEBA_SKIP_STRUCT_NULL_CHECK=1 \
- -DEBA_SKIP_STRUCT_BITS_NULL_CHECK=1 \
- -DEBA_SKIP_ARRAY_INDEX_OVERRUN_SAFETY=1 \
- -include src/ehbigint-eba.h
+ -DEBA_SKIP_SWAP=1 \
+ -DEBA_SKIP_TO_STRING=1
 
-AM_CFLAGS=$(BUILD_TYPE_CFLAGS) $(EBA_CLFAGS)
+EHSTR_SRC=./submodules/libehstr/src
+EHSTR_CFLAGS=-I $(EHSTR_SRC)
+
+ECHECK_SRC=./submodules/libecheck/src
+ECHECK_CFLAGS=-I $(ECHECK_SRC)
+
+NOISY_CFLAGS=-Wall -Wextra -Werror
+
+AM_CFLAGS=\
+ $(BUILD_TYPE_CFLAGS) \
+ $(EEMBED_HOSTED_CFLAGS) \
+ $(ALLOCA_CFLAGS) \
+ $(EEMBED_CFLAGS) \
+ $(EBA_CFLAGS) \
+ $(EHSTR_CFLAGS) \
+ $(NOISY_CFLAGS) \
+ -I src \
+ -pipe
 
 libehbigint_la_LIBADD=
-AM_LDFLAGS=-rdynamic
+AM_LDFLAGS=-rdynamic $(BUILD_TYPE_LDFLAGS)
 
 lib_LTLIBRARIES=libehbigint.la
 include_HEADERS=src/ehbigint.h
 
 libehbigint_la_SOURCES=\
+ $(EEMBED_SRC)/eembed.h \
+ $(EEMBED_SRC)/eembed.c \
+ $(EBA_SRC)/eba.h \
+ $(EBA_SRC)/eba.c \
+ $(EHSTR_SRC)/ehstr.h \
+ $(EHSTR_SRC)/ehstr.c \
  src/ehbigint.h \
- src/ehbigint-log.h \
- src/ehbigint-log.c \
- src/ehbigint-priv.h \
- src/ehbigint-priv.c \
- src/ehbigint-str.h \
- src/ehbigint-str.c \
- src/ehstr.h \
- src/ehstr.c \
- src/ehbigint-util.h \
- src/ehbigint-util.c \
- src/ehbigint-eba.h \
- src/ehbigint-eba.c \
- src/eba.h \
- src/eba.c \
  src/ehbigint.c
-
 
 TESTS=$(check_PROGRAMS)
 check_PROGRAMS=\
@@ -102,8 +117,8 @@ check_PROGRAMS=\
 #XFAIL_TESTS=test-is-probably-prime
 
 COMMON_TEST_SOURCES=src/ehbigint.h \
- tests/echeck.h \
- tests/echeck.c \
+ $(ECHECK_SRC)/echeck.h \
+ $(ECHECK_SRC)/echeck.c \
  tests/test-ehbigint-private-utils.h \
  tests/test-ehbigint-private-utils.c
 
@@ -225,7 +240,8 @@ tidy:
 		-T size_t \
 		-T FILE \
 		-T ehbigint \
-		`find src tests demos -name '*.h' -o -name '*.c'`
+		`find src tests demos -name '*.h' -o -name '*.c'` \
+		ehbigint_arduino_tests/ehbigint_arduino_tests.ino
 
 spotless:
 	rm -rf `cat .gitignore | sed -e 's/#.*//'`

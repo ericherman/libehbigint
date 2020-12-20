@@ -4,9 +4,11 @@
 
 #include "test-ehbigint-private-utils.h"
 
-int test_set_l(int verbose, long v1)
+unsigned test_set_l_v(int verbose, long v1)
 {
-	int failures, err;
+	struct eembed_log *log = eembed_err_log;
+	unsigned failures;
+	int err;
 
 	char expect[25], buf[80];
 	unsigned char bytes[4];
@@ -22,33 +24,36 @@ int test_set_l(int verbose, long v1)
 	failures += Check_ehbigint_hex(&bi, "0x00");
 	failures += Check_ehbigint_dec(&bi, "0");
 
-	sprintf(buf, "ehbi_set_l(%ld)", v1);
+	eembed_long_to_str(expect, 25, v1);
+
+	buf[0] = '\0';
+	eembed_strcat(buf, "ehbi_set_l(");
+	eembed_strcat(buf, expect);
+	eembed_strcat(buf, ")");
 	err = ehbi_set_l(&bi, v1);
 	failures += check_int_m(err, 0, buf);
 
-	sprintf(expect, "%ld", v1);
 	failures += Check_ehbigint_dec(&bi, expect);
 
 	if (failures) {
-		Test_log_error1("%d failures in test_set_l\n", failures);
+		log->append_ul(log, failures);
+		log->append_s(log, " failures in test_set_l_v(");
+		log->append_l(log, v1);
+		log->append_s(log, ")");
+		log->append_eol(log);
 	}
 
 	return failures;
 }
 
-int main(int argc, char **argv)
+unsigned test_set_l(int v)
 {
-	int v, failures;
+	unsigned failures = 0;
 
-	v = (argc > 1) ? atoi(argv[1]) : 0;
-	failures = 0;
+	failures += test_set_l_v(v, 1234567890);
+	failures += test_set_l_v(v, -1);
 
-	failures += test_set_l(v, 1234567890);
-	failures += test_set_l(v, -1);
-
-	if (failures) {
-		Test_log_error2("%d failures in %s\n", failures, __FILE__);
-	}
-
-	return check_status(failures);
+	return failures;
 }
+
+ECHECK_TEST_MAIN_V(test_set_l)

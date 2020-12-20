@@ -4,9 +4,11 @@
 
 #include "test-ehbigint-private-utils.h"
 
-int test_set(int verbose, long lval, const char *expect)
+unsigned test_set_v(int verbose, long lval, const char *expect)
 {
-	int err, failures;
+	struct eembed_log *log = eembed_err_log;
+	int err;
+	unsigned failures;
 
 	unsigned char a_bytes[10];
 	struct ehbigint a_bigint;
@@ -22,30 +24,46 @@ int test_set(int verbose, long lval, const char *expect)
 
 	err = ehbi_set_l(&a_bigint, lval);
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_l\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_l(");
+		log->append_l(log, lval);
+		log->append_s(log, ")");
+		log->append_eol(log);
 	}
 	failures += Check_ehbigint_dec(&a_bigint, expect);
 
 	err = ehbi_set(&b_bigint, &a_bigint);
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_l\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set");
+		log->append_eol(log);
 	}
 	failures += Check_ehbigint_dec(&b_bigint, expect);
 
 	if (failures) {
-		Test_log_error1("%d failures in test_set\n", failures);
+		log->append_ul(log, failures);
+		log->append_s(log, " failures in test_set_v(");
+		log->append_l(log, lval);
+		log->append_s(log, ",");
+		log->append_s(log, expect);
+		log->append_s(log, ")");
+		log->append_eol(log);
 	}
 
 	return failures;
 }
 
-int test_set_dec_str(int verbose, const char *val)
+unsigned test_set_dec_str(int verbose, const char *val)
 {
-	int err, failures;
+	struct eembed_log *log = eembed_err_log;
+	int err;
+	unsigned failures;
 
 	unsigned char bi_bytes[20];
 	struct ehbigint bi;
@@ -56,43 +74,51 @@ int test_set_dec_str(int verbose, const char *val)
 
 	ehbi_init(&bi, bi_bytes, 20);
 
-	err = ehbi_set_decimal_string(&bi, val, strlen(val));
+	err = ehbi_set_decimal_string(&bi, val, eembed_strlen(val));
 	if (err) {
-		Test_log_error1("error %d ehbi_set_decimal_string\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_decimal_string(");
+		log->append_s(log, val);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
+
 	ehbi_to_decimal_string(&bi, buf, 80, &err);
 	if (err) {
-		Test_log_error1("error %d ehbi_to_decimal_string\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_to_decimal_string");
+		log->append_eol(log);
 	}
 	failures += check_str(buf, val);
 
 	if (failures) {
-		Test_log_error1("%d failures in test_set\n", failures);
+		log->append_ul(log, failures);
+		log->append_s(log, " failures in test_set_dec_str(");
+		log->append_s(log, val);
+		log->append_s(log, ")");
+		log->append_eol(log);
 	}
 
 	return failures;
 }
 
-int main(int argc, char **argv)
+unsigned test_set(int v)
 {
-	int v, failures;
+	unsigned failures = 0;
 
-	v = (argc > 1) ? atoi(argv[1]) : 0;
-	failures = 0;
-
-	failures += test_set(v, 3, "3");
-	failures += test_set(v, -5, "-5");
+	failures += test_set_v(v, 3, "3");
+	failures += test_set_v(v, -5, "-5");
 
 	failures += test_set_dec_str(v, "3");
 	failures += test_set_dec_str(v, "-3");
 
-	if (failures) {
-		Test_log_error2("%d failures in %s\n", failures, __FILE__);
-	}
-
-	return check_status(failures);
+	return failures;
 }
+
+ECHECK_TEST_MAIN_V(test_set)

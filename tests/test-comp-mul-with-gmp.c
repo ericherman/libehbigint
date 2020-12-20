@@ -3,10 +3,12 @@
 /* Copyright (C) 2016, 2019 Eric Herman <eric@freesa.org> */
 
 #include "test-ehbigint-private-utils.h"
+#include <stdio.h>
 #include <gmp.h>
 
 int test_comp_mul_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 {
+	struct eembed_log *log = eembed_err_log;
 	int failures, i, err;
 	char ebuf[BUFLEN];
 	char gbuf[BUFLEN];
@@ -49,92 +51,141 @@ int test_comp_mul_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 	for (i = 1; ((i < max_iterations) && (failures == 0)); ++i) {
 		/* ours */
 		if (verbose) {
-			fprintf(stderr, "%d:%s\n", i, in_str);
+			log->append_l(log, i);
+			log->append_c(log, ':');
+			log->append_s(log, in_str);
+			log->append_eol(log);
 		}
 
 		mpz_set_str(gin, in_str, 10);
-		err = ehbi_set_decimal_string(&ein, in_str, strlen(in_str));
+		err =
+		    ehbi_set_decimal_string(&ein, in_str,
+					    eembed_strlen(in_str));
 		if (err) {
-			Test_log_error1("ehbi_set_decimal_string error: %d\n",
-					err);
+			STDERR_FILE_LINE_FUNC(log);
+			log->append_s(log, "ehbi_set_decimal_string error: ");
+			log->append_l(log, err);
+			log->append_eol(log);
 		}
 
 		mpz_get_str(gbuf, 10, gin);
 		ehbi_to_decimal_string(&ein, ebuf, BUFLEN, &err);
 		if (err) {
-			Test_log_error1("ehbi_to_decimal_string error: %d\n",
-					err);
+			STDERR_FILE_LINE_FUNC(log);
+			log->append_s(log, "ehbi_to_decimal_string error: ");
+			log->append_l(log, err);
+			log->append_eol(log);
 		}
 		failures += check_str_m(ebuf, gbuf, "from_decimal_string");
 
 		mpz_mul(gres, gin, gmul);
 		err = ehbi_mul(&eres, &ein, &emul);
 		if (err) {
-			Test_log_error1("ehbi_mul error: %d\n", err);
+			STDERR_FILE_LINE_FUNC(log);
+			log->append_s(log, "ehbi_mul error: ");
+			log->append_l(log, err);
+			log->append_eol(log);
 		}
 
 		mpz_get_str(gbuf, 10, gres);
 		ehbi_to_decimal_string(&eres, ebuf, BUFLEN, &err);
 		if (err) {
-			Test_log_error1("ehbi_to_decimal_string error: %d\n",
-					err);
+			STDERR_FILE_LINE_FUNC(log);
+			log->append_s(log, "ehbi_to_decimal_string error: ");
+			log->append_l(log, err);
+			log->append_eol(log);
 		}
 		failures += check_str_m(ebuf, gbuf, "ehbi_mul");
 
 		mpz_tdiv_qr(gquot, grem, gres, gdiv);
 		err = ehbi_div(&equot, &erem, &eres, &ediv);
 		if (err) {
-			Test_log_error1("ehbi_div error: %d\n", err);
+			STDERR_FILE_LINE_FUNC(log);
+			log->append_s(log, "ehbi_div error: ");
+			log->append_l(log, err);
+			log->append_eol(log);
 		}
 
 		mpz_get_str(gbuf, 10, gquot);
 		ehbi_to_decimal_string(&equot, ebuf, BUFLEN, &err);
 		if (err) {
-			Test_log_error1("ehbi_to_decimal_string error: %d\n",
-					err);
+			STDERR_FILE_LINE_FUNC(log);
+			log->append_s(log, "ehbi_to_decimal_string error: ");
+			log->append_l(log, err);
+			log->append_eol(log);
 		}
 		failures += check_str_m(ebuf, gbuf, "ehbi_div (quot)");
 		mpz_get_str(gbuf, 10, grem);
 		ehbi_to_decimal_string(&erem, ebuf, BUFLEN, &err);
 		if (err) {
-			Test_log_error1("ehbi_to_decimal_string error: %d\n",
-					err);
+			STDERR_FILE_LINE_FUNC(log);
+			log->append_s(log, "ehbi_to_decimal_string error: ");
+			log->append_l(log, err);
+			log->append_eol(log);
 		}
 		failures += check_str_m(ebuf, gbuf, "ehbi_div (rem)");
 
 		if (failures) {
-			Test_log_error2("iteration %d: in_str: %s\n", i,
-					in_str);
+			STDERR_FILE_LINE_FUNC(log);
+			log->append_s(log, "iteration ");
+			log->append_l(log, i);
+			log->append_s(log, ": in_str: ");
+			log->append_s(log, in_str);
+			log->append_eol(log);
 
 			mpz_get_str(gbuf, 10, gin);
 			ehbi_to_decimal_string(&ein, ebuf, BUFLEN, &err);
-			Test_log_error1("\tein: %s\n", ebuf);
-			Test_log_error1("\tgin: %s\n", gbuf);
+			log->append_s(log, "\tein: ");
+			log->append_s(log, ebuf);
+			log->append_eol(log);
+			log->append_s(log, "\tgin: ");
+			log->append_s(log, gbuf);
+			log->append_eol(log);
 
 			mpz_get_str(gbuf, 10, gmul);
 			ehbi_to_decimal_string(&emul, ebuf, BUFLEN, &err);
-			Test_log_error1("\temul: %s\n", ebuf);
-			Test_log_error1("\tgmul: %s\n", gbuf);
+			log->append_s(log, "\temul: ");
+			log->append_s(log, ebuf);
+			log->append_eol(log);
+			log->append_s(log, "\tgmul: ");
+			log->append_s(log, gbuf);
+			log->append_eol(log);
 
 			mpz_get_str(gbuf, 10, gres);
 			ehbi_to_decimal_string(&eres, ebuf, BUFLEN, &err);
-			Test_log_error1("\teres: %s\n", ebuf);
-			Test_log_error1("\tgres: %s\n", gbuf);
+			log->append_s(log, "\teres: ");
+			log->append_s(log, ebuf);
+			log->append_eol(log);
+			log->append_s(log, "\tgres: ");
+			log->append_s(log, gbuf);
+			log->append_eol(log);
 
 			mpz_get_str(gbuf, 10, gdiv);
 			ehbi_to_decimal_string(&ediv, ebuf, BUFLEN, &err);
-			Test_log_error1("\tediv: %s\n", ebuf);
-			Test_log_error1("\tgdiv: %s\n", gbuf);
+			log->append_s(log, "\tediv: ");
+			log->append_s(log, ebuf);
+			log->append_eol(log);
+			log->append_s(log, "\tgdiv: ");
+			log->append_s(log, gbuf);
+			log->append_eol(log);
 
 			mpz_get_str(gbuf, 10, gquot);
 			ehbi_to_decimal_string(&equot, ebuf, BUFLEN, &err);
-			Test_log_error1("\tequot: %s\n", ebuf);
-			Test_log_error1("\tgquot: %s\n", gbuf);
+			log->append_s(log, "\tequot: ");
+			log->append_s(log, ebuf);
+			log->append_eol(log);
+			log->append_s(log, "\tgquot: ");
+			log->append_s(log, gbuf);
+			log->append_eol(log);
 
 			mpz_get_str(gbuf, 10, grem);
 			ehbi_to_decimal_string(&erem, ebuf, BUFLEN, &err);
-			Test_log_error1("\terem: %s\n", ebuf);
-			Test_log_error1("\tgrem: %s\n", gbuf);
+			log->append_s(log, "\terem: ");
+			log->append_s(log, ebuf);
+			log->append_eol(log);
+			log->append_s(log, "\tgrem: ");
+			log->append_s(log, gbuf);
+			log->append_eol(log);
 
 			goto mpz_clean_up;
 		}
@@ -158,7 +209,10 @@ mpz_clean_up:
 
 int main(int argc, char **argv)
 {
-	int v, failures, slow_iterations;
+	struct eembed_log *log = eembed_err_log;
+	int v;
+	unsigned failures;
+	int slow_iterations;
 	char *cmp_init_val;
 
 	v = (argc > 1) ? atoi(argv[1]) : 0;
@@ -169,8 +223,11 @@ int main(int argc, char **argv)
 	failures += test_comp_mul_with_gmp(v, slow_iterations, cmp_init_val);
 
 	if (failures) {
-		Test_log_error2("%d failures in %s\n", failures, __FILE__);
+		log->append_ul(log, failures);
+		log->append_s(log, " failures in ");
+		log->append_s(log, __FILE__);
+		log->append_eol(log);
 	}
 
-	return check_status(failures);
+	return failures;
 }

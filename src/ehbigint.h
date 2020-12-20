@@ -401,6 +401,30 @@ char *ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len,
 char *ehbi_to_decimal_string(const struct ehbigint *bi, char *buf,
 			     size_t buf_len, int *err);
 
+/****************************************************************************/
+/* Constructors */
+/****************************************************************************/
+struct ehbigint *ehbi_alloc(size_t bytes);
+struct ehbigint *ehbi_alloc_l(size_t bytes, long val);
+/* function pointer to use if malloc fails */
+extern void (*ehbi_alloc_fail)(int err);
+
+void ehbi_free(struct ehbigint *bi);
+
+/*****************************************************************************/
+/* Log */
+/*****************************************************************************/
+/* Get the struct eembed_log pointer to where messages currently target.
+   Defaults to eembed_err_log. */
+struct eembed_log *ehbi_log_get(void);
+
+/* Set the struct eembed_log pointer to where messages shall target. */
+/* returns the previous value */
+struct eembed_log *ehbi_log_set(struct eembed_log *log);
+
+/* if _POSIX_C_SOURCE backtrace_symbols_fd is used */
+void ehbi_log_backtrace(struct eembed_log *log);
+
 /*****************************************************************************/
 /* error codes */
 /*****************************************************************************/
@@ -428,7 +452,7 @@ enum {
 	EHBI_STACK_TOO_SMALL,
 	EHBI_DIVIDE_BY_ZERO,
 	EHBI_EBA_CRASH,
-	EHBI_FILE_ERROR,
+	EHBI_PRNG_ERROR,
 	EHBI_SQRT_NEGATIVE,
 	EHBI_LAST
 };

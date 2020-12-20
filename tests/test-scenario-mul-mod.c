@@ -4,9 +4,11 @@
 
 #include "test-ehbigint-private-utils.h"
 
-int test_scenario_mul_mod(int verbose)
+unsigned test_scenario_mul_mod(int verbose)
 {
-	int err, failures;
+	struct eembed_log *log = eembed_err_log;
+	int err;
+	unsigned failures;
 	struct ehbigint bx, by, bz, bresult, bquot, brem;
 	unsigned long x, y, z, result;
 	unsigned char xb[16], yb[16], zb[16], resb[16], quotb[16], remb[16];
@@ -25,32 +27,57 @@ int test_scenario_mul_mod(int verbose)
 	x = 20151125;
 	err = ehbi_set_l(&bx, x);
 	if (err) {
-		Test_log_error2("ehbi_set_l (%lu) error: %d\n", x, err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_l(");
+		log->append_l(log, x);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
+
 	y = 252533;
 	err = ehbi_set_l(&by, y);
 	if (err) {
-		Test_log_error2("ehbi_set_l (%lu) error: %d\n", y, err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_l(");
+		log->append_l(log, y);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
+
 	z = 33554393;
 	err = ehbi_set_l(&bz, z);
 	if (err) {
-		Test_log_error2("ehbi_set_l (%lu) error: %d\n", z, err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_l(");
+		log->append_l(log, y);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
 
 	/* 20151125 * 252533 == 5088824049625 */
 	expect_mul = "5088824049625";
 	err = ehbi_mul(&bresult, &bx, &by);
 	if (err) {
-		Test_log_error3("ehbi_mul (%lu * %lu), error: %d\n", x, y, err);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_mul (");
+		log->append_ul(log, x);
+		log->append_s(log, " * ");
+		log->append_ul(log, y);
+		log->append_s(log, ")");
+		log->append_eol(log);
 		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		return 1;
 	}
 	failures += Check_ehbigint_dec(&bresult, expect_mul);
 
@@ -60,55 +87,52 @@ int test_scenario_mul_mod(int verbose)
 	 */
 	err = ehbi_div(&bquot, &brem, &bresult, &bz);
 	if (err) {
-		Test_log_error3("ehbi_div: (%s/%lu) error: %d\n", expect_mul, z,
-				err);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_div (");
+		log->append_s(log, expect_mul);
+		log->append_s(log, " / ");
+		log->append_ul(log, z);
+		log->append_s(log, ")");
+		log->append_eol(log);
 	}
+
 	if (brem.bytes_used > (1 + sizeof(unsigned long))) {
-		Test_log_error2
-		    ("brem.bytes_used > sizeof(unsigned long)(%lu > %lu)\n",
-		     (unsigned long)brem.bytes_used,
-		     (unsigned long)(1 + sizeof(unsigned long)));
-		failures += 1;
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "rem.bytes_used > 1+sizeof(unsigned long)");
+		log->append_s(log, " (");
+		log->append_ul(log, brem.bytes_used);
+		log->append_s(log, " > ");
+		log->append_ul(log, (1 + sizeof(unsigned long)));
+		log->append_s(log, ")");
+		log->append_eol(log);
 	}
 
 	result = ehbigint_to_unsigned_long(&bquot, &err);
 	if (err) {
-		Test_log_error1("ehbigint_to_unsigned_long(quot) error: %d\n",
-				err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbigint_to_unsigned_long");
+		log->append_eol(log);
 	}
 	failures += check_unsigned_long(result, 151658);
 
 	result = ehbigint_to_unsigned_long(&brem, &err);
 	if (err) {
-		Test_log_error1("ehbigint_to_unsigned_long(rem) error: %d\n",
-				err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbigint_to_unsigned_long(rem)");
+		log->append_eol(log);
 	}
 	failures += check_unsigned_long(result, 31916031);
-
-	if (failures) {
-		Test_log_error1("%d failures in test_scenario_mul_mod\n",
-				failures);
-	}
 
 	return failures;
 }
 
-int main(int argc, char **argv)
-{
-	int v, failures;
-
-	v = (argc > 1) ? atoi(argv[1]) : 0;
-	failures = 0;
-
-	failures += test_scenario_mul_mod(v);
-
-	if (failures) {
-		Test_log_error2("%d failures in %s\n", failures, __FILE__);
-	}
-
-	return check_status(failures);
-}
+ECHECK_TEST_MAIN_V(test_scenario_mul_mod)

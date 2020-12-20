@@ -1,0 +1,1 @@
+../tests/test-dec-corner-case.c

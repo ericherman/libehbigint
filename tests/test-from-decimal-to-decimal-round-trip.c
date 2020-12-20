@@ -4,9 +4,12 @@
 
 #include "test-ehbigint-private-utils.h"
 
-int test_from_decimal_to_decimal_round_trip(int verbose, const char *dec)
+unsigned from_dec_to_dec_round_trip(int verbose, const char *dec)
 {
-	int err, failures, is_negative;
+	struct eembed_log *log = eembed_err_log;
+	int err;
+	unsigned failures;
+	int is_negative;
 	unsigned char bytes_buf[20];
 	char as_string[BUFLEN];
 	struct ehbigint a_bigint;
@@ -17,53 +20,63 @@ int test_from_decimal_to_decimal_round_trip(int verbose, const char *dec)
 	ehbi_init(&a_bigint, bytes_buf, 20);
 
 	is_negative = dec[0] == '-';
-	err = ehbi_set_decimal_string(&a_bigint, dec, strlen(dec));
+	err = ehbi_set_decimal_string(&a_bigint, dec, eembed_strlen(dec));
 	if (err) {
-		Test_log_error1("error %d ehbi_set_decimal_string\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_decimal_string(");
+		log->append_s(log, dec);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
+		return 1;
 	}
+
 	if (ehbi_is_negative(&a_bigint, &err) != is_negative || err) {
-		Test_log_error3("ehbi_is_negative != %d for %s, (error:%d)\n",
-				is_negative, dec, err);
-		failures += 1;
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " ehbi_is_negative != ");
+		log->append_l(log, is_negative);
+		log->append_s(log, " for ");
+		log->append_s(log, dec);
+		log->append_eol(log);
 	}
+
 	ehbi_to_decimal_string(&a_bigint, as_string, BUFLEN, &err);
 	if (err) {
-		Test_log_error1("error %d ehbi_to_decimal_string\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_decimal_string(");
+		log->append_s(log, as_string);
+		log->append_s(log, "). Aborting test.");
+		log->append_eol(log);
 	}
-	failures += check_str(as_string, dec);
-	if (failures) {
-		Test_log_error1("%d failures in "
-				"check_decimal_to_decimal_round_trip\n",
-				failures);
-	}
+
+	failures += check_str_m(as_string, dec, "round-trip");
+
 	return failures;
 }
 
-int main(int argc, char **argv)
+unsigned test_from_decimal_to_decimal_round_trip(int v)
 {
-	int v, failures;
-	const char *dec_str;
-
-	v = (argc > 1) ? atoi(argv[1]) : 0;
-	failures = 0;
+	unsigned failures = 0;
+	const char *dec_str = NULL;
 
 	/* u64_max = "18446744073709551615" */
 	dec_str = "12345678901234567890000";
-	failures += test_from_decimal_to_decimal_round_trip(v, dec_str);
+	failures += from_dec_to_dec_round_trip(v, dec_str);
 
 	dec_str = "200";
-	failures += test_from_decimal_to_decimal_round_trip(v, dec_str);
+	failures += from_dec_to_dec_round_trip(v, dec_str);
 
 	dec_str = "-1";
-	failures += test_from_decimal_to_decimal_round_trip(v, dec_str);
+	failures += from_dec_to_dec_round_trip(v, dec_str);
 
-	if (failures) {
-		Test_log_error2("%d failures in %s\n", failures, __FILE__);
-	}
-
-	return check_status(failures);
+	return failures;
 }
+
+ECHECK_TEST_MAIN_V(test_from_decimal_to_decimal_round_trip)

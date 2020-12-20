@@ -4,9 +4,11 @@
 
 #include "test-ehbigint-private-utils.h"
 
-int test_mul(int verbose, long al, long bl, const char *expected)
+unsigned test_mul_v(int verbose, long al, long bl, const char *expected)
 {
-	int err, failures;
+	struct eembed_log *log = eembed_err_log;
+	int err;
+	unsigned failures;
 
 	unsigned char a_bytes[16];
 	struct ehbigint a_bigint;
@@ -26,73 +28,91 @@ int test_mul(int verbose, long al, long bl, const char *expected)
 	ehbi_init(&b_bigint, b_bytes, 16);
 	ehbi_init(&result, result_bytes, 16);
 
-	sprintf(buf, "%ld", al);
 	err = ehbi_set_l(&a_bigint, al);
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_l\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_l");
+		log->append_eol(log);
 	}
+	eembed_long_to_str(buf, BUFLEN, al);
 	failures += Check_ehbigint_dec(&a_bigint, buf);
 	if (failures) {
-		Test_log_error1("assign failed %s\n", buf);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, " assign failed (");
+		log->append_s(log, buf);
+		log->append_s(log, "). Aborting test");
+		log->append_eol(log);
+		return failures;
 	}
 
-	sprintf(buf, "%ld", bl);
 	err = ehbi_set_l(&b_bigint, bl);
 	if (err) {
-		Test_log_error1("error %d from ehbi_set_l\n", err);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_set_l");
+		log->append_eol(log);
 	}
+	eembed_long_to_str(buf, BUFLEN, bl);
 	failures += Check_ehbigint_dec(&b_bigint, buf);
 	if (failures) {
-		Test_log_error1("assign failed %s\n", buf);
-		Test_log_error("Aborting test\n");
-		return (1 + failures);
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, " assign failed (");
+		log->append_s(log, buf);
+		log->append_s(log, ")");
+		log->append_eol(log);
 	}
 
 	err = ehbi_mul(&result, &a_bigint, &b_bigint);
 	if (err) {
-		Test_log_error1("error %d from ehbi_mul\n", err);
+		++failures;
+		STDERR_FILE_LINE_FUNC(log);
+		log->append_s(log, "error ");
+		log->append_l(log, err);
+		log->append_s(log, " from ehbi_mul");
+		log->append_eol(log);
 	}
 
 	failures += Check_ehbigint_dec(&result, expected);
 
 	if (failures) {
-		Test_log_error4("%d failures in test_mul(%lu,%lu,%s)\n",
-				failures, al, bl, expected);
+		log->append_ul(log, failures);
+		log->append_s(log, " failures in test_mul_v(");
+		log->append_l(log, al);
+		log->append_s(log, ",");
+		log->append_l(log, bl);
+		log->append_s(log, ",");
+		log->append_s(log, expected);
+		log->append_s(log, ")");
+		log->append_eol(log);
 	}
 
 	return failures;
 }
 
-int main(int argc, char **argv)
+unsigned test_mul(int v)
 {
-	int v, failures;
+	unsigned failures = 0;
 
-	v = (argc > 1) ? atoi(argv[1]) : 0;
-	failures = 0;
+	failures += test_mul_v(v, 2, 256, "512");
 
-	failures += test_mul(v, 2, 256, "512");
+	failures += test_mul_v(v, 7, -3, "-21");
+	failures += test_mul_v(v, -41, -2, "82");
 
-	failures += test_mul(v, 7, -3, "-21");
-	failures += test_mul(v, -41, -2, "82");
-
-	failures += test_mul(v, 500, 333, "166500");
+	failures += test_mul_v(v, 500, 333, "166500");
 
 	/*
 	   $ bc <<< "9415273 * 252533"
 	   2377667136509
 	 */
-	failures += test_mul(v, 9415273, 252533, "2377667136509");
-	failures += test_mul(v, 239862259L, 581571519L, "139497058317401421");
+	failures += test_mul_v(v, 9415273, 252533, "2377667136509");
+	failures += test_mul_v(v, 239862259L, 581571519L, "139497058317401421");
 
-	if (failures) {
-		Test_log_error2("%d failures in %s\n", failures, __FILE__);
-	}
-
-	return check_status(failures);
+	return failures;
 }
+
+ECHECK_TEST_MAIN_V(test_mul)

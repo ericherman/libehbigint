@@ -20,9 +20,10 @@ unsigned test_from_binstr_to_binstr_round_trip_s(int verbose, const char *bstr)
 	prefix = (bstr && (eembed_strlen(bstr) > 2)
 		  && (bstr[1] == 'b' || bstr[1] == 'B')) ? 2 : 0;
 
-	ehbi_init(&a_bigint, bytes_buf, 20);
+	err = 0;
+	ehbi_init(&a_bigint, bytes_buf, 20, &err);
 
-	err = ehbi_set_binary_string(&a_bigint, bstr, eembed_strlen(bstr));
+	ehbi_set_binary_string(&a_bigint, bstr, eembed_strlen(bstr), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -92,14 +93,15 @@ unsigned test_hex_vs_binary_string(int verbose, const char *hex,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&a_bigint, a_bytes, 20);
-	ehbi_init(&b_bigint, b_bytes, 20);
+	err = 0;
+	ehbi_init(&a_bigint, a_bytes, 20, &err);
+	ehbi_init(&b_bigint, b_bytes, 20, &err);
 
-	ehbi_set_hex_string(&a_bigint, hex, eembed_strlen(hex));
+	ehbi_set_hex_string(&a_bigint, hex, eembed_strlen(hex), &err);
 	ehbi_to_hex_string(&a_bigint, hexhexs, BUFLEN, &err);
 	ehbi_to_binary_string(&a_bigint, hexbins, BUFLEN, &err);
 
-	ehbi_set_binary_string(&b_bigint, bstr, eembed_strlen(bstr));
+	ehbi_set_binary_string(&b_bigint, bstr, eembed_strlen(bstr), &err);
 	ehbi_to_hex_string(&b_bigint, binhexs, BUFLEN, &err);
 	ehbi_to_binary_string(&b_bigint, binbins, BUFLEN, &err);
 

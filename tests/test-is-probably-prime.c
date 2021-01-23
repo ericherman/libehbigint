@@ -10,17 +10,18 @@ unsigned test_is_probably_prime_s(int verbose, const char *val, int expected)
 	int err, failures, actual;
 	const size_t bytes_buf1_len = 20;
 	unsigned char bytes_buf1[20];
-	const size_t buf_len = 50;
-	char buf[50];
+	const size_t buf_len = 45;
+	char buf[45];
 	struct ehbigint bi;
 	unsigned accuracy;
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&bi, bytes_buf1, bytes_buf1_len);
+	err = 0;
+	ehbi_init(&bi, bytes_buf1, bytes_buf1_len, &err);
 
-	err = ehbi_set_decimal_string(&bi, val, eembed_strlen(val));
+	ehbi_set_decimal_string(&bi, val, eembed_strlen(val), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -32,7 +33,6 @@ unsigned test_is_probably_prime_s(int verbose, const char *val, int expected)
 		return 1;
 	}
 
-	err = 0;
 	ehbi_to_decimal_string(&bi, buf, buf_len, &err);
 	failures += check_str_m(buf, val, "failed to round-trip?");
 	if (err || failures) {

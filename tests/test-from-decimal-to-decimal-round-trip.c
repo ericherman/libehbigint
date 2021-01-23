@@ -17,10 +17,10 @@ unsigned from_dec_to_dec_round_trip(int verbose, const char *dec)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&a_bigint, bytes_buf, 20);
+	ehbi_init(&a_bigint, bytes_buf, 20, &err);
 
 	is_negative = dec[0] == '-';
-	err = ehbi_set_decimal_string(&a_bigint, dec, eembed_strlen(dec));
+	ehbi_set_decimal_string(&a_bigint, dec, eembed_strlen(dec), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");

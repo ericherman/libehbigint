@@ -19,10 +19,11 @@ unsigned test_set_v(int verbose, long lval, const char *expect)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&a_bigint, a_bytes, 10);
-	ehbi_init(&b_bigint, b_bytes, 10);
+	err = 0;
+	ehbi_init(&a_bigint, a_bytes, 10, &err);
+	ehbi_init(&b_bigint, b_bytes, 10, &err);
 
-	err = ehbi_set_l(&a_bigint, lval);
+	ehbi_set_l(&a_bigint, lval, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -35,7 +36,7 @@ unsigned test_set_v(int verbose, long lval, const char *expect)
 	}
 	failures += Check_ehbigint_dec(&a_bigint, expect);
 
-	err = ehbi_set(&b_bigint, &a_bigint);
+	ehbi_set(&b_bigint, &a_bigint, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -72,9 +73,10 @@ unsigned test_set_dec_str(int verbose, const char *val)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&bi, bi_bytes, 20);
+	err = 0;
+	ehbi_init(&bi, bi_bytes, 20, &err);
 
-	err = ehbi_set_decimal_string(&bi, val, eembed_strlen(val));
+	ehbi_set_decimal_string(&bi, val, eembed_strlen(val), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");

@@ -23,11 +23,12 @@ unsigned test_n_choose_k_v(int verbose, const char *nstr, const char *kstr,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&n, n_bytes, 20);
-	ehbi_init(&k, k_bytes, 20);
-	ehbi_init(&res, res_bytes, 20);
+	err = 0;
+	ehbi_init(&n, n_bytes, 20, &err);
+	ehbi_init(&k, k_bytes, 20, &err);
+	ehbi_init(&res, res_bytes, 20, &err);
 
-	err = ehbi_set_decimal_string(&n, nstr, eembed_strlen(nstr));
+	ehbi_set_decimal_string(&n, nstr, eembed_strlen(nstr), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -39,7 +40,7 @@ unsigned test_n_choose_k_v(int verbose, const char *nstr, const char *kstr,
 		return 1;
 	}
 
-	err = ehbi_set_decimal_string(&k, kstr, eembed_strlen(kstr));
+	ehbi_set_decimal_string(&k, kstr, eembed_strlen(kstr), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -51,7 +52,7 @@ unsigned test_n_choose_k_v(int verbose, const char *nstr, const char *kstr,
 		return 1;
 	}
 
-	err = ehbi_n_choose_k(&res, &n, &k);
+	ehbi_n_choose_k(&res, &n, &k, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);

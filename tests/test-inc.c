@@ -17,10 +17,11 @@ unsigned test_inc_hex(int verbose, const char *hexs1, const char *hexs2,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&bi1, bytes_buf1, 20);
-	ehbi_init(&bi2, bytes_buf2, 20);
+	err = 0;
+	ehbi_init(&bi1, bytes_buf1, 20, &err);
+	ehbi_init(&bi2, bytes_buf2, 20, &err);
 
-	err = ehbi_set_hex_string(&bi1, hexs1, eembed_strlen(hexs1));
+	ehbi_set_hex_string(&bi1, hexs1, eembed_strlen(hexs1), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -32,7 +33,7 @@ unsigned test_inc_hex(int verbose, const char *hexs1, const char *hexs2,
 		return 1;
 	}
 
-	err = ehbi_set_hex_string(&bi2, hexs2, eembed_strlen(hexs2));
+	ehbi_set_hex_string(&bi2, hexs2, eembed_strlen(hexs2), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -44,7 +45,7 @@ unsigned test_inc_hex(int verbose, const char *hexs1, const char *hexs2,
 		return 1;
 	}
 
-	err = ehbi_inc(&bi1, &bi2);
+	ehbi_inc(&bi1, &bi2, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -83,10 +84,11 @@ unsigned test_inc_v(int verbose, const char *v1, const char *v2,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&bi1, bytes_buf1, 20);
-	ehbi_init(&bi2, bytes_buf2, 20);
+	err = 0;
+	ehbi_init(&bi1, bytes_buf1, 20, &err);
+	ehbi_init(&bi2, bytes_buf2, 20, &err);
 
-	err = ehbi_set_decimal_string(&bi1, v1, eembed_strlen(v1));
+	ehbi_set_decimal_string(&bi1, v1, eembed_strlen(v1), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -97,7 +99,7 @@ unsigned test_inc_v(int verbose, const char *v1, const char *v2,
 		log->append_eol(log);
 		return 1;
 	}
-	err = ehbi_set_decimal_string(&bi2, v2, eembed_strlen(v2));
+	ehbi_set_decimal_string(&bi2, v2, eembed_strlen(v2), &err);
 
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
@@ -110,7 +112,7 @@ unsigned test_inc_v(int verbose, const char *v1, const char *v2,
 		return 1;
 	}
 
-	err += ehbi_inc(&bi1, &bi2);
+	ehbi_inc(&bi1, &bi2, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);

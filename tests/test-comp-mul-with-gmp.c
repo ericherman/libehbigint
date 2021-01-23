@@ -22,22 +22,23 @@ int test_comp_mul_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 	VERBOSE_ANNOUNCE(verbose);
 
 	failures = 0;
+	err = 0;
 
 	in_str = cmp_init_val == NULL ? "20151125" : cmp_init_val;
 
-	ehbi_init(&ein, in_bytes, BILEN);
-	ehbi_init(&emul, mul_bytes, BILEN);
-	ehbi_init(&eres, res_bytes, BILEN);
-	ehbi_init(&ediv, div_bytes, BILEN);
-	ehbi_init(&equot, quot_bytes, BILEN);
-	ehbi_init(&erem, rem_bytes, BILEN);
+	ehbi_init(&ein, in_bytes, BILEN, &err);
+	ehbi_init(&emul, mul_bytes, BILEN, &err);
+	ehbi_init(&eres, res_bytes, BILEN, &err);
+	ehbi_init(&ediv, div_bytes, BILEN, &err);
+	ehbi_init(&equot, quot_bytes, BILEN, &err);
+	ehbi_init(&erem, rem_bytes, BILEN, &err);
 
-	ehbi_set_l(&ein, 0);
-	ehbi_set_l(&emul, 252533);
-	ehbi_set_l(&eres, 0);
-	ehbi_set_l(&ediv, 33554393);
-	ehbi_set_l(&equot, 0);
-	ehbi_set_l(&erem, 0);
+	ehbi_set_l(&ein, 0, &err);
+	ehbi_set_l(&emul, 252533, &err);
+	ehbi_set_l(&eres, 0, &err);
+	ehbi_set_l(&ediv, 33554393, &err);
+	ehbi_set_l(&equot, 0, &err);
+	ehbi_set_l(&erem, 0, &err);
 
 	mpz_init(gin);
 	mpz_init(gmul);
@@ -58,14 +59,14 @@ int test_comp_mul_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 		}
 
 		mpz_set_str(gin, in_str, 10);
-		err =
-		    ehbi_set_decimal_string(&ein, in_str,
-					    eembed_strlen(in_str));
+		ehbi_set_decimal_string(&ein, in_str, eembed_strlen(in_str),
+					&err);
 		if (err) {
 			STDERR_FILE_LINE_FUNC(log);
 			log->append_s(log, "ehbi_set_decimal_string error: ");
 			log->append_l(log, err);
 			log->append_eol(log);
+			err = 0;
 		}
 
 		mpz_get_str(gbuf, 10, gin);
@@ -75,16 +76,18 @@ int test_comp_mul_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 			log->append_s(log, "ehbi_to_decimal_string error: ");
 			log->append_l(log, err);
 			log->append_eol(log);
+			err = 0;
 		}
 		failures += check_str_m(ebuf, gbuf, "from_decimal_string");
 
 		mpz_mul(gres, gin, gmul);
-		err = ehbi_mul(&eres, &ein, &emul);
+		ehbi_mul(&eres, &ein, &emul, &err);
 		if (err) {
 			STDERR_FILE_LINE_FUNC(log);
 			log->append_s(log, "ehbi_mul error: ");
 			log->append_l(log, err);
 			log->append_eol(log);
+			err = 0;
 		}
 
 		mpz_get_str(gbuf, 10, gres);
@@ -94,16 +97,18 @@ int test_comp_mul_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 			log->append_s(log, "ehbi_to_decimal_string error: ");
 			log->append_l(log, err);
 			log->append_eol(log);
+			err = 0;
 		}
 		failures += check_str_m(ebuf, gbuf, "ehbi_mul");
 
 		mpz_tdiv_qr(gquot, grem, gres, gdiv);
-		err = ehbi_div(&equot, &erem, &eres, &ediv);
+		ehbi_div(&equot, &erem, &eres, &ediv, &err);
 		if (err) {
 			STDERR_FILE_LINE_FUNC(log);
 			log->append_s(log, "ehbi_div error: ");
 			log->append_l(log, err);
 			log->append_eol(log);
+			err = 0;
 		}
 
 		mpz_get_str(gbuf, 10, gquot);
@@ -113,6 +118,7 @@ int test_comp_mul_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 			log->append_s(log, "ehbi_to_decimal_string error: ");
 			log->append_l(log, err);
 			log->append_eol(log);
+			err = 0;
 		}
 		failures += check_str_m(ebuf, gbuf, "ehbi_div (quot)");
 		mpz_get_str(gbuf, 10, grem);
@@ -122,6 +128,7 @@ int test_comp_mul_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 			log->append_s(log, "ehbi_to_decimal_string error: ");
 			log->append_l(log, err);
 			log->append_eol(log);
+			err = 0;
 		}
 		failures += check_str_m(ebuf, gbuf, "ehbi_div (rem)");
 

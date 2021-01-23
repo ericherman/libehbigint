@@ -18,10 +18,11 @@ unsigned test_bytes_shift_left_inner(int verbose, const char *val, size_t bytes,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&bi, bytes_buf1, 20);
-	ehbi_init(&expect_bi, bytes_buf2, 20);
+	err = 0;
+	ehbi_init(&bi, bytes_buf1, 20, &err);
+	ehbi_init(&expect_bi, bytes_buf2, 20, &err);
 
-	err = ehbi_set_hex_string(&bi, val, eembed_strlen(val));
+	ehbi_set_hex_string(&bi, val, eembed_strlen(val), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -33,8 +34,8 @@ unsigned test_bytes_shift_left_inner(int verbose, const char *val, size_t bytes,
 		return 1;
 	}
 
-	err =
-	    ehbi_set_hex_string(&expect_bi, expected, eembed_strlen(expected));
+	ehbi_set_hex_string(&expect_bi, expected, eembed_strlen(expected),
+			    &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -46,7 +47,7 @@ unsigned test_bytes_shift_left_inner(int verbose, const char *val, size_t bytes,
 		return 1;
 	}
 
-	err = ehbi_shift_left(&bi, EEMBED_CHAR_BIT * bytes);
+	ehbi_shift_left(&bi, EEMBED_CHAR_BIT * bytes, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);

@@ -25,11 +25,12 @@ unsigned test_dec_corner_case(int verbose)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&bi1, bytes_buf1, BILEN);
-	ehbi_init(&bi2, bytes_buf2, BILEN);
-	ehbi_init(&expect_bi, bytes_buf3, BILEN);
+	err = 0;
+	ehbi_init(&bi1, bytes_buf1, BILEN, &err);
+	ehbi_init(&bi2, bytes_buf2, BILEN, &err);
+	ehbi_init(&expect_bi, bytes_buf3, BILEN, &err);
 
-	err = ehbi_set_decimal_string(&bi1, str_1, eembed_strlen(str_1));
+	ehbi_set_decimal_string(&bi1, str_1, eembed_strlen(str_1), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -41,7 +42,7 @@ unsigned test_dec_corner_case(int verbose)
 		return 1;
 	}
 
-	err = ehbi_set_decimal_string(&bi2, str_2, eembed_strlen(str_2));
+	ehbi_set_decimal_string(&bi2, str_2, eembed_strlen(str_2), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -53,7 +54,7 @@ unsigned test_dec_corner_case(int verbose)
 		return 1;
 	}
 
-	err = ehbi_set_decimal_string(&expect_bi, str_3, eembed_strlen(str_3));
+	ehbi_set_decimal_string(&expect_bi, str_3, eembed_strlen(str_3), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -65,7 +66,7 @@ unsigned test_dec_corner_case(int verbose)
 		return 1;
 	}
 
-	err = ehbi_dec(&bi1, &bi2);
+	ehbi_dec(&bi1, &bi2, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);

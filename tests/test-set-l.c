@@ -17,9 +17,10 @@ unsigned test_set_l_v(int verbose, long v1)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&bi, bytes, 4);
+	err = 0;
+	ehbi_init(&bi, bytes, 4, &err);
 
-	err = ehbi_set_l(&bi, 0);
+	ehbi_set_l(&bi, 0, &err);
 	failures += check_int_m(err, 0, "ehbi_set_l(0)");
 	failures += Check_ehbigint_hex(&bi, "0x00");
 	failures += Check_ehbigint_dec(&bi, "0");
@@ -30,7 +31,7 @@ unsigned test_set_l_v(int verbose, long v1)
 	eembed_strcat(buf, "ehbi_set_l(");
 	eembed_strcat(buf, expect);
 	eembed_strcat(buf, ")");
-	err = ehbi_set_l(&bi, v1);
+	ehbi_set_l(&bi, v1, &err);
 	failures += check_int_m(err, 0, buf);
 
 	failures += Check_ehbigint_dec(&bi, expect);

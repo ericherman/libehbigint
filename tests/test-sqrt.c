@@ -35,11 +35,12 @@ unsigned test_sqrt_v(int verbose, const char *sval, const char *ssqrt,
 		ehbi_log_set(log);
 	}
 
-	ehbi_init(&val, bytes_val, 50);
-	ehbi_init(&sqrt, bytes_sqrt, 50);
-	ehbi_init(&remainder, bytes_remainder, 50);
+	err = 0;
+	ehbi_init(&val, bytes_val, 50, &err);
+	ehbi_init(&sqrt, bytes_sqrt, 50, &err);
+	ehbi_init(&remainder, bytes_remainder, 50, &err);
 
-	err = ehbi_set_decimal_string(&val, sval, eembed_strlen(sval));
+	ehbi_set_decimal_string(&val, sval, eembed_strlen(sval), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -59,7 +60,7 @@ unsigned test_sqrt_v(int verbose, const char *sval, const char *ssqrt,
 		return 1;
 	}
 
-	err = ehbi_sqrt(&sqrt, &remainder, &val);
+	ehbi_sqrt(&sqrt, &remainder, &val, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -108,13 +109,14 @@ unsigned test_sqrt_negative(int verbose)
 		ehbi_log_set(log);
 	}
 
-	ehbi_init(&val, bytes_val, 10);
-	ehbi_init(&sqrt, bytes_sqrt, 10);
-	ehbi_init(&remainder, bytes_remainder, 10);
+	err = 0;
+	ehbi_init(&val, bytes_val, 10, &err);
+	ehbi_init(&sqrt, bytes_sqrt, 10, &err);
+	ehbi_init(&remainder, bytes_remainder, 10, &err);
 
-	ehbi_set_l(&val, -100);
+	ehbi_set_l(&val, -100, &err);
 
-	err = ehbi_sqrt(&sqrt, &remainder, &val);
+	ehbi_sqrt(&sqrt, &remainder, &val, &err);
 	if (!err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(orig);

@@ -25,14 +25,14 @@ unsigned test_div_v(int verbose, const char *snumerator,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&numerator, bytes_numerator, 10);
-	ehbi_init(&denominator, bytes_denominator, 10);
-	ehbi_init(&quotient, bytes_quotient, 10);
-	ehbi_init(&remainder, bytes_remainder, 10);
+	err = 0;
+	ehbi_init(&numerator, bytes_numerator, 10, &err);
+	ehbi_init(&denominator, bytes_denominator, 10, &err);
+	ehbi_init(&quotient, bytes_quotient, 10, &err);
+	ehbi_init(&remainder, bytes_remainder, 10, &err);
 
-	err =
-	    ehbi_set_decimal_string(&numerator, snumerator,
-				    eembed_strlen(snumerator));
+	ehbi_set_decimal_string(&numerator, snumerator,
+				eembed_strlen(snumerator), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -53,9 +53,8 @@ unsigned test_div_v(int verbose, const char *snumerator,
 		return failures;
 	}
 
-	err =
-	    ehbi_set_decimal_string(&denominator, sdenominator,
-				    eembed_strlen(sdenominator));
+	ehbi_set_decimal_string(&denominator, sdenominator,
+				eembed_strlen(sdenominator), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -76,7 +75,7 @@ unsigned test_div_v(int verbose, const char *snumerator,
 		return failures;
 	}
 
-	err = ehbi_div(&quotient, &remainder, &numerator, &denominator);
+	ehbi_div(&quotient, &remainder, &numerator, &denominator, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -111,13 +110,13 @@ unsigned test_div_l(int verbose, const char *snumerator, long ldenominator,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&numerator, bytes_numerator, 10);
-	ehbi_init(&quotient, bytes_quotient, 10);
-	ehbi_init(&remainder, bytes_remainder, 10);
+	err = 0;
+	ehbi_init(&numerator, bytes_numerator, 10, &err);
+	ehbi_init(&quotient, bytes_quotient, 10, &err);
+	ehbi_init(&remainder, bytes_remainder, 10, &err);
 
-	err =
-	    ehbi_set_decimal_string(&numerator, snumerator,
-				    eembed_strlen(snumerator));
+	ehbi_set_decimal_string(&numerator, snumerator,
+				eembed_strlen(snumerator), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -138,7 +137,7 @@ unsigned test_div_l(int verbose, const char *snumerator, long ldenominator,
 		return failures;
 	}
 
-	err = ehbi_div_l(&quotient, &remainder, &numerator, ldenominator);
+	ehbi_div_l(&quotient, &remainder, &numerator, ldenominator, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -187,15 +186,16 @@ unsigned test_div_by_zero(int verbose)
 		ehbi_log_set(log);
 	}
 
-	ehbi_init(&numerator, bytes_numerator, 10);
-	ehbi_init(&denominator, bytes_denominator, 10);
-	ehbi_init(&quotient, bytes_quotient, 10);
-	ehbi_init(&remainder, bytes_remainder, 10);
+	err = 0;
+	ehbi_init(&numerator, bytes_numerator, 10, &err);
+	ehbi_init(&denominator, bytes_denominator, 10, &err);
+	ehbi_init(&quotient, bytes_quotient, 10, &err);
+	ehbi_init(&remainder, bytes_remainder, 10, &err);
 
-	ehbi_set_l(&numerator, 10);
-	ehbi_set_l(&denominator, 0);
+	ehbi_set_l(&numerator, 10, &err);
+	ehbi_set_l(&denominator, 0, &err);
 
-	err = ehbi_div(&quotient, &remainder, &numerator, &denominator);
+	ehbi_div(&quotient, &remainder, &numerator, &denominator, &err);
 	if (!err) {
 		++failures;
 		Test_log_error("no error from ehbi_div by zero?\n");

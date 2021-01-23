@@ -16,9 +16,10 @@ unsigned test_inc_lv(int verbose, const char *dec_str1, long v2,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&bi1, bytes_buf1, 20);
+	err = 0;
+	ehbi_init(&bi1, bytes_buf1, 20, &err);
 
-	err = ehbi_set_decimal_string(&bi1, dec_str1, eembed_strlen(dec_str1));
+	ehbi_set_decimal_string(&bi1, dec_str1, eembed_strlen(dec_str1), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -30,7 +31,7 @@ unsigned test_inc_lv(int verbose, const char *dec_str1, long v2,
 		return 1;
 	}
 
-	err = ehbi_inc_l(&bi1, v2);
+	ehbi_inc_l(&bi1, v2, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);

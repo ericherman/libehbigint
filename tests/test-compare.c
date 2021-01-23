@@ -22,11 +22,12 @@ unsigned test_compare_chain(int verbose)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&bi1, bytes_buf1, 20);
-	ehbi_init(&bi2, bytes_buf2, 10);
-	ehbi_init(&bi3, bytes_buf3, 20);
+	err = 0;
+	ehbi_init(&bi1, bytes_buf1, 20, &err);
+	ehbi_init(&bi2, bytes_buf2, 10, &err);
+	ehbi_init(&bi3, bytes_buf3, 20, &err);
 
-	err = ehbi_set_hex_string(&bi1, str_1, eembed_strlen(str_1));
+	ehbi_set_hex_string(&bi1, str_1, eembed_strlen(str_1), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -38,7 +39,7 @@ unsigned test_compare_chain(int verbose)
 		return 1;
 	}
 
-	err = ehbi_set_hex_string(&bi2, str_2, eembed_strlen(str_2));
+	ehbi_set_hex_string(&bi2, str_2, eembed_strlen(str_2), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -50,7 +51,7 @@ unsigned test_compare_chain(int verbose)
 		return 1;
 	}
 
-	err = ehbi_set_hex_string(&bi3, str_3, eembed_strlen(str_3));
+	ehbi_set_hex_string(&bi3, str_3, eembed_strlen(str_3), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -266,11 +267,12 @@ unsigned test_greater_than(int verbose, const char *a, const char *b,
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
+	err = 0;
 
-	ehbi_init(&bi1, bytes_buf1, 20);
-	ehbi_init(&bi2, bytes_buf2, 10);
+	ehbi_init(&bi1, bytes_buf1, 20, &err);
+	ehbi_init(&bi2, bytes_buf2, 10, &err);
 
-	err = ehbi_set_decimal_string(&bi1, a, eembed_strlen(a));
+	ehbi_set_decimal_string(&bi1, a, eembed_strlen(a), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -284,7 +286,7 @@ unsigned test_greater_than(int verbose, const char *a, const char *b,
 	ehbi_to_decimal_string(&bi1, buf1, 50, &err);
 	failures += check_str(buf1, a);
 
-	err = ehbi_set_decimal_string(&bi2, b, eembed_strlen(b));
+	ehbi_set_decimal_string(&bi2, b, eembed_strlen(b), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");

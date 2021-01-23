@@ -1,3 +1,44 @@
+2021-01-23  Eric Herman <eric@freesa.org>
+
+	Towards 2.0 API Changes
+
+	Rather than some functions returning an error code and others
+	passing in an error pointer, now all API functions take an
+	optional error_code address to write to if there is an error.
+
+	* src/ehbigint.h
+	* src/ehbigint.c
+	* tests/test-add.c
+	* tests/test-bytes-shift-left.c
+	* tests/test-bytes-shift-right.c
+	* tests/test-comp-exp-mod-with-gmp.c
+	* tests/test-comp-mul-with-gmp.c
+	* tests/test-compare.c
+	* tests/test-compare2.c
+	* tests/test-compare3.c
+	* tests/test-dec-corner-case.c
+	* tests/test-dec.c
+	* tests/test-div.c
+	* tests/test-equals.c
+	* tests/test-exp-mod.c
+	* tests/test-exp.c
+	* tests/test-from-binstr-to-binstr-round-trip.c
+	* tests/test-from-decimal-to-decimal-round-trip.c
+	* tests/test-from-hex-to-hex-round-trip.c
+	* tests/test-inc-l.c
+	* tests/test-inc.c
+	* tests/test-is-probably-prime.c
+	* tests/test-mul.c
+	* tests/test-n-choose-k.c
+	* tests/test-scenario-mul-mod.c
+	* tests/test-set-l.c
+	* tests/test-set.c
+	* tests/test-shift-right.c
+	* tests/test-sqrt.c
+	* tests/test-subtract.c
+	* tests/test-to-string.c
+
+
 2018-12-24  Eric Herman <eric@freesa.org>
 
 	change:

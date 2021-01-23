@@ -18,11 +18,12 @@ unsigned test_subtract_v(int verbose, const char *str_1, const char *str_2,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&bi1, bytes_buf1, 20);
-	ehbi_init(&bi2, bytes_buf2, 20);
-	ehbi_init(&bi3, bytes_buf3, 20);
+	err = 0;
+	ehbi_init(&bi1, bytes_buf1, 20, &err);
+	ehbi_init(&bi2, bytes_buf2, 20, &err);
+	ehbi_init(&bi3, bytes_buf3, 20, &err);
 
-	err = ehbi_set_decimal_string(&bi1, str_1, eembed_strlen(str_1));
+	ehbi_set_decimal_string(&bi1, str_1, eembed_strlen(str_1), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -34,7 +35,7 @@ unsigned test_subtract_v(int verbose, const char *str_1, const char *str_2,
 		return 1;
 	}
 
-	err = ehbi_set_decimal_string(&bi2, str_2, eembed_strlen(str_2));
+	ehbi_set_decimal_string(&bi2, str_2, eembed_strlen(str_2), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -46,7 +47,7 @@ unsigned test_subtract_v(int verbose, const char *str_1, const char *str_2,
 		return 1;
 	}
 
-	err = ehbi_subtract(&bi3, &bi1, &bi2);
+	ehbi_subtract(&bi3, &bi1, &bi2, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -91,11 +92,12 @@ unsigned test_subtract_big(int verbose)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&bi1, bytes_buf1, 20);
-	ehbi_init(&bi2, bytes_buf2, 20);
-	ehbi_init(&bi3, bytes_buf3, 14);
+	err = 0;
+	ehbi_init(&bi1, bytes_buf1, 20, &err);
+	ehbi_init(&bi2, bytes_buf2, 20, &err);
+	ehbi_init(&bi3, bytes_buf3, 14, &err);
 
-	err = ehbi_set_hex_string(&bi1, str_1, eembed_strlen(str_1));
+	ehbi_set_hex_string(&bi1, str_1, eembed_strlen(str_1), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -107,7 +109,7 @@ unsigned test_subtract_big(int verbose)
 		return 1;
 	}
 
-	err = ehbi_set_hex_string(&bi2, str_2, eembed_strlen(str_2));
+	ehbi_set_hex_string(&bi2, str_2, eembed_strlen(str_2), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -119,7 +121,7 @@ unsigned test_subtract_big(int verbose)
 		return 1;
 	}
 
-	err = ehbi_subtract(&bi3, &bi1, &bi2);
+	ehbi_subtract(&bi3, &bi1, &bi2, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -152,10 +154,11 @@ unsigned test_subtract_l(int verbose, const char *str_1, long l,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&bi1, bytes_buf1, 20);
-	ehbi_init(&bi3, bytes_buf3, 20);
+	err = 0;
+	ehbi_init(&bi1, bytes_buf1, 20, &err);
+	ehbi_init(&bi3, bytes_buf3, 20, &err);
 
-	err = ehbi_set_decimal_string(&bi1, str_1, eembed_strlen(str_1));
+	ehbi_set_decimal_string(&bi1, str_1, eembed_strlen(str_1), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -167,7 +170,7 @@ unsigned test_subtract_l(int verbose, const char *str_1, long l,
 		return 1;
 	}
 
-	err = ehbi_subtract_l(&bi3, &bi1, l);
+	ehbi_subtract_l(&bi3, &bi1, l, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);

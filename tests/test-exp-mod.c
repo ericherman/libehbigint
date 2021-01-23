@@ -24,12 +24,13 @@ unsigned test_exp_mod_v(int verbose, const char *sbase, const char *sexponent,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&base, bytes_base, 10);
-	ehbi_init(&exponent, bytes_exponent, 10);
-	ehbi_init(&modulus, bytes_modulus, 10);
-	ehbi_init(&result, bytes_result, 10);
+	err = 0;
+	ehbi_init(&base, bytes_base, 10, &err);
+	ehbi_init(&exponent, bytes_exponent, 10, &err);
+	ehbi_init(&modulus, bytes_modulus, 10, &err);
+	ehbi_init(&result, bytes_result, 10, &err);
 
-	err = ehbi_set_decimal_string(&base, sbase, eembed_strlen(sbase));
+	ehbi_set_decimal_string(&base, sbase, eembed_strlen(sbase), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -51,9 +52,8 @@ unsigned test_exp_mod_v(int verbose, const char *sbase, const char *sexponent,
 		return failures;
 	}
 
-	err =
-	    ehbi_set_decimal_string(&exponent, sexponent,
-				    eembed_strlen(sexponent));
+	ehbi_set_decimal_string(&exponent, sexponent, eembed_strlen(sexponent),
+				&err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -75,9 +75,8 @@ unsigned test_exp_mod_v(int verbose, const char *sbase, const char *sexponent,
 		return failures;
 	}
 
-	err =
-	    ehbi_set_decimal_string(&modulus, smodulus,
-				    eembed_strlen(smodulus));
+	ehbi_set_decimal_string(&modulus, smodulus, eembed_strlen(smodulus),
+				&err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -99,7 +98,7 @@ unsigned test_exp_mod_v(int verbose, const char *sbase, const char *sexponent,
 		return failures;
 	}
 
-	err = ehbi_exp_mod(&result, &base, &exponent, &modulus);
+	ehbi_exp_mod(&result, &base, &exponent, &modulus, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -146,16 +145,25 @@ unsigned test_exp_mod_by_zero(int verbose)
 		ehbi_log_set(log);
 	}
 
-	ehbi_init(&base, bytes_base, 10);
-	ehbi_init(&exponent, bytes_exponent, 10);
-	ehbi_init(&modulus, bytes_modulus, 10);
-	ehbi_init(&result, bytes_result, 10);
+	err = 0;
+	ehbi_init(&base, bytes_base, 10, &err);
+	ehbi_init(&exponent, bytes_exponent, 10, &err);
+	ehbi_init(&modulus, bytes_modulus, 10, &err);
+	ehbi_init(&result, bytes_result, 10, &err);
 
-	ehbi_set_l(&base, 10);
-	ehbi_set_l(&exponent, 2);
-	ehbi_set_l(&modulus, 0);
+	ehbi_set_l(&base, 10, &err);
+	ehbi_set_l(&exponent, 2, &err);
+	ehbi_set_l(&modulus, 0, &err);
 
-	err = ehbi_exp_mod(&result, &base, &exponent, &modulus);
+	if (err) {
+		STDERR_FILE_LINE_FUNC(orig);
+		orig->append_s(orig, "init error?");
+		orig->append_eol(orig);
+		return 1;
+	}
+
+	err = 0;
+	ehbi_exp_mod(&result, &base, &exponent, &modulus, &err);
 	if (!err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(orig);

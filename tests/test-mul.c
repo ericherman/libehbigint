@@ -24,11 +24,12 @@ unsigned test_mul_v(int verbose, long al, long bl, const char *expected)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&a_bigint, a_bytes, 16);
-	ehbi_init(&b_bigint, b_bytes, 16);
-	ehbi_init(&result, result_bytes, 16);
+	err = 0;
+	ehbi_init(&a_bigint, a_bytes, 16, &err);
+	ehbi_init(&b_bigint, b_bytes, 16, &err);
+	ehbi_init(&result, result_bytes, 16, &err);
 
-	err = ehbi_set_l(&a_bigint, al);
+	ehbi_set_l(&a_bigint, al, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -48,7 +49,7 @@ unsigned test_mul_v(int verbose, long al, long bl, const char *expected)
 		return failures;
 	}
 
-	err = ehbi_set_l(&b_bigint, bl);
+	ehbi_set_l(&b_bigint, bl, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -56,6 +57,7 @@ unsigned test_mul_v(int verbose, long al, long bl, const char *expected)
 		log->append_l(log, err);
 		log->append_s(log, " from ehbi_set_l");
 		log->append_eol(log);
+		err = 0;
 	}
 	eembed_long_to_str(buf, BUFLEN, bl);
 	failures += Check_ehbigint_dec(&b_bigint, buf);
@@ -67,7 +69,7 @@ unsigned test_mul_v(int verbose, long al, long bl, const char *expected)
 		log->append_eol(log);
 	}
 
-	err = ehbi_mul(&result, &a_bigint, &b_bigint);
+	ehbi_mul(&result, &a_bigint, &b_bigint, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);

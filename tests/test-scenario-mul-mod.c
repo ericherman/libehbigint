@@ -17,15 +17,16 @@ unsigned test_scenario_mul_mod(int verbose)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&bx, xb, 16);
-	ehbi_init(&by, yb, 16);
-	ehbi_init(&bz, zb, 16);
-	ehbi_init(&bresult, resb, 16);
-	ehbi_init(&bquot, quotb, 16);
-	ehbi_init(&brem, remb, 16);
+	err = 0;
+	ehbi_init(&bx, xb, 16, &err);
+	ehbi_init(&by, yb, 16, &err);
+	ehbi_init(&bz, zb, 16, &err);
+	ehbi_init(&bresult, resb, 16, &err);
+	ehbi_init(&bquot, quotb, 16, &err);
+	ehbi_init(&brem, remb, 16, &err);
 
 	x = 20151125;
-	err = ehbi_set_l(&bx, x);
+	ehbi_set_l(&bx, x, &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -38,7 +39,7 @@ unsigned test_scenario_mul_mod(int verbose)
 	}
 
 	y = 252533;
-	err = ehbi_set_l(&by, y);
+	ehbi_set_l(&by, y, &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -51,7 +52,7 @@ unsigned test_scenario_mul_mod(int verbose)
 	}
 
 	z = 33554393;
-	err = ehbi_set_l(&bz, z);
+	ehbi_set_l(&bz, z, &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -65,7 +66,7 @@ unsigned test_scenario_mul_mod(int verbose)
 
 	/* 20151125 * 252533 == 5088824049625 */
 	expect_mul = "5088824049625";
-	err = ehbi_mul(&bresult, &bx, &by);
+	ehbi_mul(&bresult, &bx, &by, &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -85,7 +86,7 @@ unsigned test_scenario_mul_mod(int verbose)
 	   r = lldiv(5088824049625, 33554393);
 	   r.quot: 151658, r.rem: 31916031
 	 */
-	err = ehbi_div(&bquot, &brem, &bresult, &bz);
+	ehbi_div(&bquot, &brem, &bresult, &bz, &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");

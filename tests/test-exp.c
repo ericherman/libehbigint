@@ -22,11 +22,12 @@ unsigned test_exp_v(int verbose, const char *sbase, const char *sexponent,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&base, bytes_base, 20);
-	ehbi_init(&exponent, bytes_exponent, 20);
-	ehbi_init(&result, bytes_result, 30);
+	err = 0;
+	ehbi_init(&base, bytes_base, 20, &err);
+	ehbi_init(&exponent, bytes_exponent, 20, &err);
+	ehbi_init(&result, bytes_result, 30, &err);
 
-	err = ehbi_set_decimal_string(&base, sbase, eembed_strlen(sbase));
+	ehbi_set_decimal_string(&base, sbase, eembed_strlen(sbase), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -48,9 +49,8 @@ unsigned test_exp_v(int verbose, const char *sbase, const char *sexponent,
 		return failures;
 	}
 
-	err =
-	    ehbi_set_decimal_string(&exponent, sexponent,
-				    eembed_strlen(sexponent));
+	ehbi_set_decimal_string(&exponent, sexponent, eembed_strlen(sexponent),
+				&err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -72,7 +72,7 @@ unsigned test_exp_v(int verbose, const char *sbase, const char *sexponent,
 		return failures;
 	}
 
-	err = ehbi_exp(&result, &base, &exponent);
+	ehbi_exp(&result, &base, &exponent, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);

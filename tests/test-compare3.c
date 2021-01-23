@@ -26,11 +26,13 @@ unsigned test_compare3_ab(int verbose, long a, long b)
 	}
 
 	failures = 0;
+	err = 0;
 
-	ehbi_init(&bi_a, bytes_buf1, 1 + sizeof(long));
-	ehbi_init(&bi_b, bytes_buf2, sizeof(long));
+	ehbi_init(&bi_a, bytes_buf1, 1 + sizeof(long), &err);
+	ehbi_init(&bi_b, bytes_buf2, sizeof(long), &err);
 
-	err = ehbi_set_l(&bi_a, a);
+	err = 0;
+	ehbi_set_l(&bi_a, a, &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -42,7 +44,7 @@ unsigned test_compare3_ab(int verbose, long a, long b)
 		return 1;
 	}
 
-	err = ehbi_set_l(&bi_b, b);
+	ehbi_set_l(&bi_b, b, &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");

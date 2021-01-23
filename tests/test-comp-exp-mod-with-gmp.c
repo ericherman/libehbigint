@@ -22,17 +22,18 @@ int test_comp_exp_with_gmp_bem(int verbose, unsigned long base,
 	VERBOSE_ANNOUNCE(verbose);
 
 	failures = 0;
-	ehbi_init(&eres, res_bytes, BILEN);
-	ehbi_init(&ebase, base_bytes, BILEN);
-	ehbi_init(&emod, mod_bytes, BILEN);
-	ehbi_init(&eexp, exp_bytes, BILEN);
+	err = 0;
+	ehbi_init(&eres, res_bytes, BILEN, &err);
+	ehbi_init(&ebase, base_bytes, BILEN, &err);
+	ehbi_init(&emod, mod_bytes, BILEN, &err);
+	ehbi_init(&eexp, exp_bytes, BILEN, &err);
 
-	ehbi_set_l(&ebase, (long)base);
-	ehbi_set_l(&eexp, (long)exp);
-	ehbi_set_l(&emod, (long)mod);
-	ehbi_set_l(&eres, 0);
+	ehbi_set_l(&ebase, (long)base, &err);
+	ehbi_set_l(&eexp, (long)exp, &err);
+	ehbi_set_l(&emod, (long)mod, &err);
+	ehbi_set_l(&eres, 0, &err);
 
-	ehbi_exp_mod(&eres, &ebase, &eexp, &emod);
+	ehbi_exp_mod(&eres, &ebase, &eexp, &emod, &err);
 	ehbi_to_decimal_string(&eres, ebuf, BUFLEN, &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);

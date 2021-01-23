@@ -19,12 +19,11 @@ unsigned test_from_hex_to_hex_round_trip(int verbose)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&a_bigint, bytes_buf, 20);
+	err = 0;
+	ehbi_init(&a_bigint, bytes_buf, 20, &err);
 
-	err =
-	    ehbi_set_hex_string(&a_bigint, expected_str,
-				eembed_strlen(expected_str));
-
+	ehbi_set_hex_string(&a_bigint, expected_str,
+			    eembed_strlen(expected_str), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");

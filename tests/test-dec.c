@@ -17,10 +17,11 @@ unsigned test_dec_hex(int verbose, const char *str_1, const char *str_2,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&bi1, bytes_buf1, BILEN);
-	ehbi_init(&bi2, bytes_buf2, BILEN);
+	err = 0;
+	ehbi_init(&bi1, bytes_buf1, BILEN, &err);
+	ehbi_init(&bi2, bytes_buf2, BILEN, &err);
 
-	err = ehbi_set_hex_string(&bi1, str_1, eembed_strlen(str_1));
+	ehbi_set_hex_string(&bi1, str_1, eembed_strlen(str_1), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -32,7 +33,7 @@ unsigned test_dec_hex(int verbose, const char *str_1, const char *str_2,
 		return 1;
 	}
 
-	err = ehbi_set_hex_string(&bi2, str_2, eembed_strlen(str_2));
+	ehbi_set_hex_string(&bi2, str_2, eembed_strlen(str_2), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -44,7 +45,7 @@ unsigned test_dec_hex(int verbose, const char *str_1, const char *str_2,
 		return 1;
 	}
 
-	err = ehbi_dec(&bi1, &bi2);
+	ehbi_dec(&bi1, &bi2, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -83,10 +84,11 @@ unsigned test_dec_inner(int verbose, const char *str_1, const char *str_2,
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&bi1, bytes_buf1, BILEN);
-	ehbi_init(&bi2, bytes_buf2, BILEN);
+	err = 0;
+	ehbi_init(&bi1, bytes_buf1, BILEN, &err);
+	ehbi_init(&bi2, bytes_buf2, BILEN, &err);
 
-	err = ehbi_set_decimal_string(&bi1, str_1, eembed_strlen(str_1));
+	ehbi_set_decimal_string(&bi1, str_1, eembed_strlen(str_1), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -98,7 +100,7 @@ unsigned test_dec_inner(int verbose, const char *str_1, const char *str_2,
 		return 1;
 	}
 
-	err = ehbi_set_decimal_string(&bi2, str_2, eembed_strlen(str_2));
+	ehbi_set_decimal_string(&bi2, str_2, eembed_strlen(str_2), &err);
 	if (err) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -110,7 +112,7 @@ unsigned test_dec_inner(int verbose, const char *str_1, const char *str_2,
 		return 1;
 	}
 
-	err = ehbi_dec(&bi1, &bi2);
+	ehbi_dec(&bi1, &bi2, &err);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);

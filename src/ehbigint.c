@@ -14,226 +14,13 @@
 #include <stdlib.h>		/* free */
 #endif
 
-static struct eembed_log *global_ehbi_log = NULL;
-
-struct eembed_log *ehbi_log_get(void)
-{
-	struct eembed_log *log = global_ehbi_log;
-	return log ? log : eembed_err_log;
-}
-
-struct eembed_log *ehbi_log_set(struct eembed_log *log)
-{
-	struct eembed_log *previous = ehbi_log_get();
-
-	global_ehbi_log = log;
-
-	return previous;
-}
-
-void ehbi_log_backtrace(struct eembed_log *log)
-{
-#if _POSIX_SOURCE
-	const size_t buffer_size = 100;
-	void *buffer[100];
-	char **strings = NULL;
-	int nptrs = 0;
-	int i = 0;
+#ifndef EHBI_SKIP_STRUCT_NULL_CHECK
+#define EHBI_SKIP_STRUCT_NULL_CHECK 0
 #endif
 
-	if (!log) {
-		return;
-	}
+#define Ehbi_paranoid (EHBI_SKIP_STRUCT_NULL_CHECK ? 0 : 1)
 
-#if _POSIX_SOURCE
-	nptrs = backtrace(buffer, buffer_size);
-	log->append_s(log, "backtrace() returned ");
-	log->append_l(log, nptrs);
-	log->append_s(log, " addresses");
-	log->append_eol(log);
-
-	strings = backtrace_symbols(buffer, nptrs);
-	if (strings != NULL) {
-		for (i = 0; i < nptrs; ++i) {
-			log->append_s(log, "\t");
-			log->append_s(log, strings[i]);
-			log->append_eol(log);
-		}
-		free(strings);
-	}
-#else
-	log->append_s(log, "(backtrace unavailable)");
-	log->append_eol(log);
-#endif
-}
-
-static void ehbi_log_file_line(const char *file, unsigned long line,
-			       struct eembed_log *log)
-{
-	if (!log) {
-		return;
-	}
-	log->append_s(log, file);
-	log->append_s(log, ":");
-	log->append_ul(log, line);
-	log->append_s(log, ": ");
-}
-
-#define Ehbi_log_file_line(log) \
-	ehbi_log_file_line(__FILE__, __LINE__, log)
-
-static void ehbi_log_error0(const char *file, unsigned long line,
-			    const char *msg)
-{
-	struct eembed_log *log = ehbi_log_get();
-	if (!log) {
-		return;
-	}
-	ehbi_log_file_line(file, line, log);
-	log->append_s(log, msg);
-	log->append_eol(log);
-}
-
-#define Ehbi_log_error0(msg) \
-	ehbi_log_error0(__FILE__, __LINE__, msg)
-
-static void ehbi_log_error_s_c_s(const char *file, unsigned long line,
-				 const char *pre, char c, const char *post)
-{
-	struct eembed_log *log = ehbi_log_get();
-	if (!log) {
-		return;
-	}
-	ehbi_log_file_line(file, line, log);
-	log->append_s(log, pre);
-	log->append_c(log, c);
-	log->append_s(log, post);
-	log->append_eol(log);
-}
-
-#define Ehbi_log_error_s_c_s(pre, c, post) \
-	ehbi_log_error_s_c_s(__FILE__, __LINE__, pre, c, post)
-
-static void ehbi_log_error_s_s_s(const char *file, unsigned long line,
-				 const char *pre, const char *mid,
-				 const char *post)
-{
-	struct eembed_log *log = ehbi_log_get();
-	if (!log) {
-		return;
-	}
-
-	ehbi_log_file_line(file, line, log);
-	log->append_s(log, pre);
-	log->append_s(log, mid);
-	log->append_s(log, post);
-	log->append_eol(log);
-}
-
-#define Ehbi_log_error_s_s_s(pre, mid, post) \
-	ehbi_log_error_s_s_s(__FILE__, __LINE__, pre, mid, post)
-
-static void ehbi_log_error_s_ul_s(const char *file, unsigned long line,
-				  const char *pre, unsigned long ul,
-				  const char *post)
-{
-	struct eembed_log *log = ehbi_log_get();
-	if (!log) {
-		return;
-	}
-	ehbi_log_file_line(file, line, log);
-	log->append_s(log, pre);
-	log->append_ul(log, ul);
-	log->append_s(log, post);
-	log->append_eol(log);
-}
-
-#define Ehbi_log_error_s_ul_s(pre, ul, post) \
-	ehbi_log_error_s_ul_s(__FILE__, __LINE__, pre, ul, post)
-
-static void ehbi_log_error_s_l_s(const char *file, unsigned long line,
-				 const char *pre, long l, const char *post)
-{
-	struct eembed_log *log = ehbi_log_get();
-	if (!log) {
-		return;
-	}
-	ehbi_log_file_line(file, line, log);
-	log->append_s(log, pre);
-	log->append_l(log, l);
-	log->append_s(log, post);
-	log->append_eol(log);
-}
-
-#define Ehbi_log_error_s_l_s(pre, l, post) \
-	ehbi_log_error_s_l_s(__FILE__, __LINE__, pre, l, post)
-
-static void ehbi_log_error_s_c_s_c_s(const char *file, unsigned long line,
-				     const char *pre, char c1, const char *mid,
-				     char c2, const char *post)
-{
-	struct eembed_log *log = ehbi_log_get();
-	if (!log) {
-		return;
-	}
-	ehbi_log_file_line(file, line, log);
-	log->append_s(log, pre);
-	log->append_c(log, c1);
-	log->append_s(log, mid);
-	log->append_c(log, c2);
-	log->append_s(log, post);
-	log->append_eol(log);
-}
-
-#define Ehbi_log_error_s_c_s_c_s(pre, c1, mid, c2, post) \
-	ehbi_log_error_s_c_s_c_s(__FILE__, __LINE__, pre, c1, mid, c2, post)
-
-static void ehbi_log_error_s_ul_s_ul_s(const char *file, unsigned long line,
-				       const char *pre, unsigned long ul1,
-				       const char *mid, unsigned long ul2,
-				       const char *post)
-{
-	struct eembed_log *log = ehbi_log_get();
-	if (!log) {
-		return;
-	}
-	ehbi_log_file_line(file, line, log);
-	log->append_s(log, pre);
-	log->append_ul(log, ul1);
-	log->append_s(log, mid);
-	log->append_ul(log, ul2);
-	log->append_s(log, post);
-	log->append_eol(log);
-}
-
-#define Ehbi_log_error_s_ul_s_ul_s(pre, ul1, mid, ul2, post) \
-	ehbi_log_error_s_ul_s_ul_s(__FILE__, __LINE__, pre, ul1, mid, ul2, post)
-
-static void ehbi_set_error(int *err, int code)
-{
-	if (err) {
-		*err = code;
-	}
-}
-
-#if EHBI_SKIP_STRUCT_NULL_CHECK
-#define Ehbi_struct_is_not_null(bi, err, action) ((void)err)
-#else
-#define Ehbi_struct_is_not_null(bi, err, action) \
-	do { \
-		if (bi == NULL) { \
-			Ehbi_log_error0("Null struct"); \
-			ehbi_set_error(err, EHBI_NULL_STRUCT); \
-			action; \
-		} \
-		if (bi->bytes == NULL) { \
-			Ehbi_log_error0("Null bytes[]"); \
-			ehbi_set_error(err, EHBI_NULL_BYTES); \
-			action; \
-		} \
-	} while(0)
-
-#endif /* EHBI_SKIP_STRUCT_NULL_CHECK */
+#ifndef Ehbi_stack_alloc_struct
 #define Ehbi_stack_alloc_struct(tmp, size, err, action) \
 	do { \
 		tmp.bytes = NULL; \
@@ -254,6 +41,60 @@ static void ehbi_set_error(int *err, int code)
 			tmp.bytes_used = 1; \
 		} \
 	} while (0)
+#endif
+
+/* global variables */
+static struct eembed_log *global_ehbi_log = NULL;
+
+/* static prototypes */
+static void ehbi_log_file_line(const char *file, int line,
+			       struct eembed_log *log);
+#define Ehbi_log_file_line(log) \
+	ehbi_log_file_line(__FILE__, __LINE__, log)
+
+static void ehbi_log_error0(const char *file, int line, const char *msg);
+#define Ehbi_log_error0(msg) \
+	ehbi_log_error0(__FILE__, __LINE__, msg)
+
+static void ehbi_log_error_s_c_s(const char *file, int line,
+				 const char *pre, char c, const char *post);
+#define Ehbi_log_error_s_c_s(pre, c, post) \
+	ehbi_log_error_s_c_s(__FILE__, __LINE__, pre, c, post)
+
+static void ehbi_log_error_s_s_s(const char *file, int line,
+				 const char *pre, const char *mid,
+				 const char *post);
+#define Ehbi_log_error_s_s_s(pre, mid, post) \
+	ehbi_log_error_s_s_s(__FILE__, __LINE__, pre, mid, post)
+
+static void ehbi_log_error_s_l_s(const char *file, int line,
+				 const char *pre, long l, const char *post);
+#define Ehbi_log_error_s_l_s(pre, mid, post) \
+	ehbi_log_error_s_l_s(__FILE__, __LINE__, pre, mid, post)
+
+static void ehbi_log_error_s_ul_s(const char *file, int line,
+				  const char *pre, unsigned long ul,
+				  const char *post);
+#define Ehbi_log_error_s_ul_s(pre, ul, post) \
+	ehbi_log_error_s_ul_s(__FILE__, __LINE__, pre, ul, post)
+
+static void ehbi_log_error_s_c_s_c_s(const char *file, int line,
+				     const char *pre, char c1, const char *mid,
+				     char c2, const char *post);
+#define Ehbi_log_error_s_c_s_c_s(pre, c1, mid, c2, post) \
+	ehbi_log_error_s_c_s_c_s(__FILE__, __LINE__, pre, c1, mid, c2, post)
+
+static void ehbi_log_error_s_ul_s_ul_s(const char *file, int line,
+				       const char *pre, unsigned long ul1,
+				       const char *mid, unsigned long ul2,
+				       const char *post);
+#define Ehbi_log_error_s_ul_s_ul_s(pre, ul1, mid, ul2, post) \
+	ehbi_log_error_s_ul_s_ul_s(__FILE__, __LINE__, pre, ul1, mid, ul2, post)
+
+static int ehbi_is_bad(const char *file, int line, const struct ehbigint *bi,
+		       int *err);
+#define Ehbi_is_bad(bi, err) \
+	ehbi_is_bad(__FILE__, __LINE__, bi, err)
 
 /* would a union make this nicer? */
 static char *ehbi_hex_chars_from_byte(char *high, char *low, unsigned char byte,
@@ -261,6 +102,13 @@ static char *ehbi_hex_chars_from_byte(char *high, char *low, unsigned char byte,
 static unsigned char ehbi_hex_chars_to_byte(char high, char low, int *err);
 
 static void ehbi_internal_reset_bytes_used(struct ehbigint *bi, size_t from);
+
+static void ehbi_set_error(int *err, int code)
+{
+	if (err) {
+		*err = code;
+	}
+}
 
 static void ehbi_internal_zero(struct ehbigint *bi)
 {
@@ -304,23 +152,14 @@ struct ehbigint *ehbi_init(struct ehbigint *bi, unsigned char *bytes,
 		ehbi_set_error(err, EHBI_NULL_STRUCT);
 		return NULL;
 	}
+	bi->bytes = bytes;
+	bi->bytes_len = len;
 
-	bi->bytes = NULL;
-	bi->bytes_len = 0;
-	bi->bytes_used = 0;
-	bi->sign = 0;
-
-	if (bytes == NULL) {
-		Ehbi_log_error0("Null bytes[]");
-		ehbi_set_error(err, EHBI_NULL_BYTES);
+	if (Ehbi_is_bad(bi, err)) {
 		return NULL;
 	}
 
-	eembed_memset(bytes, 0x00, len);
-
-	bi->bytes = bytes;
-	bi->bytes_len = len;
-	bi->bytes_used = 1;
+	ehbi_internal_zero(bi);
 
 	return bi;
 }
@@ -336,7 +175,9 @@ struct ehbigint *ehbi_init_l(struct ehbigint *bi, unsigned char *bytes,
 
 struct ehbigint *ehbi_zero(struct ehbigint *bi, int *err)
 {
-	Ehbi_struct_is_not_null(bi, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		return NULL;
+	}
 
 	ehbi_internal_zero(bi);
 
@@ -345,7 +186,9 @@ struct ehbigint *ehbi_zero(struct ehbigint *bi, int *err)
 
 struct ehbigint *ehbi_set_l(struct ehbigint *bi, long val, int *err)
 {
-	Ehbi_struct_is_not_null(bi, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		return NULL;
+	}
 
 	ehbi_internal_zero(bi);
 
@@ -357,8 +200,12 @@ struct ehbigint *ehbi_set(struct ehbigint *bi, const struct ehbigint *val,
 {
 	size_t offset, voffset;
 
-	Ehbi_struct_is_not_null(bi, err, return NULL);
-	Ehbi_struct_is_not_null(val, err, goto ehbi_set_error);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		return NULL;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(val, err)) {
+		goto ehbi_set_error;
+	}
 
 	if (val->bytes_used > bi->bytes_len) {
 		Ehbi_log_error_s_ul_s_ul_s("Result byte[", bi->bytes_len,
@@ -391,7 +238,8 @@ static int ehbi_internal_is_zero(const struct ehbigint *bi)
 	return (bi->bytes_used <= 1 && bi->bytes[bi->bytes_len - 1] == 0x00);
 }
 
-struct ehbigint *ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
+struct ehbigint *ehbi_add(struct ehbigint *res,
+			  const struct ehbigint *bi1,
 			  const struct ehbigint *bi2, int *err)
 {
 	size_t i, size;
@@ -401,9 +249,15 @@ struct ehbigint *ehbi_add(struct ehbigint *res, const struct ehbigint *bi1,
 
 	ehbi_internal_clear_null_struct(&tmp);
 
-	Ehbi_struct_is_not_null(res, err, return NULL);
-	Ehbi_struct_is_not_null(bi1, err, goto ehbi_add_error);
-	Ehbi_struct_is_not_null(bi2, err, goto ehbi_add_error);
+	if (Ehbi_paranoid && Ehbi_is_bad(res, err)) {
+		return NULL;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(bi1, err)) {
+		goto ehbi_add_error;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(bi2, err)) {
+		goto ehbi_add_error;
+	}
 
 	/* adding zero */
 	if (ehbi_internal_is_zero(bi2)) {
@@ -521,10 +375,16 @@ struct ehbigint *ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
 
 	ehbi_internal_clear_null_struct(&tmp);
 
-	Ehbi_struct_is_not_null(res, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(res, err)) {
+		return NULL;
+	}
 	ehbi_internal_zero(res);
-	Ehbi_struct_is_not_null(bi1, err, return NULL);
-	Ehbi_struct_is_not_null(bi2, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi1, err)) {
+		return NULL;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(bi2, err)) {
+		return NULL;
+	}
 
 	err = 0;
 	if (bi1->bytes_used < bi2->bytes_used) {
@@ -604,12 +464,20 @@ struct ehbigint *ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	ehbi_internal_clear_null_struct(&s_abs_numer);
 	ehbi_internal_clear_null_struct(&s_abs_denom);
 
-	Ehbi_struct_is_not_null(quotient, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(quotient, err)) {
+		return NULL;
+	}
 	ehbi_internal_zero(quotient);
-	Ehbi_struct_is_not_null(remainder, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(remainder, err)) {
+		return NULL;
+	}
 	ehbi_internal_zero(remainder);
-	Ehbi_struct_is_not_null(numerator, err, return NULL);
-	Ehbi_struct_is_not_null(denominator, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(numerator, err)) {
+		return NULL;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(denominator, err)) {
+		return NULL;
+	}
 
 	rp = quotient;
 
@@ -792,11 +660,17 @@ struct ehbigint *ehbi_sqrt(struct ehbigint *result, struct ehbigint *remainder,
 	ehbi_internal_zero(&two);
 	ehbi_inc_l(&two, 2, err);
 
-	Ehbi_struct_is_not_null(result, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(result, err)) {
+		return NULL;
+	}
 	ehbi_internal_zero(result);
-	Ehbi_struct_is_not_null(remainder, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(remainder, err)) {
+		return NULL;
+	}
 	ehbi_internal_zero(remainder);
-	Ehbi_struct_is_not_null(val, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(val, err)) {
+		return NULL;
+	}
 
 	if (ehbi_less_than(val, &zero, err)) {
 		Ehbi_log_error0("square root of a negative would be complex");
@@ -976,11 +850,19 @@ struct ehbigint *ehbi_exp_mod(struct ehbigint *result,
 	ehbi_internal_clear_null_struct(&tjunk);
 	rp = NULL;
 
-	Ehbi_struct_is_not_null(result, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(result, err)) {
+		return NULL;
+	}
 	ehbi_internal_zero(result);
-	Ehbi_struct_is_not_null(base, err, return NULL);
-	Ehbi_struct_is_not_null(exponent, err, return NULL);
-	Ehbi_struct_is_not_null(modulus, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(base, err)) {
+		return NULL;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(exponent, err)) {
+		return NULL;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(modulus, err)) {
+		return NULL;
+	}
 
 	ehbi_init(&zero, zero_bytes, 2, err);
 
@@ -1159,8 +1041,12 @@ struct ehbigint *ehbi_inc(struct ehbigint *bi, const struct ehbigint *val,
 
 	ehbi_internal_clear_null_struct(&temp);
 
-	Ehbi_struct_is_not_null(bi, err, return NULL);
-	Ehbi_struct_is_not_null(val, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		return NULL;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(val, err)) {
+		return NULL;
+	}
 
 	if (val->bytes_used > bi->bytes_len) {
 		Ehbi_log_error_s_ul_s_ul_s("byte[",
@@ -1212,8 +1098,12 @@ struct ehbigint *ehbi_dec(struct ehbigint *bi, const struct ehbigint *val,
 
 	ehbi_internal_clear_null_struct(&temp);
 
-	Ehbi_struct_is_not_null(bi, err, return NULL);
-	Ehbi_struct_is_not_null(val, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		return NULL;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(val, err)) {
+		return NULL;
+	}
 
 	size = bi->bytes_len;
 
@@ -1263,9 +1153,15 @@ struct ehbigint *ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 
 	ehbi_internal_clear_null_struct(&tmp);
 
-	Ehbi_struct_is_not_null(res, err, return NULL);
-	Ehbi_struct_is_not_null(bi1, err, return NULL);
-	Ehbi_struct_is_not_null(bi2, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(res, err)) {
+		return NULL;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(bi1, err)) {
+		return NULL;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(bi2, err)) {
+		return NULL;
+	}
 
 	rp = res;
 
@@ -1429,7 +1325,9 @@ struct ehbigint *ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits,
 	eba.bits = NULL;
 	eba.size_bytes = 0;
 
-	Ehbi_struct_is_not_null(bi, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		return NULL;
+	}
 
 	eba.bits = bi->bytes;
 	eba.size_bytes = bi->bytes_len;
@@ -1452,7 +1350,9 @@ struct ehbigint *ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits,
 	int ehbi_eba_err;
 	size_t add_size;
 
-	Ehbi_struct_is_not_null(bi, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		return NULL;
+	}
 
 	eba.endian = eba_big_endian;
 	eba.bits = bi->bytes;
@@ -1480,9 +1380,15 @@ struct ehbigint *ehbi_n_choose_k(struct ehbigint *result,
 	struct ehbigint sum_n, sum_k, tmp;
 	struct ehbigint *rp;
 
-	Ehbi_struct_is_not_null(result, err, return NULL);
-	Ehbi_struct_is_not_null(n, err, return NULL);
-	Ehbi_struct_is_not_null(k, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(result, err)) {
+		return NULL;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(n, err)) {
+		return NULL;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(k, err)) {
+		return NULL;
+	}
 
 	if (!err) {
 		local_error = EHBI_SUCCESS;
@@ -1733,7 +1639,9 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	ehbi_internal_clear_null_struct(&y);
 	ehbi_internal_clear_null_struct(&max_witness);
 
-	Ehbi_struct_is_not_null(bi, err, return 0);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		return 0;
+	}
 
 	if (!err) {
 		local_err = EHBI_SUCCESS;
@@ -1917,7 +1825,9 @@ ehbi_is_probably_prime_end:
 
 struct ehbigint *ehbi_negate(struct ehbigint *bi, int *err)
 {
-	Ehbi_struct_is_not_null(bi, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		return NULL;
+	}
 
 	bi->sign = (bi->sign == 0) ? 1 : 0;
 
@@ -1926,7 +1836,9 @@ struct ehbigint *ehbi_negate(struct ehbigint *bi, int *err)
 
 int ehbi_is_negative(const struct ehbigint *bi, int *err)
 {
-	Ehbi_struct_is_not_null(bi, err, return 0);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		return 0;
+	}
 
 	if (ehbi_internal_is_zero(bi)) {
 		if (bi->sign == 1) {
@@ -1947,8 +1859,12 @@ int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
 
 	rv = 0;
 
-	Ehbi_struct_is_not_null(bi1, err, goto ehbi_compare_end);
-	Ehbi_struct_is_not_null(bi2, err, goto ehbi_compare_end);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi1, err)) {
+		goto ehbi_compare_end;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(bi2, err)) {
+		goto ehbi_compare_end;
+	}
 
 	b1_pos = !ehbi_is_negative(bi1, err);
 	b2_pos = !ehbi_is_negative(bi2, err);
@@ -2017,8 +1933,12 @@ int ehbi_equals(const struct ehbigint *bi1, const struct ehbigint *bi2,
 {
 	int rv = 0;
 
-	Ehbi_struct_is_not_null(bi1, err, return 0);
-	Ehbi_struct_is_not_null(bi2, err, return 0);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi1, err)) {
+		return 0;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(bi2, err)) {
+		return 0;
+	}
 
 	rv = (ehbi_compare(bi1, bi2, err) == 0);
 
@@ -2040,8 +1960,12 @@ int ehbi_equals_l(const struct ehbigint *bi1, long i2, int *err)
 int ehbi_less_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		   int *err)
 {
-	Ehbi_struct_is_not_null(bi1, err, return 0);
-	Ehbi_struct_is_not_null(bi2, err, return 0);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi1, err)) {
+		return 0;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(bi2, err)) {
+		return 0;
+	}
 
 	return (ehbi_compare(bi1, bi2, err) < 0);
 }
@@ -2060,8 +1984,12 @@ int ehbi_less_than_l(const struct ehbigint *bi1, long i2, int *err)
 int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
 		      int *err)
 {
-	Ehbi_struct_is_not_null(bi1, err, return 0);
-	Ehbi_struct_is_not_null(bi2, err, return 0);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi1, err)) {
+		return 0;
+	}
+	if (Ehbi_paranoid && Ehbi_is_bad(bi2, err)) {
+		return 0;
+	}
 
 	return (ehbi_compare(bi1, bi2, err) > 0);
 }
@@ -2081,7 +2009,9 @@ int ehbi_is_odd(const struct ehbigint *bi, int *err)
 {
 	unsigned char bit;
 
-	Ehbi_struct_is_not_null(bi, err, return 0);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		return 0;
+	}
 
 	bit = 0x01 & bi->bytes[bi->bytes_len - 1];
 
@@ -2164,7 +2094,9 @@ struct ehbigint *ehbi_set_binary_string(struct ehbigint *bi, const char *str,
 	eba.bits = NULL;
 	eba.size_bytes = 0;
 
-	Ehbi_struct_is_not_null(bi, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		return NULL;
+	}
 	ehbi_zero(bi, err);
 
 	eba.bits = bi->bytes;
@@ -2211,7 +2143,9 @@ struct ehbigint *ehbi_set_hex_string(struct ehbigint *bi, const char *str,
 	unsigned char high, low;
 	int local_err;
 
-	Ehbi_struct_is_not_null(bi, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		return NULL;
+	}
 
 	if (str == 0) {
 		Ehbi_log_error0("Null string");
@@ -2289,7 +2223,9 @@ struct ehbigint *ehbi_set_decimal_string(struct ehbigint *bi, const char *dec,
 	struct ehbigint *rp;
 	int local_err;
 
-	Ehbi_struct_is_not_null(bi, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		return NULL;
+	}
 
 	if (len == 0) {
 		str = "0x00";
@@ -2353,7 +2289,9 @@ char *ehbi_to_binary_string(const struct ehbigint *bi, char *buf,
 	eba.bits = NULL;
 	eba.size_bytes = 0;
 
-	Ehbi_struct_is_not_null(bi, err, goto ehbi_to_binary_string_end);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		goto ehbi_to_binary_string_end;
+	}
 
 	eba.bits = bi->bytes;
 	eba.size_bytes = bi->bytes_len;
@@ -2408,7 +2346,9 @@ char *ehbi_to_hex_string(const struct ehbigint *bi, char *buf, size_t buf_len,
 	size_t i, j;
 	char *rp;
 
-	Ehbi_struct_is_not_null(bi, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		return NULL;
+	}
 
 	if (buf == 0) {
 		Ehbi_log_error0("Null buffer");
@@ -2477,7 +2417,9 @@ char *ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len,
 	hex = NULL;
 	rp = NULL;
 
-	Ehbi_struct_is_not_null(bi, err, return NULL);
+	if (Ehbi_paranoid && Ehbi_is_bad(bi, err)) {
+		return NULL;
+	}
 
 	size = 0;
 
@@ -2679,4 +2621,188 @@ static void ehbi_internal_reset_bytes_used(struct ehbigint *bi, size_t from)
 	if (ehbi_internal_is_zero(bi)) {
 		bi->sign = 0;
 	}
+}
+
+static int ehbi_is_bad(const char *file, int line, const struct ehbigint *bi,
+		       int *err)
+{
+	if (bi == NULL) {
+		ehbi_log_error0(file, line, "Null struct");
+		ehbi_set_error(err, EHBI_NULL_STRUCT);
+		return 1;
+	}
+	if (bi->bytes == NULL) {
+		ehbi_log_error0(file, line, "Null bytes[]");
+		ehbi_set_error(err, EHBI_NULL_BYTES);
+		return 1;
+	}
+	return 0;
+}
+
+struct eembed_log *ehbi_log_get(void)
+{
+	struct eembed_log *log = global_ehbi_log;
+	return log ? log : eembed_err_log;
+}
+
+struct eembed_log *ehbi_log_set(struct eembed_log *log)
+{
+	struct eembed_log *previous = ehbi_log_get();
+
+	global_ehbi_log = log;
+
+	return previous;
+}
+
+void ehbi_log_backtrace(struct eembed_log *log)
+{
+#if _POSIX_SOURCE
+	const size_t buffer_size = 100;
+	void *buffer[100];
+	char **strings = NULL;
+	int nptrs = 0;
+	int i = 0;
+#endif
+
+	if (!log) {
+		return;
+	}
+
+#if _POSIX_SOURCE
+	nptrs = backtrace(buffer, buffer_size);
+	log->append_s(log, "backtrace() returned ");
+	log->append_l(log, nptrs);
+	log->append_s(log, " addresses");
+	log->append_eol(log);
+
+	strings = backtrace_symbols(buffer, nptrs);
+	if (strings != NULL) {
+		for (i = 0; i < nptrs; ++i) {
+			log->append_s(log, "\t");
+			log->append_s(log, strings[i]);
+			log->append_eol(log);
+		}
+		free(strings);
+	}
+#else
+	log->append_s(log, "(backtrace unavailable)");
+	log->append_eol(log);
+#endif
+}
+
+static void ehbi_log_file_line(const char *file, int line,
+			       struct eembed_log *log)
+{
+	if (!log) {
+		return;
+	}
+	log->append_s(log, file);
+	log->append_s(log, ":");
+	log->append_l(log, line);
+	log->append_s(log, ": ");
+}
+
+static void ehbi_log_error0(const char *file, int line, const char *msg)
+{
+	struct eembed_log *log = ehbi_log_get();
+	if (!log) {
+		return;
+	}
+	ehbi_log_file_line(file, line, log);
+	log->append_s(log, msg);
+	log->append_eol(log);
+}
+
+static void ehbi_log_error_s_c_s(const char *file, int line,
+				 const char *pre, char c, const char *post)
+{
+	struct eembed_log *log = ehbi_log_get();
+	if (!log) {
+		return;
+	}
+	ehbi_log_file_line(file, line, log);
+	log->append_s(log, pre);
+	log->append_c(log, c);
+	log->append_s(log, post);
+	log->append_eol(log);
+}
+
+static void ehbi_log_error_s_s_s(const char *file, int line,
+				 const char *pre, const char *mid,
+				 const char *post)
+{
+	struct eembed_log *log = ehbi_log_get();
+	if (!log) {
+		return;
+	}
+
+	ehbi_log_file_line(file, line, log);
+	log->append_s(log, pre);
+	log->append_s(log, mid);
+	log->append_s(log, post);
+	log->append_eol(log);
+}
+
+static void ehbi_log_error_s_l_s(const char *file, int line,
+				 const char *pre, long l, const char *post)
+{
+	struct eembed_log *log = ehbi_log_get();
+	if (!log) {
+		return;
+	}
+	ehbi_log_file_line(file, line, log);
+	log->append_s(log, pre);
+	log->append_l(log, l);
+	log->append_s(log, post);
+	log->append_eol(log);
+}
+
+static void ehbi_log_error_s_ul_s(const char *file, int line,
+				  const char *pre, unsigned long ul,
+				  const char *post)
+{
+	struct eembed_log *log = ehbi_log_get();
+	if (!log) {
+		return;
+	}
+	ehbi_log_file_line(file, line, log);
+	log->append_s(log, pre);
+	log->append_ul(log, ul);
+	log->append_s(log, post);
+	log->append_eol(log);
+}
+
+static void ehbi_log_error_s_c_s_c_s(const char *file, int line,
+				     const char *pre, char c1, const char *mid,
+				     char c2, const char *post)
+{
+	struct eembed_log *log = ehbi_log_get();
+	if (!log) {
+		return;
+	}
+	ehbi_log_file_line(file, line, log);
+	log->append_s(log, pre);
+	log->append_c(log, c1);
+	log->append_s(log, mid);
+	log->append_c(log, c2);
+	log->append_s(log, post);
+	log->append_eol(log);
+}
+
+static void ehbi_log_error_s_ul_s_ul_s(const char *file, int line,
+				       const char *pre, unsigned long ul1,
+				       const char *mid, unsigned long ul2,
+				       const char *post)
+{
+	struct eembed_log *log = ehbi_log_get();
+	if (!log) {
+		return;
+	}
+	ehbi_log_file_line(file, line, log);
+	log->append_s(log, pre);
+	log->append_ul(log, ul1);
+	log->append_s(log, mid);
+	log->append_ul(log, ul2);
+	log->append_s(log, post);
+	log->append_eol(log);
 }

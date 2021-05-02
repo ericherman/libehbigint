@@ -19,8 +19,8 @@ unsigned test_shift_right_v(int verbose, const char *val, unsigned long bits,
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&bi, bytes_buf1, 20, &err);
-	ehbi_init(&expect_bi, bytes_buf2, 20, &err);
+	ehbi_init(&bi, bytes_buf1, 20);
+	ehbi_init(&expect_bi, bytes_buf2, 20);
 
 	ehbi_set_hex_string(&bi, val, eembed_strlen(val), &err);
 	if (err) {
@@ -47,15 +47,7 @@ unsigned test_shift_right_v(int verbose, const char *val, unsigned long bits,
 		return 1;
 	}
 
-	ehbi_shift_right(&bi, bits, &err);
-	if (err) {
-		++failures;
-		STDERR_FILE_LINE_FUNC(log);
-		log->append_s(log, "error ");
-		log->append_l(log, err);
-		log->append_s(log, " from ehbi_shift_right");
-		log->append_eol(log);
-	}
+	ehbi_shift_right(&bi, bits);
 
 	failures += Check_ehbigint(&bi, &expect_bi);
 

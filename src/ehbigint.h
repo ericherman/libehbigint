@@ -26,24 +26,24 @@ struct ehbigint {
 };
 
 /*
-   assignes the byte[] to the struct, sets to zero
-   returns NULL on error, and populates err with error_code
+   assigns the byte[] to the struct, sets to zero
+   parameters must not be NULL
 */
 struct ehbigint *ehbi_init(struct ehbigint *bi, unsigned char *bytes,
-			   size_t len, int *err);
+			   size_t len);
 
 /*
    assignes the byte[] to the struct, sets to val
-   returns NULL on error, and populates err with error_code
+   parameters must not be NULL
 */
 struct ehbigint *ehbi_init_l(struct ehbigint *bi, unsigned char *bytes,
 			     size_t len, long val, int *err);
 
 /*
    populates an ehbigint with a value of zero
-   returns NULL on error, and populates err with error_code
+   parameter must not be NULL
 */
-struct ehbigint *ehbi_zero(struct ehbigint *bi, int *err);
+struct ehbigint *ehbi_zero(struct ehbigint *bi);
 
 /*
    populates an ehbigint with a binary string value e.g. "0b0101010111110000"
@@ -151,17 +151,17 @@ struct ehbigint *ehbi_mul_l(struct ehbigint *res, const struct ehbigint *bi1,
 
 /*
    shifts the value of the ehbigint up by num_bits number of bits
-   returns NULL on error, and populates err with error_code
+   if not enough space was available, overflow is populated with the number
+   of bits lost, but *does* *not* return NULL
+   returns the ehbigint pointer, even on overflow
 */
 struct ehbigint *ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits,
-				 int *err);
+				 unsigned long *overflow);
 
 /*
    shifts the value of the ehbigint down by num_bits number of bits
-   returns NULL on error, and populates err with error_code
 */
-struct ehbigint *ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits,
-				  int *err);
+struct ehbigint *ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits);
 
 /*
    populates the first ehbigint quotient and remainder with the results
@@ -315,86 +315,78 @@ int ehbi_is_probably_prime(const struct ehbigint *bi,
 #endif /* EHBI_SKIP_IS_PROBABLY_PRIME */
 
 /* sign inversion
-   returns NULL on error, and populates err with error_code
+   returns a pointer int the incoming parameter
+   parameter must not be NULL
 */
-struct ehbigint *ehbi_negate(struct ehbigint *bi, int *err);
+struct ehbigint *ehbi_negate(struct ehbigint *bi);
 
 /*
    returns 1 if the values represented by the ehbigint arguments are equal
    returns 0 otherwise
-   populates the contents of err with 0 on success or error_code on error
 */
-int ehbi_equals(const struct ehbigint *bi1, const struct ehbigint *bi2,
-		int *err);
+int ehbi_equals(const struct ehbigint *bi1, const struct ehbigint *bi2);
 
 /*
    returns 1 if the values represented by the first two arguments are equal
    returns 0 otherwise
-   populates the contents of err with 0 on success or error_code on error
 */
-int ehbi_equals_l(const struct ehbigint *bi1, long i2, int *err);
+int ehbi_equals_l(const struct ehbigint *bi1, long i2);
 
 /*
    returns 1 if the first parameter is less than the second
    returns 0 otherwise
-   populates the contents of err with 0 on success or error_code on error
 */
-int ehbi_less_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
-		   int *err);
+int ehbi_less_than(const struct ehbigint *bi1, const struct ehbigint *bi2);
 
 /*
    returns 1 if the first parameter is less than the second
    returns 0 otherwise
-   populates the contents of err with 0 on success or error_code on error
 */
-int ehbi_less_than_l(const struct ehbigint *bi1, long i2, int *err);
+int ehbi_less_than_l(const struct ehbigint *bi1, long i2);
 
 /*
    returns 1 if the first parameter is greater than the second
    returns 0 otherwise
-   populates the contents of err with 0 on success or error_code on error
 */
-int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2,
-		      int *err);
+int ehbi_greater_than(const struct ehbigint *bi1, const struct ehbigint *bi2);
 
 /*
    returns 1 if the first parameter is greater than the second
    returns 0 otherwise
-   populates the contents of err with 0 on success or error_code on error
 */
-int ehbi_greater_than_l(const struct ehbigint *bi1, long i2, int *err);
+int ehbi_greater_than_l(const struct ehbigint *bi1, long i2);
 
 /*
    returns 0 if the values represented by the ehbigint arguments are equal
    returns <0 if the first ehbigint is less than the second
    returns >0 if the first ehbigint is greater than the second
-   populates the contents of err with 0 on success or error_code on error
 */
-int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2,
-		 int *err);
+int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2);
 
 /*
    returns 0 if the values represented by the arguments are equal
    returns <0 if the first ehbigint is less than the second
    returns >0 if the first ehbigint is greater than the second
-   populates the contents of err with 0 on success or error_code on error
 */
-
-int ehbi_compare_l(const struct ehbigint *bi1, long i2, int *err);
+int ehbi_compare_l(const struct ehbigint *bi1, long i2);
 
 /*
    returns 1 if negative
    returns 0 otherwise
-   populates the contents of err with 0 on success or error_code on error
 */
-int ehbi_is_negative(const struct ehbigint *bi, int *err);
+int ehbi_is_zero(const struct ehbigint *bi);
+
+/*
+   returns 1 if negative
+   returns 0 otherwise
+*/
+int ehbi_is_negative(const struct ehbigint *bi);
 
 /*
    returns 1 if odd
    returns 0 if even
-   populates the contents of err with 0 on success or error_code on error
 */
-int ehbi_is_odd(const struct ehbigint *bi, int *err);
+int ehbi_is_odd(const struct ehbigint *bi);
 
 /*
    populates the passed in buffer with a binary string representation
@@ -471,7 +463,6 @@ enum {
 	EHBI_CORRUPT_DATA,
 	EHBI_STACK_TOO_SMALL,
 	EHBI_DIVIDE_BY_ZERO,
-	EHBI_EBA_CRASH,
 	EHBI_PRNG_ERROR,
 	EHBI_SQRT_NEGATIVE,
 	EHBI_LAST

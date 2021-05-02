@@ -18,8 +18,8 @@ unsigned test_inc_hex(int verbose, const char *hexs1, const char *hexs2,
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&bi1, bytes_buf1, 20, &err);
-	ehbi_init(&bi2, bytes_buf2, 20, &err);
+	ehbi_init(&bi1, bytes_buf1, 20);
+	ehbi_init(&bi2, bytes_buf2, 20);
 
 	ehbi_set_hex_string(&bi1, hexs1, eembed_strlen(hexs1), &err);
 	if (err) {
@@ -85,8 +85,8 @@ unsigned test_inc_v(int verbose, const char *v1, const char *v2,
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&bi1, bytes_buf1, 20, &err);
-	ehbi_init(&bi2, bytes_buf2, 20, &err);
+	ehbi_init(&bi1, bytes_buf1, 20);
+	ehbi_init(&bi2, bytes_buf2, 20);
 
 	ehbi_set_decimal_string(&bi1, v1, eembed_strlen(v1), &err);
 	if (err) {

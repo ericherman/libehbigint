@@ -23,9 +23,9 @@ unsigned test_exp_v(int verbose, const char *sbase, const char *sexponent,
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&base, bytes_base, 20, &err);
-	ehbi_init(&exponent, bytes_exponent, 20, &err);
-	ehbi_init(&result, bytes_result, 30, &err);
+	ehbi_init(&base, bytes_base, 20);
+	ehbi_init(&exponent, bytes_exponent, 20);
+	ehbi_init(&result, bytes_result, 30);
 
 	ehbi_set_decimal_string(&base, sbase, eembed_strlen(sbase), &err);
 	if (err) {

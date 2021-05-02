@@ -19,9 +19,9 @@ unsigned test_add_decimal(int verbose, const char *str_1, const char *str_2,
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&bi1, bytes_buf1, 20, &err);
-	ehbi_init(&bi2, bytes_buf2, 20, &err);
-	ehbi_init(&bi3, bytes_buf3, 20, &err);
+	ehbi_init(&bi1, bytes_buf1, 20);
+	ehbi_init(&bi2, bytes_buf2, 20);
+	ehbi_init(&bi3, bytes_buf3, 20);
 
 	ehbi_set_decimal_string(&bi1, str_1, eembed_strlen(str_1), &err);
 	if (err) {
@@ -87,9 +87,9 @@ unsigned test_add_hex(int verbose, const char *str_1, const char *str_2,
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&bi1, bytes_buf1, 20, &err);
-	ehbi_init(&bi2, bytes_buf2, 20, &err);
-	ehbi_init(&bi3, bytes_buf3, 20, &err);
+	ehbi_init(&bi1, bytes_buf1, 20);
+	ehbi_init(&bi2, bytes_buf2, 20);
+	ehbi_init(&bi3, bytes_buf3, 20);
 
 	ehbi_set_hex_string(&bi1, str_1, eembed_strlen(str_1), &err);
 	if (err) {

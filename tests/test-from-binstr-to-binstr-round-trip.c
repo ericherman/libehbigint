@@ -21,7 +21,7 @@ unsigned test_from_binstr_to_binstr_round_trip_s(int verbose, const char *bstr)
 		  && (bstr[1] == 'b' || bstr[1] == 'B')) ? 2 : 0;
 
 	err = 0;
-	ehbi_init(&a_bigint, bytes_buf, 20, &err);
+	ehbi_init(&a_bigint, bytes_buf, 20);
 
 	ehbi_set_binary_string(&a_bigint, bstr, eembed_strlen(bstr), &err);
 	if (err) {
@@ -94,8 +94,8 @@ unsigned test_hex_vs_binary_string(int verbose, const char *hex,
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&a_bigint, a_bytes, 20, &err);
-	ehbi_init(&b_bigint, b_bytes, 20, &err);
+	ehbi_init(&a_bigint, a_bytes, 20);
+	ehbi_init(&b_bigint, b_bytes, 20);
 
 	ehbi_set_hex_string(&a_bigint, hex, eembed_strlen(hex), &err);
 	ehbi_to_hex_string(&a_bigint, hexhexs, BUFLEN, &err);

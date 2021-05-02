@@ -34,7 +34,7 @@ unsigned check_ehbigint(struct ehbigint *actual, struct ehbigint *expected,
 		return 1;
 	}
 
-	if (ehbi_equals(actual, expected, &err)) {
+	if (ehbi_equals(actual, expected)) {
 		return 0;
 	}
 

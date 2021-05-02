@@ -23,10 +23,10 @@ int test_comp_exp_with_gmp_bem(int verbose, unsigned long base,
 
 	failures = 0;
 	err = 0;
-	ehbi_init(&eres, res_bytes, BILEN, &err);
-	ehbi_init(&ebase, base_bytes, BILEN, &err);
-	ehbi_init(&emod, mod_bytes, BILEN, &err);
-	ehbi_init(&eexp, exp_bytes, BILEN, &err);
+	ehbi_init(&eres, res_bytes, BILEN);
+	ehbi_init(&ebase, base_bytes, BILEN);
+	ehbi_init(&emod, mod_bytes, BILEN);
+	ehbi_init(&eexp, exp_bytes, BILEN);
 
 	ehbi_set_l(&ebase, (long)base, &err);
 	ehbi_set_l(&eexp, (long)exp, &err);

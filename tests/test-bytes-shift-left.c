@@ -9,6 +9,7 @@ unsigned test_bytes_shift_left_inner(int verbose, const char *val, size_t bytes,
 {
 	struct eembed_log *log = eembed_err_log;
 	int err;
+	unsigned long overflow;
 	unsigned failures;
 	unsigned char bytes_buf1[20];
 	unsigned char bytes_buf2[20];
@@ -19,8 +20,8 @@ unsigned test_bytes_shift_left_inner(int verbose, const char *val, size_t bytes,
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&bi, bytes_buf1, 20, &err);
-	ehbi_init(&expect_bi, bytes_buf2, 20, &err);
+	ehbi_init(&bi, bytes_buf1, 20);
+	ehbi_init(&expect_bi, bytes_buf2, 20);
 
 	ehbi_set_hex_string(&bi, val, eembed_strlen(val), &err);
 	if (err) {
@@ -47,12 +48,13 @@ unsigned test_bytes_shift_left_inner(int verbose, const char *val, size_t bytes,
 		return 1;
 	}
 
-	ehbi_shift_left(&bi, EEMBED_CHAR_BIT * bytes, &err);
-	if (err) {
+	overflow = 0;
+	ehbi_shift_left(&bi, EEMBED_CHAR_BIT * bytes, &overflow);
+	if (0 && overflow) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
-		log->append_s(log, "error ");
-		log->append_l(log, err);
+		log->append_s(log, "overflow ");
+		log->append_ul(log, overflow);
 		log->append_s(log, " from ehbi_shift_left");
 		log->append_eol(log);
 	}

@@ -25,10 +25,10 @@ unsigned test_exp_mod_v(int verbose, const char *sbase, const char *sexponent,
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&base, bytes_base, 10, &err);
-	ehbi_init(&exponent, bytes_exponent, 10, &err);
-	ehbi_init(&modulus, bytes_modulus, 10, &err);
-	ehbi_init(&result, bytes_result, 10, &err);
+	ehbi_init(&base, bytes_base, 10);
+	ehbi_init(&exponent, bytes_exponent, 10);
+	ehbi_init(&modulus, bytes_modulus, 10);
+	ehbi_init(&result, bytes_result, 10);
 
 	ehbi_set_decimal_string(&base, sbase, eembed_strlen(sbase), &err);
 	if (err) {
@@ -146,10 +146,10 @@ unsigned test_exp_mod_by_zero(int verbose)
 	}
 
 	err = 0;
-	ehbi_init(&base, bytes_base, 10, &err);
-	ehbi_init(&exponent, bytes_exponent, 10, &err);
-	ehbi_init(&modulus, bytes_modulus, 10, &err);
-	ehbi_init(&result, bytes_result, 10, &err);
+	ehbi_init(&base, bytes_base, 10);
+	ehbi_init(&exponent, bytes_exponent, 10);
+	ehbi_init(&modulus, bytes_modulus, 10);
+	ehbi_init(&result, bytes_result, 10);
 
 	ehbi_set_l(&base, 10, &err);
 	ehbi_set_l(&exponent, 2, &err);

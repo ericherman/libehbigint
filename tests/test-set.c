@@ -20,8 +20,8 @@ unsigned test_set_v(int verbose, long lval, const char *expect)
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&a_bigint, a_bytes, 10, &err);
-	ehbi_init(&b_bigint, b_bytes, 10, &err);
+	ehbi_init(&a_bigint, a_bytes, 10);
+	ehbi_init(&b_bigint, b_bytes, 10);
 
 	ehbi_set_l(&a_bigint, lval, &err);
 	if (err) {
@@ -74,7 +74,7 @@ unsigned test_set_dec_str(int verbose, const char *val)
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&bi, bi_bytes, 20, &err);
+	ehbi_init(&bi, bi_bytes, 20);
 
 	ehbi_set_decimal_string(&bi, val, eembed_strlen(val), &err);
 	if (err) {

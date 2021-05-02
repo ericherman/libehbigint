@@ -20,7 +20,7 @@ unsigned test_from_hex_to_hex_round_trip(int verbose)
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&a_bigint, bytes_buf, 20, &err);
+	ehbi_init(&a_bigint, bytes_buf, 20);
 
 	ehbi_set_hex_string(&a_bigint, expected_str,
 			    eembed_strlen(expected_str), &err);

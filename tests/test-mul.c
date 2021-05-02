@@ -25,9 +25,9 @@ unsigned test_mul_v(int verbose, long al, long bl, const char *expected)
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&a_bigint, a_bytes, 16, &err);
-	ehbi_init(&b_bigint, b_bytes, 16, &err);
-	ehbi_init(&result, result_bytes, 16, &err);
+	ehbi_init(&a_bigint, a_bytes, 16);
+	ehbi_init(&b_bigint, b_bytes, 16);
+	ehbi_init(&result, result_bytes, 16);
 
 	ehbi_set_l(&a_bigint, al, &err);
 	if (err) {

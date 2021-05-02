@@ -18,7 +18,7 @@ unsigned test_set_l_v(int verbose, long v1)
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&bi, bytes, 4, &err);
+	ehbi_init(&bi, bytes, 4);
 
 	ehbi_set_l(&bi, 0, &err);
 	failures += check_int_m(err, 0, "ehbi_set_l(0)");

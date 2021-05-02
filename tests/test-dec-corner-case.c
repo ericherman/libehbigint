@@ -26,9 +26,9 @@ unsigned test_dec_corner_case(int verbose)
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&bi1, bytes_buf1, BILEN, &err);
-	ehbi_init(&bi2, bytes_buf2, BILEN, &err);
-	ehbi_init(&expect_bi, bytes_buf3, BILEN, &err);
+	ehbi_init(&bi1, bytes_buf1, BILEN);
+	ehbi_init(&bi2, bytes_buf2, BILEN);
+	ehbi_init(&expect_bi, bytes_buf3, BILEN);
 
 	ehbi_set_decimal_string(&bi1, str_1, eembed_strlen(str_1), &err);
 	if (err) {

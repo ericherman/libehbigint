@@ -36,9 +36,9 @@ unsigned test_sqrt_v(int verbose, const char *sval, const char *ssqrt,
 	}
 
 	err = 0;
-	ehbi_init(&val, bytes_val, 50, &err);
-	ehbi_init(&sqrt, bytes_sqrt, 50, &err);
-	ehbi_init(&remainder, bytes_remainder, 50, &err);
+	ehbi_init(&val, bytes_val, 50);
+	ehbi_init(&sqrt, bytes_sqrt, 50);
+	ehbi_init(&remainder, bytes_remainder, 50);
 
 	ehbi_set_decimal_string(&val, sval, eembed_strlen(sval), &err);
 	if (err) {
@@ -110,9 +110,9 @@ unsigned test_sqrt_negative(int verbose)
 	}
 
 	err = 0;
-	ehbi_init(&val, bytes_val, 10, &err);
-	ehbi_init(&sqrt, bytes_sqrt, 10, &err);
-	ehbi_init(&remainder, bytes_remainder, 10, &err);
+	ehbi_init(&val, bytes_val, 10);
+	ehbi_init(&sqrt, bytes_sqrt, 10);
+	ehbi_init(&remainder, bytes_remainder, 10);
 
 	ehbi_set_l(&val, -100, &err);
 

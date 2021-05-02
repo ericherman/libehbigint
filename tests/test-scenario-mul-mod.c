@@ -18,12 +18,12 @@ unsigned test_scenario_mul_mod(int verbose)
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&bx, xb, 16, &err);
-	ehbi_init(&by, yb, 16, &err);
-	ehbi_init(&bz, zb, 16, &err);
-	ehbi_init(&bresult, resb, 16, &err);
-	ehbi_init(&bquot, quotb, 16, &err);
-	ehbi_init(&brem, remb, 16, &err);
+	ehbi_init(&bx, xb, 16);
+	ehbi_init(&by, yb, 16);
+	ehbi_init(&bz, zb, 16);
+	ehbi_init(&bresult, resb, 16);
+	ehbi_init(&bquot, quotb, 16);
+	ehbi_init(&brem, remb, 16);
 
 	x = 20151125;
 	ehbi_set_l(&bx, x, &err);

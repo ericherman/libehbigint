@@ -17,7 +17,7 @@ unsigned test_inc_lv(int verbose, const char *dec_str1, long v2,
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&bi1, bytes_buf1, 20, &err);
+	ehbi_init(&bi1, bytes_buf1, 20);
 
 	ehbi_set_decimal_string(&bi1, dec_str1, eembed_strlen(dec_str1), &err);
 	if (err) {

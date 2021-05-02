@@ -37,7 +37,6 @@ unsigned test_to_string_negative_3(int verbose)
 {
 	struct eembed_log *log = eembed_err_log;
 	unsigned failures;
-	int err;
 
 	unsigned char bytes[20];
 	struct ehbigint bi;
@@ -45,8 +44,7 @@ unsigned test_to_string_negative_3(int verbose)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	err = 0;
-	ehbi_init(&bi, bytes, 20, &err);
+	ehbi_init(&bi, bytes, 20);
 	bi.bytes[19] = 0x03;
 	bi.bytes_used = 1;
 	bi.sign = 1;
@@ -76,7 +74,7 @@ unsigned test_to_string_ld(int verbose, long val)
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&bi, bytes, 1 + sizeof(long), &err);
+	ehbi_init(&bi, bytes, 1 + sizeof(long));
 
 	ehbi_set_l(&bi, val, &err);
 

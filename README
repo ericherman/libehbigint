@@ -28,14 +28,19 @@ structure and initialize it, for example:
 
 	struct ehbigint bi;
 	unsigned char bytes[BUF_LEN];
-	int err;
 
-	err = ehbi_init(&bi, &bytes, BUF_LEN);
+	struct ehbigint *rv = ehbi_init(&bi, &bytes, BUF_LEN);
 
 The value will be initalized to zero. If you wish  initialize it with
 a non-zero, but "long" value:
-	err = ehbi_init_l(&bi, &bytes, BUF_LEN, 42);
 
+	struct ehbigint bi;
+	unsigned char bytes[BUF_LEN];
+	int err = 0;
+	struct ehbigint *rv = ehbi_init_l(&bi, &bytes, BUF_LEN, 42, &err);
+
+If the bytes[BUF_LEN] array is too small to hold the long value, then
+NULL is returned and the *err pointer is set to a non-zero error code.
 
 The ehbigint functions internally do not need to call malloc/free, but
 if you would rather use the heap for the object itself, it's naturally
@@ -50,7 +55,7 @@ like:
 	bytes = (unsigned char *)malloc(bytes_len);
 	err = ehbi_init(bi, bytes, bytes_len);
 
-The caller is, of course, responisible for freeing the objects.
+The caller is, of course, responsible for freeing the objects.
 
 
 Most ehbigint functions return an error code. The "ehbigint.h" header
@@ -87,60 +92,76 @@ or another instance of struct ehbigint:
 Zero
 ----
 Set a value to zero, in place:
-	err = ehbi_zero(bi);
+
+	ehbi_zero(bi);
 
 
 Negation
 --------
 Negate a value, in place:
-	err = ehbi_negate(bi);
+
+	ehbi_negate(bi);
 
 
 Addition
 --------
 Populate a result from adding two passed in:
-	err = ehbi_add(result, bi1, bi2);
+
+	int err = 0;
+	struct ehbigint *rv = ehbi_add(result, bi1, bi2, &err);
 
 or add a long:
-	err = ehbi_add_l(result, bi, 23);
+
+	struct ehbigint *rv = ehbi_add_l(result, bi, 23, &err);
 
 
 Increment
 ---------
 Adding to an existing value, modifying in place:
-	err = ehbi_inc(bi, bi_amount);
+
+	int err = 0;
+	ehbi_inc(bi, bi_amount, &err);
 
 Add to an existing value using an long:
-	err = ehbi_inc_l(bi, 23);
+
+	int err = 0;
+	ehbi_inc_l(bi, 23, &err);
 
 
 Subtraction
 -----------
 Populate a result with the value of the second param minus the third:
-	err = ehbi_subtract(result, bi1, bi2);
+
+	int err = 0;
+	ehbi_subtract(result, bi1, bi2, &err);
 
 Or subtract a long:
-	err = ehbi_subtract_l(result, bi1, 7);
+
+	int err = 0;
+	ehbi_subtract_l(result, bi1, 7, &err);
 
 
 Decrement
 ---------
 Decrement the value in place:
-	err = ehbi_dec(bi, bi_amount);
+
+	ehbi_dec(bi, bi_amount, &err);
 
 Decrement values in place with a long:
-	err = ehbi_dec_l(bi, 2);
+
+	ehbi_dec_l(bi, 2, &err);
 
 
 Multiplication
 --------------
 Populate the first ehbigint with the sum of the second multiplied by the
 third:
-	err = ehbi_mul(result, bi1, bi2);
+
+	ehbi_mul(result, bi1, bi2, &err);
 
 or with a long:
 
-	err = ehbi_mul_l(result, bi1, 3L);
+	ehbi_mul_l(result, bi1, 3L, &err);
 
 
 Division
@@ -148,25 +169,34 @@ Division
 Populate the quotient and remainder with the results of the numerator
 divided by the denominator:
 
-	err = ehbi_div(quotient, remainder, numerator, denominator);
+	ehbi_div(quotient, remainder, numerator, denominator, &err);
+
 or:
-	err = ehbi_div_l(quotient, remainder, numerator, 10);
+
+	ehbi_div_l(quotient, remainder, numerator, 10, &err);
 
 
 Shifting
 --------
 Shift the value of the ehbigint up by num_bits number of bits:
 
-	err = ehbi_shift_left(bi, num_bits);
-or:
-	err = ehbi_shift_right(bi, num_bits);
+	unsigned long overflow = 0;
+	ehbi_shift_left(bi, num_bits, &overflow);
+
+or down by a number of bits:
+
+	ehbi_shift_right(bi, num_bits);
+
+Bits shifted off the byte array will be "lost" ... in the case of the
+ehbi_shift_left, the caller may optionally pass a pointer which will
+be set to the number of bits which were "lost" up to the first set bit.
 
 
 Square Root
 -----------
 Obtain the closest integer less than the sqare root, and the remainder:
 
-	err = ehbi_sqrt(sqrt, remainder, bi);
+	ehbi_sqrt(sqrt, remainder, bi, &err);
 
 
 Exponents
@@ -174,9 +204,11 @@ Exponents
 Populate the first ehbigint result with the value of the base
 raised to the power of the exponent:
 
-	err = ehbi_exp(result, base, exponent);
+	ehbi_exp(result, base, exponent, &err);
+
 or:
-	err = ehbi_exp_l(result, base, 11);
+
+	ehbi_exp_l(result, base, 11, &err);
 
 
 Modular Exponentiation
@@ -184,11 +216,15 @@ Modular Exponentiation
 Populate the first ehbigint result with the value of the base
    raised to the power of the exponent mod the modulus
 
-	err = ehbi_exp_mod(result, base, exponent, modulus);
+	ehbi_exp_mod(result, base, exponent, modulus, &err);
+
 or:
-	err = ehbi_exp_mod_l(result, base, bi_exponent, 4);
+
+	ehbi_exp_mod_l(result, base, bi_exponent, 4, &err);
+
 or:
-	err = ehbi_exp_mod_ll(result, base, 4096L, 31L);
+
+	ehbi_exp_mod_ll(result, base, 4096L, 31L, &err);
 
 
 Binomial Coefficients
@@ -202,11 +238,15 @@ Binomial Coefficients
 Populates the first ehbigint result with the number of combinations
 of n objects taken k at a time, disregarding order
 
-	err = ehbi_n_choose_k(result, n, k);
+	ehbi_n_choose_k(result, n, k, &err);
+
 or:
-	err = ehbi_n_choose_k_l(result, n, 5L);
+
+	ehbi_n_choose_k_l(result, n, 5L, &err);
+
 or:
-	err = ehbi_n_choose_k_ll(result, 52L, 26L);
+
+	ehbi_n_choose_k_ll(result, 52L, 26L, &err);
 
 
 Comparison
@@ -214,19 +254,20 @@ Comparison
 The comparison functions return a result, and pass the return code to
 the functions as an "out" paramter:
 
-	result = ehbi_equals(bi1, bi2, &err);
-	result = ehbi_equals_l(bi1, 31L, &err);
-	result = ehbi_less_than(bi1, bi2, &err);
-	result = ehbi_less_than_l(bi1, 73L, &err);
-	result = ehbi_greater_than(bi1, bi2, &err);
-	result = ehbi_greater_than_l(bi1, 321L, &err);
-	result = ehbi_compare(bi1, bi2, &err);
-	result = ehbi_compare_l(bi1, 69L, &err);
-	result = ehbi_is_negative(bi, &err);
-	result = ehbi_is_odd(bi, &err);
+	result = ehbi_equals(bi1, bi2);
+	result = ehbi_equals_l(bi1, 31L);
+	result = ehbi_less_than(bi1, bi2);
+	result = ehbi_less_than_l(bi1, 73L);
+	result = ehbi_greater_than(bi1, bi2);
+	result = ehbi_greater_than_l(bi1, 321L);
+	result = ehbi_compare(bi1, bi2);
+	result = ehbi_compare_l(bi1, 69L);
+	result = ehbi_is_negative(bi);
+	result = ehbi_is_odd(bi);
 
 With the result, standard if statements can be made:
-	if (ehbi_equals(bi1, bi2, &err)) {
+
+	if (ehbi_equals(bi1, bi2)) {
 		printf("bi1 == bi2\n");
 	}
 
@@ -247,16 +288,19 @@ Output
 ------
 Populate the passed in buffer with a hex string representation of the
 ehbigint:
+
 	int err = 0;
 	printf("%s\n", ehbi_to_hex_string(bi, buf, buf_len, &err));
 
 Populates the passed in buffer with a decimal string representation of
 the ehbigint:
+
 	int err = 0;
 	printf("%s\n", ehbi_to_decimal_string(bi, buf, buf_len, &err));
 
 Populates the passed in buffer with a binary string representation of
 the ehbigint:
+
 	int err = 0;
 	printf("%s\n", ehbi_to_binary_string(bi, buf, buf_len, &err));
 

@@ -26,12 +26,12 @@ int test_comp_mul_with_gmp(int verbose, int max_iterations, char *cmp_init_val)
 
 	in_str = cmp_init_val == NULL ? "20151125" : cmp_init_val;
 
-	ehbi_init(&ein, in_bytes, BILEN, &err);
-	ehbi_init(&emul, mul_bytes, BILEN, &err);
-	ehbi_init(&eres, res_bytes, BILEN, &err);
-	ehbi_init(&ediv, div_bytes, BILEN, &err);
-	ehbi_init(&equot, quot_bytes, BILEN, &err);
-	ehbi_init(&erem, rem_bytes, BILEN, &err);
+	ehbi_init(&ein, in_bytes, BILEN);
+	ehbi_init(&emul, mul_bytes, BILEN);
+	ehbi_init(&eres, res_bytes, BILEN);
+	ehbi_init(&ediv, div_bytes, BILEN);
+	ehbi_init(&equot, quot_bytes, BILEN);
+	ehbi_init(&erem, rem_bytes, BILEN);
 
 	ehbi_set_l(&ein, 0, &err);
 	ehbi_set_l(&emul, 252533, &err);

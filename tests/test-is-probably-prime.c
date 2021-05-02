@@ -19,7 +19,7 @@ unsigned test_is_probably_prime_s(int verbose, const char *val, int expected)
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&bi, bytes_buf1, bytes_buf1_len, &err);
+	ehbi_init(&bi, bytes_buf1, bytes_buf1_len);
 
 	ehbi_set_decimal_string(&bi, val, eembed_strlen(val), &err);
 	if (err) {

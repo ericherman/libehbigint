@@ -24,9 +24,9 @@ unsigned test_n_choose_k_v(int verbose, const char *nstr, const char *kstr,
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&n, n_bytes, 20, &err);
-	ehbi_init(&k, k_bytes, 20, &err);
-	ehbi_init(&res, res_bytes, 20, &err);
+	ehbi_init(&n, n_bytes, 20);
+	ehbi_init(&k, k_bytes, 20);
+	ehbi_init(&res, res_bytes, 20);
 
 	ehbi_set_decimal_string(&n, nstr, eembed_strlen(nstr), &err);
 	if (err) {

@@ -17,7 +17,7 @@ unsigned from_dec_to_dec_round_trip(int verbose, const char *dec)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	ehbi_init(&a_bigint, bytes_buf, 20, &err);
+	ehbi_init(&a_bigint, bytes_buf, 20);
 
 	is_negative = dec[0] == '-';
 	ehbi_set_decimal_string(&a_bigint, dec, eembed_strlen(dec), &err);
@@ -32,7 +32,7 @@ unsigned from_dec_to_dec_round_trip(int verbose, const char *dec)
 		return 1;
 	}
 
-	if (ehbi_is_negative(&a_bigint, &err) != is_negative || err) {
+	if (ehbi_is_negative(&a_bigint) != is_negative || err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");

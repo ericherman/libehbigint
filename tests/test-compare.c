@@ -23,9 +23,9 @@ unsigned test_compare_chain(int verbose)
 	failures = 0;
 
 	err = 0;
-	ehbi_init(&bi1, bytes_buf1, 20, &err);
-	ehbi_init(&bi2, bytes_buf2, 10, &err);
-	ehbi_init(&bi3, bytes_buf3, 20, &err);
+	ehbi_init(&bi1, bytes_buf1, 20);
+	ehbi_init(&bi2, bytes_buf2, 10);
+	ehbi_init(&bi3, bytes_buf3, 20);
 
 	ehbi_set_hex_string(&bi1, str_1, eembed_strlen(str_1), &err);
 	if (err) {
@@ -64,7 +64,7 @@ unsigned test_compare_chain(int verbose)
 	}
 
 	err = 0;
-	result = ehbi_compare(&bi1, &bi1, &err);
+	result = ehbi_compare(&bi1, &bi1);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -76,7 +76,7 @@ unsigned test_compare_chain(int verbose)
 	failures += check_int(result, 0);
 
 	err = 0;
-	result = ehbi_less_than(&bi1, &bi1, &err);
+	result = ehbi_less_than(&bi1, &bi1);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -88,7 +88,7 @@ unsigned test_compare_chain(int verbose)
 	failures += check_int(result, 0);
 
 	err = 0;
-	result = ehbi_greater_than(&bi1, &bi1, &err);
+	result = ehbi_greater_than(&bi1, &bi1);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -100,7 +100,7 @@ unsigned test_compare_chain(int verbose)
 	failures += check_int(result, 0);
 
 	err = 0;
-	result = ehbi_compare(&bi1, &bi2, &err);
+	result = ehbi_compare(&bi1, &bi2);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -112,7 +112,7 @@ unsigned test_compare_chain(int verbose)
 	failures += check_int(result, -1);
 
 	err = 0;
-	result = ehbi_less_than(&bi1, &bi2, &err);
+	result = ehbi_less_than(&bi1, &bi2);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -124,7 +124,7 @@ unsigned test_compare_chain(int verbose)
 	failures += check_int(result, 1);
 
 	err = 0;
-	result = ehbi_greater_than(&bi1, &bi2, &err);
+	result = ehbi_greater_than(&bi1, &bi2);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -136,7 +136,7 @@ unsigned test_compare_chain(int verbose)
 	failures += check_int(result, 0);
 
 	err = 0;
-	result = ehbi_compare(&bi2, &bi1, &err);
+	result = ehbi_compare(&bi2, &bi1);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -148,7 +148,7 @@ unsigned test_compare_chain(int verbose)
 	failures += check_int(result, 1);
 
 	err = 0;
-	result = ehbi_less_than(&bi2, &bi1, &err);
+	result = ehbi_less_than(&bi2, &bi1);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -160,7 +160,7 @@ unsigned test_compare_chain(int verbose)
 	failures += check_int(result, 0);
 
 	err = 0;
-	result = ehbi_greater_than(&bi2, &bi1, &err);
+	result = ehbi_greater_than(&bi2, &bi1);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -172,7 +172,7 @@ unsigned test_compare_chain(int verbose)
 	failures += check_int(result, 1);
 
 	err = 0;
-	result = ehbi_compare(&bi1, &bi3, &err);
+	result = ehbi_compare(&bi1, &bi3);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -184,7 +184,7 @@ unsigned test_compare_chain(int verbose)
 	failures += check_int(result, 1);
 
 	err = 0;
-	result = ehbi_less_than(&bi1, &bi3, &err);
+	result = ehbi_less_than(&bi1, &bi3);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -196,7 +196,7 @@ unsigned test_compare_chain(int verbose)
 	failures += check_int(result, 0);
 
 	err = 0;
-	result = ehbi_greater_than(&bi1, &bi3, &err);
+	result = ehbi_greater_than(&bi1, &bi3);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -208,7 +208,7 @@ unsigned test_compare_chain(int verbose)
 	failures += check_int(result, 1);
 
 	err = 0;
-	result = ehbi_compare(&bi3, &bi1, &err);
+	result = ehbi_compare(&bi3, &bi1);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -220,7 +220,7 @@ unsigned test_compare_chain(int verbose)
 	failures += check_int(result, -1);
 
 	err = 0;
-	result = ehbi_less_than(&bi3, &bi1, &err);
+	result = ehbi_less_than(&bi3, &bi1);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -232,7 +232,7 @@ unsigned test_compare_chain(int verbose)
 	failures += check_int(result, 1);
 
 	err = 0;
-	result = ehbi_greater_than(&bi3, &bi1, &err);
+	result = ehbi_greater_than(&bi3, &bi1);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
@@ -269,8 +269,8 @@ unsigned test_greater_than(int verbose, const char *a, const char *b,
 	failures = 0;
 	err = 0;
 
-	ehbi_init(&bi1, bytes_buf1, 20, &err);
-	ehbi_init(&bi2, bytes_buf2, 10, &err);
+	ehbi_init(&bi1, bytes_buf1, 20);
+	ehbi_init(&bi2, bytes_buf2, 10);
 
 	ehbi_set_decimal_string(&bi1, a, eembed_strlen(a), &err);
 	if (err) {
@@ -301,7 +301,7 @@ unsigned test_greater_than(int verbose, const char *a, const char *b,
 	failures += check_str(buf2, b);
 
 	err = 0;
-	result = ehbi_greater_than(&bi1, &bi2, &err);
+	result = ehbi_greater_than(&bi1, &bi2);
 	if (err) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);

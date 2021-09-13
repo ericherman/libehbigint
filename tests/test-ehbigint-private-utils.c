@@ -74,6 +74,7 @@ unsigned check_ehbigint_dec(struct ehbigint *actual, const char *expected,
 	struct eembed_log *log = eembed_err_log;
 
 	eembed_strcpy(buf, msg);
+	eembed_strcat(buf, ":");
 	eembed_strcat(buf, eembed_long_to_str(abuf, BUFLEN, line));
 
 	actual2 = ehbi_to_decimal_string(actual, abuf, BUFLEN, &err);

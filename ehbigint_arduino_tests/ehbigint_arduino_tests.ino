@@ -8,6 +8,8 @@
 #include "eembed-arduino.h"
 #include "ehbigint.h"
 
+// having ALL of these tests in a single .ino file bloats the firmware
+// a lot, consider breaking into separate .ino files.
 unsigned test_add(int verbose);
 unsigned test_bytes_shift_left(int verbose);
 unsigned test_bytes_shift_right(int verbose);
@@ -54,13 +56,25 @@ void setup(void)
 
 unsigned test_func(const char *name, unsigned (*pfunc)(int v), int verbose)
 {
+	// print the name delay so that it flushes before running test
+	// the delay helps us see which test crashed and caused a restart
 	Serial.print(name);
 	Serial.print(" ...");
 	uint32_t delay_ms = 125;
 	delay(delay_ms);
+
+	unsigned long usec_begin = micros();
+
 	unsigned fail = pfunc(verbose);
+
+	unsigned long usec_end = micros();
+	unsigned long usec_elapsed = usec_end - usec_begin;
+	double seconds_elapsed = (usec_elapsed * 1.0) / (1000.0 * 1000.0);
+	Serial.print(" (");
+	Serial.print(seconds_elapsed, 6);
+	Serial.print(" seconds)");
+
 	Serial.println(fail ? " FAIL!" : " ok.");
-	delay(delay_ms);
 	return fail;
 }
 
@@ -94,6 +108,7 @@ void loop(void)
 	failures += Test_func(test_from_hex_to_hex_round_trip, verbose);
 	failures += Test_func(test_inc_l, verbose);
 	failures += Test_func(test_inc, verbose);
+	// test_is_probably_prime bloats the firmware a lot, make stand-alone
 	// failures += Test_func(test_is_probably_prime, verbose);
 	failures += Test_func(test_mul, verbose);
 	failures += Test_func(test_n_choose_k, verbose);
@@ -101,8 +116,8 @@ void loop(void)
 	failures += Test_func(test_set_l, verbose);
 	failures += Test_func(test_set, verbose);
 	failures += Test_func(test_shift_right, verbose);
-	Serial.println("test_sqrt takes a long time");
-	failures += Test_func(test_sqrt, verbose);
+	// Serial.println(" (test_sqrt takes a long time)");
+	// failures += Test_func(test_sqrt, verbose);
 	failures += Test_func(test_subtract, verbose);
 	failures += Test_func(test_to_string, verbose);
 

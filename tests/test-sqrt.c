@@ -4,44 +4,43 @@
 
 #include "test-ehbigint-private-utils.h"
 
+#ifndef Test_bi_buf_size
+#if EEMBED_HOSTED
+#define Test_bi_buf_size 48
+#else
+#define Test_bi_buf_size 20
+#endif
+#endif
+
 unsigned test_sqrt_v(int verbose, const char *sval, const char *ssqrt,
 		     const char *sremainder)
 {
 	int err;
 	unsigned failures;
 
-	const size_t buflen = 250;
-	char buf[250];
-	struct eembed_str_buf sbuf;
-	struct eembed_log slog;
 	struct eembed_log *log;
-	struct eembed_log *orig;
 
-	unsigned char bytes_val[50];
-	unsigned char bytes_sqrt[50];
-	unsigned char bytes_remainder[50];
+	unsigned char bytes_val[Test_bi_buf_size];
+	unsigned char bytes_sqrt[Test_bi_buf_size];
+	unsigned char bytes_remainder[Test_bi_buf_size];
 
 	struct ehbigint val;
 	struct ehbigint sqrt;
 	struct ehbigint remainder;
+	struct ehbigint *bi;
 
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
-	orig = ehbi_log_get();
-	eembed_memset(buf, 0x00, buflen);
-	log = eembed_char_buf_log_init(&slog, &sbuf, buf, buflen);
-	if (log) {
-		ehbi_log_set(log);
-	}
+	log = ehbi_log_get();
 
 	err = 0;
-	ehbi_init(&val, bytes_val, 50);
-	ehbi_init(&sqrt, bytes_sqrt, 50);
-	ehbi_init(&remainder, bytes_remainder, 50);
+	ehbi_init(&val, bytes_val, Test_bi_buf_size);
+	ehbi_init(&sqrt, bytes_sqrt, Test_bi_buf_size);
+	ehbi_init(&remainder, bytes_remainder, Test_bi_buf_size);
 
-	ehbi_set_decimal_string(&val, sval, eembed_strlen(sval), &err);
-	if (err) {
+	bi = ehbi_set_decimal_string(&val, sval, eembed_strlen(sval), &err);
+	if (!bi) {
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
 		log->append_l(log, err);
@@ -60,8 +59,8 @@ unsigned test_sqrt_v(int verbose, const char *sval, const char *ssqrt,
 		return 1;
 	}
 
-	ehbi_sqrt(&sqrt, &remainder, &val, &err);
-	if (err) {
+	bi = ehbi_sqrt(&sqrt, &remainder, &val, &err);
+	if (!bi) {
 		++failures;
 		STDERR_FILE_LINE_FUNC(log);
 		log->append_s(log, "error ");
@@ -73,8 +72,6 @@ unsigned test_sqrt_v(int verbose, const char *sval, const char *ssqrt,
 	failures += Check_ehbigint_dec(&sqrt, ssqrt);
 
 	failures += Check_ehbigint_dec(&remainder, sremainder);
-
-	ehbi_log_set(orig);
 
 	return failures;
 }
@@ -138,11 +135,13 @@ unsigned test_sqrt(int v)
 	failures += test_sqrt_v(v, "10000000000000001", "100000000", "1");
 	failures +=
 	    test_sqrt_v(v, "10000000000000000000001", "100000000000", "1");
+#if EEMBED_HOSTED
 	failures +=
 	    test_sqrt_v(v,
 			"22934986159900715116108208953020869407965649891682811",
 			"151443012912120561509118328",
 			"111863686247280161986167227");
+#endif
 
 	failures += test_sqrt_v(v, "0", "0", "0");
 	failures += test_sqrt_negative(v);

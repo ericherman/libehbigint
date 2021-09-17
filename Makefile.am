@@ -53,7 +53,7 @@ EHSTR_CFLAGS=-I $(EHSTR_SRC)
 ECHECK_SRC=./submodules/libecheck/src
 ECHECK_CFLAGS=-I $(ECHECK_SRC)
 
-NOISY_CFLAGS=-Wall -Wextra -Werror
+NOISY_CFLAGS=-Wall -Wextra -Wcast-qual -Wc++-compat -Werror
 
 AM_CFLAGS=\
  $(BUILD_TYPE_CFLAGS) \

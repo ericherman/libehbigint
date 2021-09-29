@@ -1377,13 +1377,60 @@ struct ehbigint *ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits)
 	return bi;
 }
 
+static unsigned char ehbi_msb8(register unsigned char in)
+{
+	if (in & (1 << 7)) {
+		return 8;
+	}
+	if (in & (1 << 6)) {
+		return 7;
+	}
+	if (in & (1 << 5)) {
+		return 6;
+	}
+	if (in & (1 << 4)) {
+		return 5;
+	}
+	if (in & (1 << 3)) {
+		return 4;
+	}
+	if (in & (1 << 2)) {
+		return 3;
+	}
+	if (in & (1 << 1)) {
+		return 2;
+	}
+	if (in & (1 << 0)) {
+		return 1;
+	}
+	return 0;
+}
+
+static unsigned long ehbi_shift_left_overflow(struct ehbigint *bi,
+					      unsigned long num_bits)
+{
+	unsigned long overflow, avail;
+	unsigned char top;
+
+	Ehbi_assert_bi(bi);
+
+	overflow = 0;
+	avail = 8 * (bi->bytes_len - bi->bytes_used);
+	top = bi->bytes[bi->bytes_len - bi->bytes_used];
+	avail += (8 - ehbi_msb8(top));
+
+	if (avail < num_bits) {
+		overflow = (num_bits - avail);
+	}
+
+	return overflow;
+}
+
 struct ehbigint *ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits,
 				 unsigned long *overflow)
 {
 	struct eba eba;
-	size_t found, i, add_size;
-	unsigned long avail;
-	unsigned char top;
+	size_t add_size;
 
 	Ehbi_assert_bi(bi);
 	eba.endian = eba_big_endian;
@@ -1391,17 +1438,7 @@ struct ehbigint *ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits,
 	eba.size_bytes = bi->bytes_len;
 
 	if (overflow) {
-		avail = 8 * (bi->bytes_len - bi->bytes_used);
-		top = bi->bytes[bi->bytes_len - bi->bytes_used];
-		for (found = 0, i = 0; !found && i < 8; ++i) {
-			found = top & (1U << (7 - i));
-			if (!found) {
-				++avail;
-			}
-		}
-		if (avail < num_bits) {
-			*overflow = (num_bits - avail);
-		}
+		*overflow = ehbi_shift_left_overflow(bi, num_bits);
 	}
 
 	eba_shift_left(&eba, num_bits);

@@ -2,6 +2,8 @@
 # Makefile.am
 # Copyright (C) 2016, 2018, 2019 Eric Herman <eric@freesa.org>
 
+BROWSER ?= firefox
+
 if DEBUG
 BUILD_TYPE_CFLAGS=\
 	-std=gnu11 -D_GNU_SOURCE \
@@ -230,6 +232,20 @@ ACLOCAL_AMFLAGS=-I m4 --install
 
 EXTRA_DIST=COPYING.LESSER misc
 
+
+line-cov: check
+	lcov    --checksum \
+		--capture \
+		--base-directory . \
+		--directory src \
+		--output-file coverage.info
+
+html-report: line-cov
+	mkdir -pv ./coverage_html
+	genhtml coverage.info --output-directory coverage_html
+
+coverage: html-report
+	$(BROWSER) ./coverage_html/index.html
 
 
 # extracted from https://github.com/torvalds/linux/blob/master/scripts/Lindent

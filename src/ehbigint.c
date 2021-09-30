@@ -1380,8 +1380,8 @@ struct ehbigint *ehbi_shift_right(struct ehbigint *bi, unsigned long num_bits)
 	eba.size_bytes = 0;
 
 	Ehbi_assert_bi(bi);
-	eba.bits = bi->bytes;
-	eba.size_bytes = bi->bytes_len;
+	eba.bits = bi->bytes + (bi->bytes_len - bi->bytes_used);
+	eba.size_bytes = bi->bytes_used;
 
 	eba_shift_right(&eba, num_bits);
 
@@ -1443,20 +1443,29 @@ struct ehbigint *ehbi_shift_left(struct ehbigint *bi, unsigned long num_bits,
 				 unsigned long *overflow)
 {
 	struct eba eba;
-	size_t add_size;
+	size_t add_size, avail_bytes;
 
 	Ehbi_assert_bi(bi);
 	eba.endian = eba_big_endian;
-	eba.bits = bi->bytes;
-	eba.size_bytes = bi->bytes_len;
 
-	if (overflow) {
-		*overflow = ehbi_shift_left_overflow(bi, num_bits);
+	add_size = 2 + (num_bits / EEMBED_CHAR_BIT);
+	avail_bytes = bi->bytes_len - bi->bytes_used;
+	if (avail_bytes > add_size) {
+		eba.bits = bi->bytes + (avail_bytes - add_size);
+		eba.size_bytes = bi->bytes_len - (avail_bytes - add_size);
+		if (overflow) {
+			*overflow = 0;
+		}
+	} else {
+		eba.bits = bi->bytes;
+		eba.size_bytes = bi->bytes_len;
+		if (overflow) {
+			*overflow = ehbi_shift_left_overflow(bi, num_bits);
+		}
 	}
 
 	eba_shift_left(&eba, num_bits);
 
-	add_size = 2 + (num_bits / EEMBED_CHAR_BIT);
 	ehbi_internal_reset_bytes_used(bi, bi->bytes_used + add_size);
 
 	return bi;

@@ -123,7 +123,7 @@ unsigned test_inc_v(int verbose, const char *v1, const char *v2,
 	}
 	failures += Check_ehbigint_dec(&bi1, expect);
 
-	check_int(bi1.sign, expect[0] == '-');
+	check_int(ehbi_is_negative(&bi1), expect[0] == '-');
 
 	if (failures) {
 		log->append_ul(log, failures);

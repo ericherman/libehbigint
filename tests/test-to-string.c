@@ -18,7 +18,7 @@ unsigned test_to_string_65605(int verbose)
 
 	a_bigint.bytes = bytes;
 	a_bigint.bytes_len = 4;
-	a_bigint.sign = 0;
+	a_bigint.flags = 0x00;
 	a_bigint.bytes_used = 3;
 
 	failures += Check_ehbigint_hex(&a_bigint, "0x010045");
@@ -47,7 +47,7 @@ unsigned test_to_string_negative_3(int verbose)
 	ehbi_init(&bi, bytes, 20);
 	bi.bytes[19] = 0x03;
 	bi.bytes_used = 1;
-	bi.sign = 1;
+	ehbi_negate(&bi);
 
 	failures += Check_ehbigint_hex(&bi, "0x03");
 	failures += Check_ehbigint_dec(&bi, "-3");

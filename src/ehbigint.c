@@ -101,13 +101,27 @@ static void ehbi_set_error(int *err, int code)
 	}
 }
 
+enum ehbi_flags {
+	ehbi_flag_sign = 0
+};
+
+static void ehbi_sign_set(struct ehbigint *bi, unsigned val)
+{
+	bi->flags = eba_set_byte_bit(bi->flags, ehbi_flag_sign, val);
+}
+
+static unsigned ehbi_sign(const struct ehbigint *bi)
+{
+	return eba_get_byte_bit(bi->flags, ehbi_flag_sign);
+}
+
 struct ehbigint *ehbi_zero(struct ehbigint *bi)
 {
 	Ehbi_assert_bi(bi);
 
 	eembed_memset(bi->bytes, 0x00, bi->bytes_len);
 	bi->bytes_used = 1;
-	bi->sign = 0;
+	ehbi_sign_set(bi, 0);
 
 	return bi;
 }
@@ -119,7 +133,7 @@ static void ehbi_internal_clear_null_struct(struct ehbigint *bi)
 	bi->bytes = NULL;
 	bi->bytes_len = 0;
 	bi->bytes_used = 0;
-	bi->sign = 0;
+	bi->flags = 0x00;
 }
 
 static void ehbi_internal_struct_l(struct ehbigint *temp, long val)
@@ -139,7 +153,7 @@ static void ehbi_internal_struct_l(struct ehbigint *temp, long val)
 		j = (temp->bytes_len - 1) - i;
 		temp->bytes[j] = c;
 	}
-	temp->sign = (val < 0);
+	ehbi_sign_set(temp, (val < 0));
 	ehbi_internal_reset_bytes_used(temp, sizeof(unsigned long));
 }
 
@@ -185,7 +199,7 @@ struct ehbigint *ehbi_set(struct ehbigint *bi, const struct ehbigint *val,
 		ehbi_set_error(err, EHBI_BYTES_TOO_SMALL);
 		goto ehbi_set_error;
 	}
-	bi->sign = val->sign;
+	ehbi_sign_set(bi, ehbi_sign(val));
 	bi->bytes_used = val->bytes_used;
 
 	offset = bi->bytes_len - bi->bytes_used;
@@ -215,10 +229,7 @@ static struct ehbigint *ehbi_set_or_malloc(struct ehbigint *tmp,
 					   unsigned char *bbuf, size_t bbuf_len,
 					   size_t need, int *err, int line)
 {
-	tmp->bytes = NULL;
-	tmp->bytes_len = 0;
-	tmp->bytes_used = 0;
-	tmp->sign = 0;
+	ehbi_internal_clear_null_struct(tmp);
 	if (bbuf_len >= need) {
 		tmp->bytes = bbuf;
 		tmp->bytes_len = bbuf_len;
@@ -275,7 +286,7 @@ struct ehbigint *ehbi_add(struct ehbigint *res,
 		return ehbi_set(res, bi2, err);
 	}
 
-	if (bi1->sign != bi2->sign) {
+	if (ehbi_sign(bi1) != ehbi_sign(bi2)) {
 		size = bi2->bytes_len;
 		if (!Ehbi_set_or_malloc
 		    (&tmp, bytes, Ehbi_bi_buf_size, size, err)) {
@@ -296,7 +307,7 @@ struct ehbigint *ehbi_add(struct ehbigint *res,
 		ehbi_set_or_malloc_free(&tmp, Ehbi_bi_buf_size);
 		return res;
 	}
-	res->sign = bi1->sign;
+	ehbi_sign_set(res, ehbi_sign(bi1));
 
 	if (bi1->bytes_used < bi2->bytes_used) {
 		swp = bi1;
@@ -347,7 +358,7 @@ struct ehbigint *ehbi_add(struct ehbigint *res,
 	}
 
 	if (ehbi_is_zero(res)) {
-		res->sign = 0;
+		ehbi_sign_set(res, 0);
 	}
 
 	return res;
@@ -434,8 +445,8 @@ struct ehbigint *ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
 		}
 	}
 
-	if (bi1->sign != bi2->sign) {
-		res->sign = 1;
+	if (ehbi_sign(bi1) != ehbi_sign(bi2)) {
+		ehbi_sign_set(res, 1);
 	}
 
 ehbi_mul_end:
@@ -500,12 +511,12 @@ struct ehbigint *ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		return NULL;
 	}
 
-	if (numerator->sign == 0) {
+	if (ehbi_sign(numerator) == 0) {
 		abs_numer = numerator;
 	} else {
 		s_abs_numer.bytes_used = 0;
 		s_abs_numer.bytes_len = 0;
-		s_abs_numer.sign = 0;
+		s_abs_numer.flags = 0x00;
 		size = numerator->bytes_used;
 		rp = NULL;
 		if (!Ehbi_set_or_malloc
@@ -524,12 +535,12 @@ struct ehbigint *ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		abs_numer = &s_abs_numer;
 	}
 
-	if (denominator->sign == 0) {
+	if (ehbi_sign(denominator) == 0) {
 		abs_denom = denominator;
 	} else {
 		s_abs_denom.bytes_used = 0;
 		s_abs_denom.bytes_len = 0;
-		s_abs_denom.sign = 0;
+		s_abs_denom.flags = 0x00;
 		size = numerator->bytes_used;
 		rp = NULL;
 		if (!Ehbi_set_or_malloc(&s_abs_denom, abs_denom_bytes,
@@ -623,8 +634,8 @@ struct ehbigint *ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		}
 	}
 
-	if (numerator->sign != denominator->sign) {
-		quotient->sign = 1;
+	if (ehbi_sign(numerator) != ehbi_sign(denominator)) {
+		ehbi_sign_set(quotient, 1);
 	}
 
 ehbi_div_end:
@@ -983,7 +994,7 @@ struct ehbigint *ehbi_exp_mod(struct ehbigint *result,
 
 	/* base := base mod modulus */
 	rp = ehbi_div(&tjunk, &tbase, base, modulus, err);
-	if (!err) {
+	if (!rp) {
 		goto ehbi_mod_exp_end;
 	}
 
@@ -1214,7 +1225,7 @@ struct ehbigint *ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 	}
 
 	/* subtracting a negative */
-	if (bi1->sign == 0 && bi2->sign != 0) {
+	if (ehbi_sign(bi1) == 0 && ehbi_sign(bi2) != 0) {
 		size = bi2->bytes_len;
 		if (!Ehbi_set_or_malloc
 		    (&tmp, bytes, Ehbi_bi_buf_size, size, err)) {
@@ -1234,7 +1245,7 @@ struct ehbigint *ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 	}
 
 	/* negative subtracting a positive */
-	if (bi1->sign != 0 && bi2->sign == 0) {
+	if (ehbi_sign(bi1) != 0 && ehbi_sign(bi2) == 0) {
 		size = bi1->bytes_len;
 		if (!Ehbi_set_or_malloc
 		    (&tmp, bytes, Ehbi_bi_buf_size, size, err)) {
@@ -1257,8 +1268,10 @@ struct ehbigint *ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 		goto ehbi_subtract_end;
 	}
 
-	if ((bi1->sign == 0 && bi2->sign == 0 && ehbi_greater_than(bi2, bi1))
-	    || (bi1->sign != 0 && bi2->sign != 0 && ehbi_less_than(bi2, bi1))) {
+	if ((ehbi_sign(bi1) == 0 && ehbi_sign(bi2) == 0
+	     && ehbi_greater_than(bi2, bi1))
+	    || (ehbi_sign(bi1) != 0 && ehbi_sign(bi2) != 0
+		&& ehbi_less_than(bi2, bi1))) {
 		/* subtracting a bigger number */
 		negate = 1;
 		swp = bi1;
@@ -1325,9 +1338,9 @@ struct ehbigint *ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 		}
 	}
 
-	res->sign = (negate) ? !(bi1->sign) : bi1->sign;
+	ehbi_sign_set(res, (negate) ? !ehbi_sign(bi1) : ehbi_sign(bi1));
 	if (ehbi_is_zero(res)) {
-		res->sign = 0;
+		ehbi_sign_set(res, 0);
 	}
 	ehbi_internal_reset_bytes_used(res, res->bytes_used + 1);
 ehbi_subtract_end:
@@ -1926,7 +1939,7 @@ struct ehbigint *ehbi_negate(struct ehbigint *bi)
 {
 	Ehbi_assert_bi(bi);
 
-	bi->sign = (bi->sign == 0) ? 1 : 0;
+	ehbi_sign_set(bi, (ehbi_sign(bi) == 0) ? 1 : 0);
 
 	return bi;
 }
@@ -1935,10 +1948,10 @@ int ehbi_is_negative(const struct ehbigint *bi)
 {
 	Ehbi_assert_bi(bi);
 	if (ehbi_is_zero(bi)) {
-		eembed_assert(bi->sign == 0);
+		eembed_assert(ehbi_sign(bi) == 0);
 	}
 
-	return (bi->sign == 0) ? 0 : 1;
+	return (ehbi_sign(bi) == 0) ? 0 : 1;
 }
 
 int ehbi_compare(const struct ehbigint *bi1, const struct ehbigint *bi2)
@@ -2223,7 +2236,7 @@ struct ehbigint *ehbi_set_hex_string(struct ehbigint *bi, const char *str,
 		return NULL;
 	}
 
-	bi->sign = 0;
+	ehbi_sign_set(bi, 0);
 
 	/* ignore characters starting with the first NULL in string */
 	for (i = 1; i < str_len; ++i) {
@@ -2686,7 +2699,7 @@ static void ehbi_internal_reset_bytes_used(struct ehbigint *bi, size_t from)
 	}
 
 	if (ehbi_is_zero(bi)) {
-		bi->sign = 0;
+		ehbi_sign_set(bi, 0);
 	}
 }
 

@@ -22,7 +22,10 @@ struct ehbigint {
 	unsigned char *bytes;
 	size_t bytes_len;
 	size_t bytes_used;
-	unsigned char sign;
+	unsigned char flags;
+	/*
+	   struct eembed_allocator *ea;
+	 */
 };
 
 /*
@@ -433,9 +436,6 @@ struct eembed_log *ehbi_log_get(void);
 /* Set the struct eembed_log pointer to where messages shall target. */
 /* returns the previous value */
 struct eembed_log *ehbi_log_set(struct eembed_log *log);
-
-/* if _POSIX_C_SOURCE backtrace_symbols_fd is used */
-void ehbi_log_backtrace(struct eembed_log *log);
 
 /*****************************************************************************/
 /* error codes */

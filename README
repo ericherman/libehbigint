@@ -19,8 +19,10 @@ contains the pointer to the underlying bytes, as well as some meta-data:
 		unsigned char *bytes;
 		size_t bytes_len;
 		size_t bytes_used;
-		unsigned char sign;
+		unsigned char flags;
 	};
+The sign of the value is held within the flags member variable, and
+can be accessed via ehbi_is_negative(bi) and ehbi_negate(bi).
 
 
 Prior to use, it is the caller's responsibility to allocate the

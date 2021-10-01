@@ -110,6 +110,51 @@ unsigned test_set_dec_str(int verbose, const char *val)
 	return failures;
 }
 
+unsigned test_set_too_small(int verbose)
+{
+	struct eembed_log *log = eembed_err_log;
+	int err;
+	long lval;
+	const size_t lbuf_size = 21;
+	char lbuf[21];
+	unsigned failures;
+
+	unsigned char a_bytes[4];
+	struct ehbigint a_bigint;
+
+	unsigned char b_bytes[2];
+	struct ehbigint b_bigint;
+
+	struct ehbigint *rv;
+
+	VERBOSE_ANNOUNCE(verbose);
+	failures = 0;
+
+	err = 0;
+	ehbi_init(&a_bigint, a_bytes, 4);
+	ehbi_init(&b_bigint, b_bytes, 2);
+
+	lval = (1 << (8 * 3));
+	eembed_long_to_str(lbuf, lbuf_size, lval);
+
+	rv = ehbi_set_l(&a_bigint, lval, &err);
+	failures += check_ptr_not_null_m(rv, lbuf);
+	failures += check_int_m(err, 0, "err?");
+	failures += Check_ehbigint_dec(&a_bigint, lbuf);
+
+	rv = ehbi_set(&b_bigint, &a_bigint, &err);
+	failures += check_int_m(rv ? 0 : 1, 1, "expected NULL");
+	failures += check_int_m(err, EHBI_BYTES_TOO_SMALL, "BYTES_TOO_SMALL");
+
+	if (failures) {
+		log->append_ul(log, failures);
+		log->append_s(log, " failures test_set_too_small");
+		log->append_eol(log);
+	}
+
+	return failures;
+}
+
 unsigned test_set(int v)
 {
 	unsigned failures = 0;
@@ -119,6 +164,8 @@ unsigned test_set(int v)
 
 	failures += test_set_dec_str(v, "3");
 	failures += test_set_dec_str(v, "-3");
+
+	failures += test_set_too_small(v);
 
 	return failures;
 }

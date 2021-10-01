@@ -296,10 +296,7 @@ struct ehbigint *ehbi_add(struct ehbigint *res,
 		if (!swp) {
 			goto ehbi_add_error;
 		}
-		swp = ehbi_negate(&tmp);
-		if (!swp) {
-			goto ehbi_add_error;
-		}
+		ehbi_negate(&tmp);
 		swp = ehbi_subtract(res, bi1, &tmp, err);
 		if (!swp) {
 			goto ehbi_add_error;
@@ -528,10 +525,7 @@ struct ehbigint *ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		if (!rp) {
 			goto ehbi_div_end;
 		}
-		rp = ehbi_negate(&s_abs_numer);
-		if (!rp) {
-			goto ehbi_div_end;
-		}
+		ehbi_negate(&s_abs_numer);
 		abs_numer = &s_abs_numer;
 	}
 
@@ -551,10 +545,7 @@ struct ehbigint *ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		if (!rp) {
 			goto ehbi_div_end;
 		}
-		rp = ehbi_negate(&s_abs_denom);
-		if (!rp) {
-			goto ehbi_div_end;
-		}
+		ehbi_negate(&s_abs_denom);
 		abs_denom = &s_abs_denom;
 	}
 
@@ -1236,10 +1227,7 @@ struct ehbigint *ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 		if (!rp) {
 			goto ehbi_subtract_end;
 		}
-		rp = ehbi_negate(&tmp);
-		if (!rp) {
-			goto ehbi_subtract_end;
-		}
+		ehbi_negate(&tmp);
 		rp = ehbi_add(res, bi1, &tmp, err);
 		goto ehbi_subtract_end;
 	}
@@ -1256,10 +1244,7 @@ struct ehbigint *ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 		if (!rp) {
 			goto ehbi_subtract_end;
 		}
-		rp = ehbi_negate(&tmp);
-		if (!rp) {
-			goto ehbi_subtract_end;
-		}
+		ehbi_negate(&tmp);
 		rp = ehbi_add(res, &tmp, bi2, err);
 		if (!rp) {
 			goto ehbi_subtract_end;

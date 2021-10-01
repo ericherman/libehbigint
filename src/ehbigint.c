@@ -227,8 +227,10 @@ int ehbi_is_zero(const struct ehbigint *bi)
 
 static struct ehbigint *ehbi_set_or_malloc(struct ehbigint *tmp,
 					   unsigned char *bbuf, size_t bbuf_len,
-					   size_t need, int *err, int line)
+					   const struct ehbigint *val, int *err,
+					   int line)
 {
+	size_t need = val->bytes_used;
 	ehbi_internal_clear_null_struct(tmp);
 	if (bbuf_len >= need) {
 		tmp->bytes = bbuf;
@@ -239,18 +241,17 @@ static struct ehbigint *ehbi_set_or_malloc(struct ehbigint *tmp,
 			Ehbi_log_error_s_ul_s_ul_s("Line ", line,
 						   ". Could not allocate ",
 						   need, " bytes?");
-			ehbi_set_error(err, EHBI_STACK_TOO_SMALL);
+			ehbi_set_error(err, EHBI_NOMEM);
 			return NULL;
 		}
 		tmp->bytes_len = need;
 	}
-	eembed_memset(tmp->bytes, 0x00, tmp->bytes_len);
-	tmp->bytes_used = 1;
-	return tmp;
+	ehbi_zero(tmp);
+	return ehbi_set(tmp, val, err);
 }
 
-#define Ehbi_set_or_malloc(tmp, bbuf, bbuf_len, need, err) \
-	ehbi_set_or_malloc(tmp, bbuf, bbuf_len, need, err, __LINE__)
+#define Ehbi_set_or_malloc(tmp, bbuf, bbuf_len, val, err) \
+	ehbi_set_or_malloc(tmp, bbuf, bbuf_len, val, err, __LINE__)
 
 static void ehbi_set_or_malloc_free(struct ehbigint *tmp, size_t stack_buf_size)
 {
@@ -264,7 +265,7 @@ struct ehbigint *ehbi_add(struct ehbigint *res,
 			  const struct ehbigint *bi1,
 			  const struct ehbigint *bi2, int *err)
 {
-	size_t i, size;
+	size_t i;
 	unsigned char a, b, c;
 	const struct ehbigint *swp;
 	struct ehbigint tmp;
@@ -287,12 +288,8 @@ struct ehbigint *ehbi_add(struct ehbigint *res,
 	}
 
 	if (ehbi_sign(bi1) != ehbi_sign(bi2)) {
-		size = bi2->bytes_len;
-		if (!Ehbi_set_or_malloc
-		    (&tmp, bytes, Ehbi_bi_buf_size, size, err)) {
-			goto ehbi_add_error;
-		}
-		swp = ehbi_set(&tmp, bi2, err);
+		swp =
+		    Ehbi_set_or_malloc(&tmp, bytes, Ehbi_bi_buf_size, bi2, err);
 		if (!swp) {
 			goto ehbi_add_error;
 		}
@@ -406,8 +403,8 @@ struct ehbigint *ehbi_mul(struct ehbigint *res, const struct ehbigint *bi1,
 		bi2 = t;
 	}
 
-	if (!Ehbi_set_or_malloc
-	    (&tmp, bytes, Ehbi_bi_buf_size, res->bytes_len, err)) {
+	rp = Ehbi_set_or_malloc(&tmp, bytes, Ehbi_bi_buf_size, res, err);
+	if (!rp) {
 		return NULL;
 	}
 	ehbi_zero(&tmp);
@@ -475,7 +472,7 @@ struct ehbigint *ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 			  const struct ehbigint *numerator,
 			  const struct ehbigint *denominator, int *err)
 {
-	size_t i, size, num_idx;
+	size_t i, num_idx;
 	unsigned long overflow;
 	struct ehbigint s_abs_numer;
 	struct ehbigint s_abs_denom;
@@ -514,16 +511,10 @@ struct ehbigint *ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		s_abs_numer.bytes_used = 0;
 		s_abs_numer.bytes_len = 0;
 		s_abs_numer.flags = 0x00;
-		size = numerator->bytes_used;
-		rp = NULL;
-		if (!Ehbi_set_or_malloc
-		    (&s_abs_numer, abs_numer_bytes, Ehbi_bi_buf_size, size,
-		     err)) {
-			return NULL;
-		}
-		rp = ehbi_set(&s_abs_numer, numerator, err);
+		rp = Ehbi_set_or_malloc(&s_abs_numer, abs_numer_bytes,
+					Ehbi_bi_buf_size, numerator, err);
 		if (!rp) {
-			goto ehbi_div_end;
+			return NULL;
 		}
 		ehbi_negate(&s_abs_numer);
 		abs_numer = &s_abs_numer;
@@ -535,13 +526,8 @@ struct ehbigint *ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 		s_abs_denom.bytes_used = 0;
 		s_abs_denom.bytes_len = 0;
 		s_abs_denom.flags = 0x00;
-		size = numerator->bytes_used;
-		rp = NULL;
-		if (!Ehbi_set_or_malloc(&s_abs_denom, abs_denom_bytes,
-					Ehbi_bi_buf_size, size, err)) {
-			goto ehbi_div_end;
-		}
-		rp = ehbi_set(&s_abs_denom, denominator, err);
+		rp = Ehbi_set_or_malloc(&s_abs_denom, abs_denom_bytes,
+					Ehbi_bi_buf_size, denominator, err);
 		if (!rp) {
 			goto ehbi_div_end;
 		}
@@ -667,7 +653,6 @@ struct ehbigint *ehbi_sqrt(struct ehbigint *result, struct ehbigint *remainder,
 	unsigned char zbytes[2];
 	unsigned char obytes[2];
 	unsigned char tbytes[2];
-	size_t size;
 	struct ehbigint *rp;
 	unsigned char gues_bytes[Ehbi_bi_buf_size];
 	unsigned char temp_bytes[Ehbi_bi_buf_size];
@@ -711,17 +696,16 @@ struct ehbigint *ehbi_sqrt(struct ehbigint *result, struct ehbigint *remainder,
 
 	Ehbi_assert_bi(val);
 
-	size = 1 + val->bytes_used;
-	if (!Ehbi_set_or_malloc
-	    (&guess, gues_bytes, Ehbi_bi_buf_size, size, err)) {
+	rp = Ehbi_set_or_malloc(&guess, gues_bytes, Ehbi_bi_buf_size, val, err);
+	if (!rp) {
 		return NULL;
 	}
-
-	size = 1 + (val->bytes_used * 2);
-	if (!Ehbi_set_or_malloc(&temp, temp_bytes, Ehbi_bi_buf_size, size, err)) {
+	rp = Ehbi_set_or_malloc(&temp, temp_bytes, Ehbi_bi_buf_size, val, err);
+	if (!rp) {
 		goto ehbi_sqrt_end;
 	}
-	if (!Ehbi_set_or_malloc(&junk, junk_bytes, Ehbi_bi_buf_size, size, err)) {
+	rp = Ehbi_set_or_malloc(&junk, junk_bytes, Ehbi_bi_buf_size, val, err);
+	if (!rp) {
 		goto ehbi_sqrt_end;
 	}
 
@@ -817,12 +801,12 @@ struct ehbigint *ehbi_exp(struct ehbigint *result, const struct ehbigint *base,
 	rp = NULL;
 	ehbi_internal_clear_null_struct(&loop);
 
-	if (!Ehbi_set_or_malloc(&loop, lbytes, Ehbi_bi_buf_size,
-				exponent->bytes_used, err)) {
+	rp = Ehbi_set_or_malloc(&loop, lbytes, Ehbi_bi_buf_size, exponent, err);
+	if (!rp) {
 		goto ehbi_exp_end;
 	}
-	if (!Ehbi_set_or_malloc(&tmp, tbytes, Ehbi_bi_buf_size,
-				result->bytes_len, err)) {
+	rp = Ehbi_set_or_malloc(&tmp, tbytes, Ehbi_bi_buf_size, result, err);
+	if (!rp) {
 		goto ehbi_exp_end;
 	}
 
@@ -905,20 +889,30 @@ struct ehbigint *ehbi_exp_mod(struct ehbigint *result,
 	Ehbi_assert_bi(modulus);
 	ehbi_init(&zero, zero_bytes, 2);
 
+	/* cheating on result->bytes_used */
 	size = 8 + (4 * base->bytes_used) + (4 * exponent->bytes_used);
+	result->bytes_used = size;
 
-	if (!Ehbi_set_or_malloc(&tmp1, t1_bytes, Ehbi_bi_buf_size, size, err)) {
+	rp = Ehbi_set_or_malloc(&tmp1, t1_bytes, Ehbi_bi_buf_size, result, err);
+	if (!rp) {
+		ehbi_zero(result);
 		return NULL;
 	}
-	if (!Ehbi_set_or_malloc(&tbase, tb_bytes, Ehbi_bi_buf_size, size, err)) {
+	rp = Ehbi_set_or_malloc(&tbase, tb_bytes, Ehbi_bi_buf_size, result,
+				err);
+	if (!rp) {
 		goto ehbi_mod_exp_end;
 	}
-	if (!Ehbi_set_or_malloc(&texp, te_bytes, Ehbi_bi_buf_size, size, err)) {
+	rp = Ehbi_set_or_malloc(&texp, te_bytes, Ehbi_bi_buf_size, result, err);
+	if (!rp) {
 		goto ehbi_mod_exp_end;
 	}
-	if (!Ehbi_set_or_malloc(&tjunk, tj_bytes, Ehbi_bi_buf_size, size, err)) {
+	rp = Ehbi_set_or_malloc(&tjunk, tj_bytes, Ehbi_bi_buf_size, result,
+				err);
+	if (!rp) {
 		goto ehbi_mod_exp_end;
 	}
+	ehbi_zero(result);
 
 	/* prevent divide by zero */
 	ehbi_zero(&tmp1);
@@ -1079,7 +1073,6 @@ struct ehbigint *ehbi_exp_mod_ll(struct ehbigint *result,
 struct ehbigint *ehbi_inc(struct ehbigint *bi, const struct ehbigint *val,
 			  int *err)
 {
-	size_t size;
 	struct ehbigint temp;
 	struct ehbigint *rp;
 	unsigned char bytes[Ehbi_bi_buf_size];
@@ -1097,18 +1090,12 @@ struct ehbigint *ehbi_inc(struct ehbigint *bi, const struct ehbigint *val,
 		return NULL;
 	}
 
-	size = bi->bytes_used;
-	if (!Ehbi_set_or_malloc(&temp, bytes, Ehbi_bi_buf_size, size, err)) {
-		return NULL;
-	}
-
-	rp = ehbi_set(&temp, bi, err);
+	rp = Ehbi_set_or_malloc(&temp, bytes, Ehbi_bi_buf_size, bi, err);
 	if (!rp) {
-		goto ehbi_inc_end;
+		return NULL;
 	}
 	rp = ehbi_add(bi, &temp, val, err);
 
-ehbi_inc_end:
 	ehbi_set_or_malloc_free(&temp, Ehbi_bi_buf_size);
 	if (!rp) {
 		return NULL;
@@ -1134,7 +1121,6 @@ struct ehbigint *ehbi_inc_l(struct ehbigint *bi, long val, int *err)
 struct ehbigint *ehbi_dec(struct ehbigint *bi, const struct ehbigint *val,
 			  int *err)
 {
-	size_t size;
 	struct ehbigint temp;
 	struct ehbigint *rp;
 	unsigned char bytes[Ehbi_bi_buf_size];
@@ -1143,9 +1129,9 @@ struct ehbigint *ehbi_dec(struct ehbigint *bi, const struct ehbigint *val,
 
 	Ehbi_assert_bi(bi);
 	Ehbi_assert_bi(val);
-	size = bi->bytes_len;
 
-	if (!Ehbi_set_or_malloc(&temp, bytes, Ehbi_bi_buf_size, size, err)) {
+	rp = Ehbi_set_or_malloc(&temp, bytes, Ehbi_bi_buf_size, bi, err);
+	if (!rp) {
 		return NULL;
 	}
 	ehbi_zero(&temp);
@@ -1183,7 +1169,7 @@ struct ehbigint *ehbi_dec_l(struct ehbigint *bi, long val, int *err)
 struct ehbigint *ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 			       const struct ehbigint *bi2, int *err)
 {
-	size_t i, j, size;
+	size_t i, j;
 	unsigned char a, b, c, negate;
 	const struct ehbigint *swp;
 	struct ehbigint *bi1a;
@@ -1217,13 +1203,8 @@ struct ehbigint *ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 
 	/* subtracting a negative */
 	if (ehbi_sign(bi1) == 0 && ehbi_sign(bi2) != 0) {
-		size = bi2->bytes_len;
-		if (!Ehbi_set_or_malloc
-		    (&tmp, bytes, Ehbi_bi_buf_size, size, err)) {
-			rp = NULL;
-			goto ehbi_subtract_end;
-		}
-		rp = ehbi_set(&tmp, bi2, err);
+		rp = Ehbi_set_or_malloc(&tmp, bytes, Ehbi_bi_buf_size, bi2,
+					err);
 		if (!rp) {
 			goto ehbi_subtract_end;
 		}
@@ -1234,13 +1215,8 @@ struct ehbigint *ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 
 	/* negative subtracting a positive */
 	if (ehbi_sign(bi1) != 0 && ehbi_sign(bi2) == 0) {
-		size = bi1->bytes_len;
-		if (!Ehbi_set_or_malloc
-		    (&tmp, bytes, Ehbi_bi_buf_size, size, err)) {
-			rp = NULL;
-			goto ehbi_subtract_end;
-		}
-		rp = ehbi_set(&tmp, bi1, err);
+		rp = Ehbi_set_or_malloc(&tmp, bytes, Ehbi_bi_buf_size, bi1,
+					err);
 		if (!rp) {
 			goto ehbi_subtract_end;
 		}
@@ -1268,12 +1244,7 @@ struct ehbigint *ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 	}
 
 	/* we don't wish to modify the real bi1, so use tmp */
-	size = bi1->bytes_len;
-	if (!Ehbi_set_or_malloc(&tmp, bytes, Ehbi_bi_buf_size, size, err)) {
-		rp = NULL;
-		goto ehbi_subtract_end;
-	}
-	rp = ehbi_set(&tmp, bi1, err);
+	rp = Ehbi_set_or_malloc(&tmp, bytes, Ehbi_bi_buf_size, bi1, err);
 	if (!rp) {
 		goto ehbi_subtract_end;
 	}
@@ -1475,7 +1446,7 @@ struct ehbigint *ehbi_n_choose_k(struct ehbigint *result,
 		local_error = EHBI_SUCCESS;
 		err = &local_error;
 	}
-	rp = result;
+	rp = ehbi_zero(result);
 
 	if (ehbi_greater_than(k, n) || ehbi_less_than_l(k, 0)) {
 		rp = ehbi_set_l(result, 0, err);
@@ -1507,15 +1478,21 @@ struct ehbigint *ehbi_n_choose_k(struct ehbigint *result,
 		size = k->bytes_len;
 	}
 
-	if (!Ehbi_set_or_malloc(&tmp, tbytes, Ehbi_bi_buf_size, size, err)) {
+	/* cheating on result */
+	result->bytes_used = size;
+	rp = Ehbi_set_or_malloc(&tmp, tbytes, Ehbi_bi_buf_size, result, err);
+	if (!rp) {
 		goto ehbi_n_choose_k_end;
 	}
-	if (!Ehbi_set_or_malloc(&sum_n, nbytes, Ehbi_bi_buf_size, size, err)) {
+	rp = Ehbi_set_or_malloc(&sum_n, nbytes, Ehbi_bi_buf_size, result, err);
+	if (!rp) {
 		goto ehbi_n_choose_k_end;
 	}
-	if (!Ehbi_set_or_malloc(&sum_k, kbytes, Ehbi_bi_buf_size, size, err)) {
+	rp = Ehbi_set_or_malloc(&sum_k, kbytes, Ehbi_bi_buf_size, result, err);
+	if (!rp) {
 		goto ehbi_n_choose_k_end;
 	}
+	ehbi_zero(result);
 
 	rp = ehbi_inc(&sum_n, n, err);
 	if (!rp) {
@@ -1714,7 +1691,7 @@ static struct ehbigint *ehbi_get_witness(size_t i, struct ehbigint *a,
 int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 			   int *err)
 {
-	size_t i, k, size, size2;
+	size_t i, k;
 	int is_probably_prime, stop, local_err;
 	struct ehbigint bimin1, a, d, x, y, max_witness;
 	struct ehbigint *rp;
@@ -1747,32 +1724,36 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 		return 0;
 	}
 
-	size = bi->bytes_used;
-	if (size < 4) {
-		size = 4;
-	}
-	if (!Ehbi_set_or_malloc(&bimin1, bbytes, Ehbi_bi_buf_size, size, err)) {
+	rp = Ehbi_set_or_malloc(&bimin1, bbytes, Ehbi_bi_buf_size, bi, err);
+	if (!bi) {
 		goto ehbi_is_probably_prime_end;
 	}
-	if (!Ehbi_set_or_malloc(&max_witness, wbytes, Ehbi_bi_buf_size, size,
-				err)) {
-		goto ehbi_is_probably_prime_end;
-	}
-
-	if (!Ehbi_set_or_malloc(&a, abytes, Ehbi_bi_buf_size, size, err)) {
-		goto ehbi_is_probably_prime_end;
-	}
-	if (!Ehbi_set_or_malloc(&d, dbytes, Ehbi_bi_buf_size, size, err)) {
+	rp = Ehbi_set_or_malloc(&max_witness, wbytes, Ehbi_bi_buf_size, bi,
+				err);
+	if (!rp) {
 		goto ehbi_is_probably_prime_end;
 	}
 
-	size2 = 2 + (size * 2);
-	if (!Ehbi_set_or_malloc(&x, xbytes, Ehbi_bi_buf_size, size2, err)) {
+	rp = Ehbi_set_or_malloc(&a, abytes, Ehbi_bi_buf_size, bi, err);
+	if (!rp) {
 		goto ehbi_is_probably_prime_end;
 	}
-	if (!Ehbi_set_or_malloc(&y, ybytes, Ehbi_bi_buf_size, size2, err)) {
+	rp = Ehbi_set_or_malloc(&d, dbytes, Ehbi_bi_buf_size, bi, err);
+	if (!rp) {
 		goto ehbi_is_probably_prime_end;
 	}
+
+	/* cheating on d bytes used */
+	d.bytes_used = 2 + (bi->bytes_used * 2);
+	rp = Ehbi_set_or_malloc(&x, xbytes, Ehbi_bi_buf_size, &d, err);
+	if (!rp) {
+		goto ehbi_is_probably_prime_end;
+	}
+	rp = Ehbi_set_or_malloc(&y, ybytes, Ehbi_bi_buf_size, &d, err);
+	if (!rp) {
+		goto ehbi_is_probably_prime_end;
+	}
+	ehbi_zero(&d);
 
 	/* set d to 2, the first prime */
 	rp = ehbi_set_l(&d, 2, err);
@@ -2289,6 +2270,7 @@ struct ehbigint *ehbi_set_decimal_string(struct ehbigint *bi, const char *dec,
 					 size_t len, int *err)
 {
 	char *hex;
+	const size_t buf_size = 80;
 	char buf[80];
 	const char *str;
 	size_t size;
@@ -2306,15 +2288,16 @@ struct ehbigint *ehbi_set_decimal_string(struct ehbigint *bi, const char *dec,
 		return NULL;
 	}
 	size = 4 /* strlen("0x00") */  + len + 1;
-	if (size > 80) {
-		hex = (char *)eembed_malloc(size);
-	} else {
+	if (size <= buf_size) {
 		hex = buf;
-	}
-	if (!hex) {
-		Ehbi_log_error_s_ul_s("Could not allocate ", size, " bytes?");
-		ehbi_set_error(err, EHBI_STACK_TOO_SMALL);
-		return NULL;
+	} else {
+		hex = (char *)eembed_malloc(size);
+		if (!hex) {
+			Ehbi_log_error_s_ul_s("Could not allocate ", size,
+					      " bytes?");
+			ehbi_set_error(err, EHBI_NOMEM);
+			return NULL;
+		}
 	}
 
 	if (dec[0] == '-') {
@@ -2483,6 +2466,7 @@ char *ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len,
 {
 	char *hex, *rp;
 	size_t size;
+	const size_t sbuf_size = 80;
 	char sbuf[80];
 
 	hex = NULL;
@@ -2502,15 +2486,16 @@ char *ehbi_to_decimal_string(const struct ehbigint *bi, char *buf, size_t len,
 	buf[0] = '\0';
 
 	size = 4 /* strlen("0x00") */  + (2 * bi->bytes_used) + 1;
-	if (size > 80) {
-		hex = (char *)eembed_malloc(size);
-	} else {
+	if (size <= sbuf_size) {
 		hex = sbuf;
-	}
-	if (!hex) {
-		Ehbi_log_error_s_ul_s("Could not allocate ", size, " bytes?");
-		ehbi_set_error(err, EHBI_STACK_TOO_SMALL);
-		goto ehbi_to_decimal_string_end;
+	} else {
+		hex = (char *)eembed_malloc(size);
+		if (!hex) {
+			Ehbi_log_error_s_ul_s("Could not allocate ", size,
+					      " bytes?");
+			ehbi_set_error(err, EHBI_NOMEM);
+			goto ehbi_to_decimal_string_end;
+		}
 	}
 
 	if (ehbi_is_negative(bi)) {

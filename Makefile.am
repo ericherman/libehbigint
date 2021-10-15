@@ -257,6 +257,7 @@ tidy:
 		-T FILE \
 		-T ehbigint \
 		`find src tests demos -name '*.h' -o -name '*.c'` \
+		ehbigint_arduino_tests_slow/ehbigint_arduino_tests_slow.ino \
 		ehbigint_arduino_tests/ehbigint_arduino_tests.ino
 
 spotless:

@@ -9,7 +9,7 @@
 #include "ehbigint.h"
 
 // having ALL of these tests in a single .ino file bloats the firmware
-// a lot, consider breaking into separate .ino files.
+// a lot, thus split into a couple of .ino files.
 unsigned test_add(int verbose);
 unsigned test_bytes_shift_left(int verbose);
 unsigned test_bytes_shift_right(int verbose);
@@ -27,14 +27,10 @@ unsigned test_from_decimal_to_decimal_round_trip(int verbose);
 unsigned test_from_hex_to_hex_round_trip(int verbose);
 unsigned test_inc(int verbose);
 unsigned test_inc_l(int verbose);
-unsigned test_is_probably_prime(int verbose);
 unsigned test_mul(int verbose);
-unsigned test_n_choose_k(int verbose);
-unsigned test_scenario_mul_mod(int verbose);
 unsigned test_set(int verbose);
 unsigned test_set_l(int verbose);
 unsigned test_shift_right(int verbose);
-unsigned test_sqrt(int verbose);
 unsigned test_subtract(int verbose);
 unsigned test_to_string(int verbose);
 
@@ -60,7 +56,7 @@ unsigned test_func(const char *name, unsigned (*pfunc)(int v), int verbose)
 	// the delay helps us see which test crashed and caused a restart
 	Serial.print(name);
 	Serial.print(" ...");
-	uint32_t delay_ms = 125;
+	uint32_t delay_ms = 25;
 	delay(delay_ms);
 
 	unsigned long usec_begin = micros();
@@ -108,16 +104,10 @@ void loop(void)
 	failures += Test_func(test_from_hex_to_hex_round_trip, verbose);
 	failures += Test_func(test_inc_l, verbose);
 	failures += Test_func(test_inc, verbose);
-	// test_is_probably_prime bloats the firmware a lot, make stand-alone
-	// failures += Test_func(test_is_probably_prime, verbose);
 	failures += Test_func(test_mul, verbose);
-	failures += Test_func(test_n_choose_k, verbose);
-	failures += Test_func(test_scenario_mul_mod, verbose);
 	failures += Test_func(test_set_l, verbose);
 	failures += Test_func(test_set, verbose);
 	failures += Test_func(test_shift_right, verbose);
-	// Serial.println(" (test_sqrt takes a long time)");
-	// failures += Test_func(test_sqrt, verbose);
 	failures += Test_func(test_subtract, verbose);
 	failures += Test_func(test_to_string, verbose);
 

@@ -113,6 +113,13 @@ unsigned test_set_dec_str(int verbose, const char *val)
 unsigned test_set_too_small(int verbose)
 {
 	struct eembed_log *log = eembed_err_log;
+
+	const size_t buflen = 250;
+	char buf[250];
+	struct eembed_str_buf sbuf;
+	struct eembed_log slog;
+	struct eembed_log *orig;
+
 	int err;
 	long lval;
 	const size_t lbuf_size = 21;
@@ -130,19 +137,29 @@ unsigned test_set_too_small(int verbose)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
+	orig = ehbi_log_get();
+	eembed_memset(buf, 0x00, buflen);
+	log = eembed_char_buf_log_init(&slog, &sbuf, buf, buflen);
+
 	err = 0;
 	ehbi_init(&a_bigint, a_bytes, 4);
 	ehbi_init(&b_bigint, b_bytes, 2);
 
-	lval = (1 << (8 * 3));
+	lval = (1L << (8 * 3));
 	eembed_long_to_str(lbuf, lbuf_size, lval);
 
 	rv = ehbi_set_l(&a_bigint, lval, &err);
 	failures += check_ptr_not_null_m(rv, lbuf);
 	failures += check_int_m(err, 0, "err?");
 	failures += Check_ehbigint_dec(&a_bigint, lbuf);
+	failures += check_int(a_bigint.bytes_used, 4);
 
+	failures += check_int(b_bigint.bytes_len, 2);
+	if (log) {
+		ehbi_log_set(log);
+	}
 	rv = ehbi_set(&b_bigint, &a_bigint, &err);
+	ehbi_log_set(orig);
 	failures += check_int_m(rv ? 0 : 1, 1, "expected NULL");
 	failures += check_int_m(err, EHBI_BYTES_TOO_SMALL, "BYTES_TOO_SMALL");
 

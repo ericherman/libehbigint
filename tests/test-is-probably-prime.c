@@ -18,6 +18,17 @@ unsigned test_is_probably_prime_s(int verbose, const char *val, int expected)
 	VERBOSE_ANNOUNCE(verbose);
 	failures = 0;
 
+	if (verbose) {
+		log->append_s(log, "\t");
+		log->append_s(log, val);
+		log->append_s(log, " is actually known to be:");
+		if (!expected) {
+			log->append_s(log, " not");
+		}
+		log->append_s(log, " prime ...");
+		log->append_eol(log);
+	}
+
 	err = 0;
 	ehbi_init(&bi, bytes_buf1, bytes_buf1_len);
 
@@ -52,6 +63,16 @@ unsigned test_is_probably_prime_s(int verbose, const char *val, int expected)
 		log->append_eol(log);
 	}
 	failures += check_int_m(actual, expected, val);
+	if (verbose) {
+		log->append_s(log, "\tehbi_is_probably_prime(");
+		log->append_s(log, val);
+		log->append_s(log, "):");
+		if (!actual) {
+			log->append_s(log, " not");
+		}
+		log->append_s(log, " prime");
+		log->append_eol(log);
+	}
 
 	if (failures) {
 		log->append_ul(log, failures);

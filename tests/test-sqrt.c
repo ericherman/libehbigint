@@ -34,6 +34,18 @@ unsigned test_sqrt_v(int verbose, const char *sval, const char *ssqrt,
 
 	log = ehbi_log_get();
 
+	if (verbose) {
+		log->append_s(log, "\tehbi_sqrt(");
+		log->append_s(log, sval);
+		log->append_s(log, ")");
+		log->append_eol(log);
+		log->append_s(log, "\t should return ");
+		log->append_s(log, ssqrt);
+		log->append_s(log, " (remainder ");
+		log->append_s(log, sremainder);
+		log->append_s(log, ") ...");
+	}
+
 	err = 0;
 	ehbi_init(&val, bytes_val, Test_bi_buf_size);
 	ehbi_init(&sqrt, bytes_sqrt, Test_bi_buf_size);
@@ -72,6 +84,11 @@ unsigned test_sqrt_v(int verbose, const char *sval, const char *ssqrt,
 	failures += Check_ehbigint_dec(&sqrt, ssqrt);
 
 	failures += Check_ehbigint_dec(&remainder, sremainder);
+
+	if (verbose) {
+		log->append_s(log, failures ? " FAIL!" : " correct.");
+		log->append_eol(log);
+	}
 
 	return failures;
 }

@@ -18,11 +18,14 @@ BUILD_TYPE_CFLAGS=\
 BUILD_TYPE_LDFLAGS=--coverage
 else
 BUILD_TYPE_CFLAGS=\
-	-std=c89 -Wpedantic \
+	-std=gnu89 -Wpedantic \
 	-ggdb -O2 \
 	-fomit-frame-pointer \
+	-fdata-sections \
+	-ffunction-sections \
 	-DNDEBUG=1 \
 	-DEHBI_SKIP_STRUCT_NULL_CHECK=1
+BUILD_TYPE_LDFLAGS=-flto -Wl,--gc-sections
 endif
 
 if FAUX_FREESTANDING

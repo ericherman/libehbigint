@@ -31,9 +31,9 @@
 
 #define VERBOSE_ANNOUNCE(verbose) \
 	if (verbose) { \
-		eembed_system_print("starting "); \
-		eembed_system_print(TEST_FUNC); \
-		eembed_system_println(); \
+		print_s("starting "); \
+		print_s(TEST_FUNC); \
+		print_eol(); \
 	}
 
 #define BUFLEN 80

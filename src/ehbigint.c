@@ -922,7 +922,7 @@ struct ehbigint *ehbi_exp_mod(struct ehbigint *result,
 		goto ehbi_mod_exp_end;
 	}
 
-	/* prevent negative eponent */
+	/* prevent negative exponent */
 	if (ehbi_is_negative(exponent)) {
 		Ehbi_log_error0("exponent < 0");
 		ehbi_set_error(err, EHBI_BAD_DATA);

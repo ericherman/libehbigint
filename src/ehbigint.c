@@ -1725,7 +1725,7 @@ int ehbi_is_probably_prime(const struct ehbigint *bi, unsigned int accuracy,
 	}
 
 	rp = Ehbi_set_or_malloc(&bimin1, bbytes, Ehbi_bi_buf_size, bi, err);
-	if (!bi) {
+	if (!rp) {
 		goto ehbi_is_probably_prime_end;
 	}
 	rp = Ehbi_set_or_malloc(&max_witness, wbytes, Ehbi_bi_buf_size, bi,

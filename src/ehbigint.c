@@ -253,7 +253,7 @@ static struct ehbigint *ehbi_set_or_malloc(struct ehbigint *tmp,
 #define Ehbi_set_or_malloc(tmp, bbuf, bbuf_len, val, err) \
 	ehbi_set_or_malloc(tmp, bbuf, bbuf_len, val, err, __LINE__)
 
-static void ehbi_set_or_malloc_free(struct ehbigint *tmp, size_t stack_buf_size)
+static void ehbi_free_if_not_stack(struct ehbigint *tmp, size_t stack_buf_size)
 {
 	if (tmp->bytes_len > stack_buf_size) {
 		eembed_free(tmp->bytes);
@@ -298,7 +298,7 @@ struct ehbigint *ehbi_add(struct ehbigint *res,
 		if (!swp) {
 			goto ehbi_add_error;
 		}
-		ehbi_set_or_malloc_free(&tmp, Ehbi_bi_buf_size);
+		ehbi_free_if_not_stack(&tmp, Ehbi_bi_buf_size);
 		return res;
 	}
 	ehbi_sign_set(res, ehbi_sign(bi1));
@@ -359,7 +359,7 @@ struct ehbigint *ehbi_add(struct ehbigint *res,
 
 ehbi_add_error:
 	ehbi_zero(res);
-	ehbi_set_or_malloc_free(&tmp, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&tmp, Ehbi_bi_buf_size);
 	return NULL;
 }
 
@@ -448,7 +448,7 @@ ehbi_mul_end:
 		ehbi_zero(res);
 	}
 
-	ehbi_set_or_malloc_free(&tmp, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&tmp, Ehbi_bi_buf_size);
 
 	return rp;
 }
@@ -616,8 +616,8 @@ struct ehbigint *ehbi_div(struct ehbigint *quotient, struct ehbigint *remainder,
 	}
 
 ehbi_div_end:
-	ehbi_set_or_malloc_free(&s_abs_denom, Ehbi_bi_buf_size);
-	ehbi_set_or_malloc_free(&s_abs_numer, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&s_abs_denom, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&s_abs_numer, Ehbi_bi_buf_size);
 
 	/* if error, let's not return garbage or 1/2 an answer */
 	if (!rp) {
@@ -776,9 +776,9 @@ struct ehbigint *ehbi_sqrt(struct ehbigint *result, struct ehbigint *remainder,
 	rp = ehbi_subtract(remainder, val, &temp, err);
 
 ehbi_sqrt_end:
-	ehbi_set_or_malloc_free(&guess, Ehbi_bi_buf_size);
-	ehbi_set_or_malloc_free(&temp, Ehbi_bi_buf_size);
-	ehbi_set_or_malloc_free(&junk, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&guess, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&temp, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&junk, Ehbi_bi_buf_size);
 
 	if (!rp) {
 		ehbi_zero(result);
@@ -835,8 +835,8 @@ struct ehbigint *ehbi_exp(struct ehbigint *result, const struct ehbigint *base,
 	}
 
 ehbi_exp_end:
-	ehbi_set_or_malloc_free(&loop, Ehbi_bi_buf_size);
-	ehbi_set_or_malloc_free(&tmp, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&loop, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&tmp, Ehbi_bi_buf_size);
 
 	if (!rp) {
 		ehbi_zero(result);
@@ -1015,10 +1015,10 @@ struct ehbigint *ehbi_exp_mod(struct ehbigint *result,
 	/* return result */
 
 ehbi_mod_exp_end:
-	ehbi_set_or_malloc_free(&tmp1, Ehbi_bi_buf_size);
-	ehbi_set_or_malloc_free(&tbase, Ehbi_bi_buf_size);
-	ehbi_set_or_malloc_free(&texp, Ehbi_bi_buf_size);
-	ehbi_set_or_malloc_free(&tjunk, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&tmp1, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&tbase, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&texp, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&tjunk, Ehbi_bi_buf_size);
 
 	if (!rp) {
 		ehbi_zero(result);
@@ -1096,7 +1096,7 @@ struct ehbigint *ehbi_inc(struct ehbigint *bi, const struct ehbigint *val,
 	}
 	rp = ehbi_add(bi, &temp, val, err);
 
-	ehbi_set_or_malloc_free(&temp, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&temp, Ehbi_bi_buf_size);
 	if (!rp) {
 		return NULL;
 	}
@@ -1143,7 +1143,7 @@ struct ehbigint *ehbi_dec(struct ehbigint *bi, const struct ehbigint *val,
 	rp = ehbi_set(bi, &temp, err);
 
 ehbi_dec_end:
-	ehbi_set_or_malloc_free(&temp, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&temp, Ehbi_bi_buf_size);
 
 	if (!rp) {
 		return NULL;
@@ -1300,7 +1300,7 @@ struct ehbigint *ehbi_subtract(struct ehbigint *res, const struct ehbigint *bi1,
 	}
 	ehbi_internal_reset_bytes_used(res, res->bytes_used + 1);
 ehbi_subtract_end:
-	ehbi_set_or_malloc_free(&tmp, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&tmp, Ehbi_bi_buf_size);
 
 	if (!rp) {
 		if (res) {
@@ -1547,9 +1547,9 @@ struct ehbigint *ehbi_n_choose_k(struct ehbigint *result,
 	rp = ehbi_div(result, &tmp, &sum_n, &sum_k, err);
 
 ehbi_n_choose_k_end:
-	ehbi_set_or_malloc_free(&tmp, Ehbi_bi_buf_size);
-	ehbi_set_or_malloc_free(&sum_n, Ehbi_bi_buf_size);
-	ehbi_set_or_malloc_free(&sum_k, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&tmp, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&sum_n, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&sum_k, Ehbi_bi_buf_size);
 
 	if (!rp) {
 		Ehbi_log_error_s_l_s("error ", *err, ", setting result = 0");
@@ -1898,12 +1898,12 @@ ehbi_is_probably_prime_end:
 		is_probably_prime = 0;
 	}
 
-	ehbi_set_or_malloc_free(&y, Ehbi_bi_buf_size);
-	ehbi_set_or_malloc_free(&x, Ehbi_bi_buf_size);
-	ehbi_set_or_malloc_free(&d, Ehbi_bi_buf_size);
-	ehbi_set_or_malloc_free(&a, Ehbi_bi_buf_size);
-	ehbi_set_or_malloc_free(&max_witness, Ehbi_bi_buf_size);
-	ehbi_set_or_malloc_free(&bimin1, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&y, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&x, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&d, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&a, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&max_witness, Ehbi_bi_buf_size);
+	ehbi_free_if_not_stack(&bimin1, Ehbi_bi_buf_size);
 
 	return is_probably_prime;
 }
